@@ -1,0 +1,108 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.34.4.
+--
+-- see: https://github.com/sol/hpack
+
+name:           calc
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/massung/calc#readme>
+homepage:       https://github.com/massung/calc#readme
+bug-reports:    https://github.com/massung/calc/issues
+author:         Jeffrey Massung
+maintainer:     massung@gmail.com
+copyright:      2022 Jeffrey Massung
+license:        BSD3
+build-type:     Simple
+extra-source-files:
+    README.md
+
+source-repository head
+  type: git
+  location: https://github.com/massung/calc
+
+library
+  exposed-modules:
+      Calc.Eval
+      Calc.Graph
+      Calc.Parser
+      Calc.Scalar
+      Calc.Units
+  other-modules:
+      Paths_calc
+  hs-source-dirs:
+      src
+  build-depends:
+      base >=4.7 && <5
+    , bytestring
+    , case-insensitive
+    , cassava
+    , cmdargs
+    , containers
+    , errors
+    , fgl
+    , file-embed
+    , mtl
+    , parsec
+    , random
+    , scientific
+    , symbol
+    , utf8-string
+    , vector
+  default-language: Haskell2010
+
+executable calc
+  main-is: Main.hs
+  other-modules:
+      Paths_calc
+  hs-source-dirs:
+      app
+  ghc-options: -threaded -rtsopts -O2 -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , bytestring
+    , calc
+    , case-insensitive
+    , cassava
+    , cmdargs
+    , containers
+    , errors
+    , fgl
+    , file-embed
+    , mtl
+    , parsec
+    , random
+    , scientific
+    , symbol
+    , utf8-string
+    , vector
+  default-language: Haskell2010
+
+test-suite calc-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Paths_calc
+  hs-source-dirs:
+      test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , bytestring
+    , calc
+    , case-insensitive
+    , cassava
+    , cmdargs
+    , containers
+    , errors
+    , fgl
+    , file-embed
+    , hspec
+    , mtl
+    , parsec
+    , random
+    , scientific
+    , symbol
+    , utf8-string
+    , vector
+  default-language: Haskell2010

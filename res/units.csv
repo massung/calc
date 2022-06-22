@@ -1,0 +1,7 @@
+category,from,to,scale
+bytes,B,b,8
+bytes,KB,B,1024
+bytes,MB,KB,1024
+bytes,GB,MB,1024
+bytes,TB,GB,1024
+bytes,PB,TB,1024
