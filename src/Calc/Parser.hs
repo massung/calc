@@ -57,7 +57,7 @@ unitsExprParser = buildExpressionParser unitsExprTable unitsTerm
 
 expr = do
   e <- exprParser
-  u <- optionMaybe unitsTerm
+  u <- optionMaybe (try unitsExpr <|> units)
   return $ case u of
     Nothing -> e
     Just u' -> Binary "_" (*) e u'
@@ -65,16 +65,16 @@ expr = do
 exprTerm =
   parens lexer expr
     <|> brackets lexer expr
-    <|> number
+    <|> scalar
 
-unitsExpr = try unitsExprParser <|> unitsTerm
+unitsExpr = unitsExprParser
 
 unitsTerm =
   parens lexer unitsExpr
     <|> brackets lexer unitsExpr
     <|> units
 
-number = do
+scalar = do
   n <- naturalOrFloat lexer
   return $ case n of
     Left i -> Term (Scalar (fromIntegral i) Nothing)
