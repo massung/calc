@@ -38,7 +38,9 @@ instance Show Units where
       showNum = intercalate "*" $ L.map showUnits num
       showDen = intercalate "*" $ L.map showUnits den
 
-emptyUnits = Units M.empty
+fromList = Units . M.fromList
+
+singleton u = Units $ M.singleton u 1
 
 recipUnits (Units a) =
   Units $ M.map negate a

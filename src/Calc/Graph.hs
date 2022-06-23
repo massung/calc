@@ -3,6 +3,8 @@
 
 module Calc.Graph where
 
+import Calc.Scalar
+import Calc.Units as U
 import Data.ByteString.UTF8 as BS
 import Data.Csv
 import Data.Either
@@ -15,36 +17,24 @@ import Data.Map as M
 import Data.Scientific
 import Data.Vector as V
 
--- units that can be multiplied and divided
-data Units = Units
-  { category :: [String],
-    abbrev :: [String]
-  }
-
-instance Show Units where
-  show = L.concat . abbrev
-
-instance Eq Units where
-  (==) a b = category a == category b && abbrev a == abbrev b
-
-instance Ord Units where
-  (<=) a b = category a <= category b && abbrev a <= abbrev b
-
--- csv conversion record
-data Conv = Conv
-  { from :: Units,
-    to :: Units,
-    scale :: Scientific
-  }
+data Conv =
+  Conv
+    { from :: Unit,
+      to:: Unit,
+      scale :: Scalar
+    }
   deriving (Show)
 
 instance FromNamedRecord Conv where
-  parseNamedRecord r =
-    Conv
-      <$> r .: "category"
-      <*> r .: "from"
-      <*> r .: "to"
-      <*> r .: "scale"
+  parseNamedRecord r = do
+    from <- r .: "from"
+    to <- r .: "to"
+    scale <- r .: "scale"
+    let n = U.fromList [(from,1), (to, scale)]
+      in return $ Conv { from=from, to=to, scale=Scalar 1 (Just n)}
+
+instance FromField Unit where
+  parseField s = pure $ Unit (BS.toString s)
 
 -- compile the conversion table into the executable
 csv = $(embedStringFile "res/units.csv")
@@ -72,8 +62,10 @@ edges (conv : convs) = (a, b, x) : (b, a, recip x) : edges convs
     x = scale conv
 
 -- graph containing all units and conversions
-graph :: Gr String Scientific
-graph = mkGraph [(v, k) | (k, v) <- M.toList unitsMap] $ edges conversions
+graph :: Gr Unit Scalar
+graph = mkGraph nodes $ edges conversions
+  where
+    nodes = [(v, k) | (k, v) <- M.toList unitsMap]
 
 -- attempt to convert from one unit type to another
 conversionScale from to = do

@@ -1,4 +1,0 @@
-
-function is {x} even
-  x % 2 = 0
-end

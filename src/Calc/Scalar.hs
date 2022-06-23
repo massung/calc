@@ -1,18 +1,15 @@
 module Calc.Scalar where
 
 import Calc.Units
-import Data.Scientific
 
-data Scalar = Scalar Scientific Units
+data Scalar = Scalar Double (Maybe Units)
 
 instance Show Scalar where
-  show (Scalar n u) = show n ++ " " ++ show u
+  show (Scalar n Nothing) = show n
+  show (Scalar n (Just u)) = show n ++ " " ++ show u
 
 instance Eq Scalar where
-  (==) (Scalar n1 u1) (Scalar n2 u2) =
-    if u1 == u2
-      then n1 == n2
-      else error "Cannot compare disparately typed scalars."
+  (==) (Scalar n1 u1) (Scalar n2 u2) = u1 == u2 && n1 == n2
 
 instance Ord Scalar where
   (<=) (Scalar n1 u1) (Scalar n2 u2) =
@@ -22,23 +19,41 @@ instance Ord Scalar where
 
 instance Num Scalar where
   -- adding scalars with the same units
+  (+) (Scalar n1 Nothing) (Scalar n2 Nothing) =
+    Scalar (n1 + n2) Nothing
+  (+) (Scalar n1 (Just u1)) (Scalar n2 Nothing) =
+    Scalar (n1 + n2) (Just u1)
+  (+) (Scalar n1 Nothing) (Scalar n2 (Just u2)) =
+    Scalar (n1 + n2) (Just u2)
   (+) (Scalar n1 u1) (Scalar n2 u2) =
     if u1 == u2
       then Scalar (n1 + n2) u1
       else error "Cannot add disparately typed scalars."
 
   -- subtracting scalars with the same units
+  (-) (Scalar n1 Nothing) (Scalar n2 Nothing) =
+    Scalar (n1 - n2) Nothing
+  (-) (Scalar n1 (Just u1)) (Scalar n2 Nothing) =
+    Scalar (n1 - n2) (Just u1)
+  (-) (Scalar n1 Nothing) (Scalar n2 (Just u2)) =
+    Scalar (n1 - n2) (Just u2)
   (-) (Scalar n1 u1) (Scalar n2 u2) =
     if u1 == u2
       then Scalar (n1 - n2) u1
       else error "Cannot subtract disparately typed scalars."
 
   -- multiplication of scalars
-  (*) (Scalar n1 u1) (Scalar n2 u2) =
-    Scalar (n1 * n2) (multiplyUnits u1 u2)
+  (*) (Scalar n1 Nothing) (Scalar n2 Nothing) =
+    Scalar (n1 * n2) Nothing
+  (*) (Scalar n1 (Just u1)) (Scalar n2 Nothing) =
+    Scalar (n1 * n2) (Just u1)
+  (*) (Scalar n1 Nothing) (Scalar n2 (Just u2)) =
+    Scalar (n1 * n2) (Just u2)
+  (*) (Scalar n1 (Just u1)) (Scalar n2 (Just u2)) =
+    Scalar (n1 * n2) (Just $ multiplyUnits u1 u2)
 
   -- create a new scalar from an integer
-  fromInteger i = Scalar (fromInteger i) emptyUnits
+  fromInteger i = Scalar (fromInteger i) Nothing
 
   -- numeric operations on scalars
   negate (Scalar n u) = Scalar (negate n) u
@@ -46,13 +61,17 @@ instance Num Scalar where
   signum (Scalar n u) = Scalar (signum n) u
 
 instance Fractional Scalar where
-  fromRational r = Scalar (fromRational r) emptyUnits
+  fromRational r = Scalar (fromRational r) Nothing
 
   -- divide scalars and simplify units
-  (/) (Scalar n1 u1) (Scalar n2 u2) =
-    if u1 == u2
-      then Scalar (n1 / n2) emptyUnits
-      else Scalar (n1 / n2) (multiplyUnits u1 $ recipUnits u2)
+  (/) (Scalar n1 Nothing) (Scalar n2 Nothing) =
+    Scalar (n1 / n2) Nothing
+  (/) (Scalar n1 (Just u1)) (Scalar n2 Nothing) =
+    Scalar (n1 / n2) (Just u1)
+  (/) (Scalar n1 Nothing) (Scalar n2 (Just u2)) =
+    Scalar (n1 / n2) (Just u2)
+  (/) (Scalar n1 (Just u1)) (Scalar n2 (Just u2)) =
+    Scalar (n1 / n2) (Just $ multiplyUnits u1 $ recipUnits u2)
 
   -- reciprocal of the scalar
   recip (Scalar n u) = Scalar (recip n) u

@@ -1,34 +1,31 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TupleSections #-}
 
 module Calc.Parser where
 
-import Data.Foldable
+import Calc.Scalar
+import Calc.Units as U
 import Data.Functor
-import Data.Scientific
+import Data.List as L
 import Text.Parsec
 import Text.Parsec.Expr
 import Text.Parsec.Token
 
 -- valid expressions
 data Expr
-  = Num Scientific [String]
+  = Num Scalar
   | Unary UnaryOp Expr
-  | BinaryConv BinaryOp Expr Expr -- units converted
-  | BinaryComp BinaryOp Expr Expr -- units combined
+  | Binary BinaryOp Expr Expr
 
 instance Show Expr where
-  show (Num x []) = show x
-  show (Num x xs) = show x ++ " " ++ concat xs
+  show (Num x) = show x
   show _ = "<expression>"
 
--- Func String [Expr]
--- Conv Expr String
-
 -- unary expression operators
-type UnaryOp = Scientific -> Scientific
+type UnaryOp = Scalar -> Scalar
 
 -- binary expression operators
-type BinaryOp = Scientific -> Scientific -> Scientific
+type BinaryOp = Scalar -> Scalar -> Scalar
 
 calc =
   LanguageDef
@@ -54,21 +51,25 @@ term = parens lexer expr <|> number <|> singleUnit
 
 number = do
   n <- naturalOrFloat lexer
-  u <- optionMaybe $ identifier lexer
+  u <- units
   return $ case n of
-    Left i -> Num (fromInteger i) (toList u)
-    Right f -> Num (fromFloatDigits f) (toList u)
+    Left i -> Num (Scalar (fromIntegral i) u)
+    Right f -> Num (Scalar f u)
 
-singleUnit = identifier lexer <&> \u -> Num 1 [u]
+units = do
+  us <- optionMaybe $ many1 unit
+  return $ us <&> U.fromList . L.map (, 1 :: Int)
+
+unit = identifier lexer <&> Unit
+
+singleUnit = unit <&> Num . Scalar 1 . Just . U.singleton
 
 table =
   [ [prefix "-" negate, prefix "+" id],
-    [binaryComp "*" (*) AssocLeft, binaryComp "/" (/) AssocLeft],
-    [binaryConv "+" (+) AssocLeft, binaryConv "-" (-) AssocLeft]
+    [binary "*" (*) AssocLeft, binary "/" (/) AssocLeft],
+    [binary "+" (+) AssocLeft, binary "-" (-) AssocLeft]
   ]
 
-binaryConv name f = Infix (do reservedOp lexer name; return $ BinaryConv f)
-
-binaryComp name f = Infix (do reservedOp lexer name; return $ BinaryComp f)
+binary name f = Infix (do reservedOp lexer name; return $ Binary f)
 
 prefix name f = Prefix (do reservedOp lexer name; return $ Unary f)
