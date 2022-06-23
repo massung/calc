@@ -22,21 +22,25 @@ newtype Units = Units (Map Unit Int)
 instance Show Units where
   show (Units u) =
     case (F.null num, F.null den) of
-      (False, False) -> showNum ++ "/" ++ showDen
-      (False, _) -> showNum
-      (_, False) -> showDen
+      (False, False) -> expNum num ++ "/" ++ expNum den
+      (False, _) -> expNum num
+      (_, False) -> expDen den
       _ -> ""
     where
-      showUnits (u, 1) = show u
-      showUnits (u, -1) = show u
-      showUnits (u, n) = show u ++ "^" ++ show (abs n)
-
-      -- separate the units into the numerator and denominator
       (num, den) = L.partition ((> 0) . snd) $ M.toList u
 
+      --
+      showUnits (u, 1) = show u
+      showUnits (u, n) = show u ++ "^" ++ show n
+
+      --
+      showUnitsAbs (u, 1) = show u
+      showUnitsAbs (u, -1) = show u
+      showUnitsAbs (u, n) = show u ++ "^" ++ show (abs n)
+
       -- show the numerator
-      showNum = intercalate "*" $ L.map showUnits num
-      showDen = intercalate "*" $ L.map showUnits den
+      expNum = unwords . L.map showUnitsAbs
+      expDen = unwords . L.map showUnits
 
 fromList = Units . M.fromListWith (+)
 

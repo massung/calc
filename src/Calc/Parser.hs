@@ -44,6 +44,10 @@ calc =
 
 lexer = makeTokenParser calc
 
+parseExpr = parse (ws >> expr) ""
+  where
+    ws = whiteSpace lexer
+
 expr :: Parsec String () Expr
 expr = buildExpressionParser table term
 

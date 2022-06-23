@@ -6,7 +6,6 @@ import Calc.Eval
 import Calc.Parser
 import System.Console.CmdArgs
 import System.Environment
-import Text.Parsec
 
 -- command line options
 newtype Opts = Opts
@@ -21,6 +20,6 @@ opts =
 
 main = do
   args <- cmdArgs opts
-  case parse expr "" (evalExpr args) of
+  case parseExpr (evalExpr args) of
     Right expr -> print $ eval expr
     Left err -> print err
