@@ -5,3 +5,10 @@ bytes,MB,KB,1024
 bytes,GB,MB,1024
 bytes,TB,GB,1024
 bytes,PB,TB,1024
+length,ft,in,12
+length,yd,ft,3
+length,mi,ft,5280
+time,min,s,60
+time,hr,min,60
+time,day,hr,24
+time,wk,day,7

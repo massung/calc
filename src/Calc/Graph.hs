@@ -17,12 +17,11 @@ import Data.Map as M
 import Data.Scientific
 import Data.Vector as V
 
-data Conv =
-  Conv
-    { from :: Unit,
-      to:: Unit,
-      scale :: Scalar
-    }
+data Conv = Conv
+  { from :: Unit,
+    to :: Unit,
+    scale :: Scalar
+  }
   deriving (Show)
 
 instance FromNamedRecord Conv where
@@ -30,30 +29,25 @@ instance FromNamedRecord Conv where
     from <- r .: "from"
     to <- r .: "to"
     scale <- r .: "scale"
-    let n = U.fromList [(from,1), (to, scale)]
-      in return $ Conv { from=from, to=to, scale=Scalar 1 (Just n)}
+    let n = Scalar scale (Just $ U.fromList [(from, -1), (to, 1)])
+     in return $ Conv {from = from, to = to, scale = n}
 
 instance FromField Unit where
   parseField s = pure $ Unit (BS.toString s)
 
--- compile the conversion table into the executable
 csv = $(embedStringFile "res/units.csv")
 
--- parse all the conversions from res/units.csv
 conversions = case decodeByName csv of
   Left err -> []
   Right (_, convs) -> V.toList convs
 
--- list of all unit names
 units = nub $ names conversions
   where
     names [] = []
     names (conv : convs) = from conv : to conv : names convs
 
--- mapping of unit names to graph node index
 unitsMap = M.fromList $ L.zip units [1 ..]
 
--- labelled graph edges using scale as label
 edges [] = []
 edges (conv : convs) = (a, b, x) : (b, a, recip x) : edges convs
   where
@@ -61,13 +55,11 @@ edges (conv : convs) = (a, b, x) : (b, a, recip x) : edges convs
     b = unitsMap M.! to conv
     x = scale conv
 
--- graph containing all units and conversions
 graph :: Gr Unit Scalar
 graph = mkGraph nodes $ edges conversions
   where
     nodes = [(v, k) | (k, v) <- M.toList unitsMap]
 
--- attempt to convert from one unit type to another
 conversionScale from to = do
   a <- M.lookup from unitsMap
   b <- M.lookup to unitsMap

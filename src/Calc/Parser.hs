@@ -36,43 +36,29 @@ calc =
       nestedComments = False,
       identStart = letter,
       identLetter = letter,
-      opStart = oneOf "+-*/",
-      opLetter = oneOf "+-*/",
+      opStart = oneOf "_:+-*/",
+      opLetter = oneOf "_:+-*/",
       reservedNames = ["ans", "to"],
-      reservedOpNames = ["+", "-", "*", "/"],
+      reservedOpNames = ["_", "+", "-", "*", "/", ":"],
       caseSensitive = True
     }
 
 lexer = makeTokenParser calc
 
-parseExpr = parse (ws >> (expr <|> unitsExpr)) ""
+parseExpr = parse (ws >> expr) ""
   where
     ws = whiteSpace lexer
 
 exprParser :: Parsec String () Expr
 exprParser = buildExpressionParser exprTable exprTerm
 
-unitsExprParser :: Parsec String () Expr
-unitsExprParser = buildExpressionParser unitsExprTable unitsTerm
-
-expr = do
-  e <- exprParser
-  u <- optionMaybe (try unitsExpr <|> units)
-  return $ case u of
-    Nothing -> e
-    Just u' -> Binary "_" (*) e u'
+expr = exprParser
 
 exprTerm =
   parens lexer expr
     <|> brackets lexer expr
     <|> scalar
-
-unitsExpr = unitsExprParser
-
-unitsTerm =
-  parens lexer unitsExpr
-    <|> brackets lexer unitsExpr
-    <|> units
+    <|> unitScalar
 
 scalar = do
   n <- naturalOrFloat lexer
@@ -80,7 +66,9 @@ scalar = do
     Left i -> Term (Scalar (fromIntegral i) Nothing)
     Right f -> Term (Scalar f Nothing)
 
-units = many1 unit <&> Term . Scalar 1 . Just . U.fromList
+unitScalar = units <&> Term
+
+units = many1 unit <&> Scalar 1 . Just . U.fromList
   where
     unit = do
       u <- identifier lexer <&> Unit
@@ -89,12 +77,10 @@ units = many1 unit <&> Term . Scalar 1 . Just . U.fromList
 
 exprTable =
   [ [prefix "-" negate, prefix "+" id],
+    [postfixUnits],
     [binary "*" (*) AssocLeft, binary "/" (/) AssocLeft],
     [binary "+" (+) AssocLeft, binary "-" (-) AssocLeft]
-  ]
-
-unitsExprTable =
-  [ [binary "*" (*) AssocLeft, binary "/" (/) AssocLeft]
+    --[unitsConversion]
   ]
 
 binary name f = Infix (do reservedOp lexer name; return $ Binary name f)
@@ -102,5 +88,11 @@ binary name f = Infix (do reservedOp lexer name; return $ Binary name f)
 prefix name f = Prefix (do reservedOp lexer name; return $ Unary name f)
 
 postfixUnits = Postfix $ do
-  (Term u) <- unitsTerm
+  optional $ reservedOp lexer "_"
+  u <- units
   return $ Unary "_" (* u)
+
+--unitsConversion = Postfix $ do
+--  reservedOp lexer ":"
+--  u <- units
+--  return $ UnaryOp (" : " ++ show u) (conv u)

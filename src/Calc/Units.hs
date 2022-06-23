@@ -13,9 +13,6 @@ newtype Unit = Unit String
 instance Show Unit where
   show (Unit u) = u
 
-instance IsString Unit where
-  fromString = Unit
-
 newtype Units = Units (Map Unit Integer)
   deriving (Eq)
 
