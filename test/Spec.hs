@@ -10,10 +10,31 @@ main = hspec $ do
   testUnits
   testScalars
 
+cm = U.singleton "cm"
+
+miles = U.singleton "mi"
+
+hours = U.singleton "hr"
+
+mph = U.fromList [("mi", 1), ("hr", -1)]
+
 testUnits =
-  describe "units" $ do
-    it "is a singleton unit" $ do
-      U.singleton "cm" `shouldBe` Units (M.singleton "cm" 1)
+  describe "build units" $ do
+    it "singleton unit" $ do
+      cm `shouldBe` Units (M.singleton "cm" 1)
+    it "ratio unit" $ do
+      mph `shouldBe` Units (M.fromList [("mi", 1), ("hr", -1)])
+    it "reciprocal numerator" $ do
+      recipUnits cm `shouldBe` Units (M.singleton "cm" (-1))
+    it "reciprocal ratio" $ do
+      recipUnits mph `shouldBe` Units (M.fromList [("mi", -1), ("hr", 1)])
+    it "multiply units" $ do
+      multiplyUnits cm cm `shouldBe` Units (M.singleton "cm" 2)
+    it "divide units" $ do
+      divideUnits miles hours `shouldBe` Units (M.fromList [("mi", 1), ("hr", -1)])
+    it "simplify units" $ do
+      multiplyUnits mph hours `shouldBe` miles
+      divideUnits mph miles `shouldBe` recipUnits hours
 
 testScalars =
   describe "Unitless scalar" $ do

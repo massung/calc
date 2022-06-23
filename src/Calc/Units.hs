@@ -38,7 +38,7 @@ instance Show Units where
       showNum = intercalate "*" $ L.map showUnits num
       showDen = intercalate "*" $ L.map showUnits den
 
-fromList = Units . M.fromList
+fromList = Units . M.fromListWith (+)
 
 singleton u = Units $ M.singleton u 1
 
@@ -48,7 +48,5 @@ recipUnits (Units a) =
 multiplyUnits (Units a) (Units b) =
   Units $ M.filter (/= 0) $ M.unionWith (+) a b
 
-simplifyUnits (Units a) (Units b) = (Units a', Units b')
-  where
-    a' = M.filter (/= 0) $ M.unionWith (-) a $ M.intersection b a
-    b' = M.filter (/= 0) $ M.unionWith (-) b $ M.intersection a b
+divideUnits a b =
+  multiplyUnits a $ recipUnits b

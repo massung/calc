@@ -69,9 +69,10 @@ instance Fractional Scalar where
   (/) (Scalar n1 (Just u1)) (Scalar n2 Nothing) =
     Scalar (n1 / n2) (Just u1)
   (/) (Scalar n1 Nothing) (Scalar n2 (Just u2)) =
-    Scalar (n1 / n2) (Just u2)
+    Scalar (n1 / n2) (Just $ recipUnits u2)
   (/) (Scalar n1 (Just u1)) (Scalar n2 (Just u2)) =
-    Scalar (n1 / n2) (Just $ multiplyUnits u1 $ recipUnits u2)
+    Scalar (n1 / n2) (Just $ divideUnits u1 u2)
 
   -- reciprocal of the scalar
-  recip (Scalar n u) = Scalar (recip n) u
+  recip (Scalar n Nothing) = Scalar (recip n) Nothing
+  recip (Scalar n (Just u)) = Scalar (recip n) (Just $ recipUnits u)
