@@ -6,6 +6,7 @@ data Scalar = Scalar Double (Maybe Units)
 
 instance Show Scalar where
   show (Scalar n Nothing) = show n
+  show (Scalar 1 (Just u)) = show u
   show (Scalar n (Just u)) = show n ++ " " ++ show u
 
 instance Eq Scalar where

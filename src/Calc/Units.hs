@@ -16,7 +16,7 @@ instance Show Unit where
 instance IsString Unit where
   fromString = Unit
 
-newtype Units = Units (Map Unit Int)
+newtype Units = Units (Map Unit Integer)
   deriving (Eq)
 
 instance Show Units where

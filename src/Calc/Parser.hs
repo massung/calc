@@ -13,13 +13,14 @@ import Text.Parsec.Token
 
 -- valid expressions
 data Expr
-  = Num Scalar
-  | Unary UnaryOp Expr
-  | Binary BinaryOp Expr Expr
+  = Term Scalar
+  | Unary String UnaryOp Expr
+  | Binary String BinaryOp Expr Expr
 
 instance Show Expr where
-  show (Num x) = show x
-  show _ = "<expression>"
+  show (Term x) = show x
+  show (Unary n _ x) = n ++ show x
+  show (Binary n _ x y) = show x ++ n ++ show y
 
 -- unary expression operators
 type UnaryOp = Scalar -> Scalar
@@ -37,43 +38,69 @@ calc =
       identLetter = letter,
       opStart = oneOf "+-*/",
       opLetter = oneOf "+-*/",
-      reservedNames = ["it", "to", "as"],
+      reservedNames = ["ans", "to"],
       reservedOpNames = ["+", "-", "*", "/"],
       caseSensitive = True
     }
 
 lexer = makeTokenParser calc
 
-parseExpr = parse (ws >> expr) ""
+parseExpr = parse (ws >> (expr <|> unitsExpr)) ""
   where
     ws = whiteSpace lexer
 
-expr :: Parsec String () Expr
-expr = buildExpressionParser table term
+exprParser :: Parsec String () Expr
+exprParser = buildExpressionParser exprTable exprTerm
 
-term = parens lexer expr <|> number <|> singleUnit
+unitsExprParser :: Parsec String () Expr
+unitsExprParser = buildExpressionParser unitsExprTable unitsTerm
+
+expr = do
+  e <- exprParser
+  u <- optionMaybe unitsTerm
+  return $ case u of
+    Nothing -> e
+    Just u' -> Binary "_" (*) e u'
+
+exprTerm =
+  parens lexer expr
+    <|> brackets lexer expr
+    <|> number
+
+unitsExpr = try unitsExprParser <|> unitsTerm
+
+unitsTerm =
+  parens lexer unitsExpr
+    <|> brackets lexer unitsExpr
+    <|> units
 
 number = do
   n <- naturalOrFloat lexer
-  u <- units
   return $ case n of
-    Left i -> Num (Scalar (fromIntegral i) u)
-    Right f -> Num (Scalar f u)
+    Left i -> Term (Scalar (fromIntegral i) Nothing)
+    Right f -> Term (Scalar f Nothing)
 
-units = do
-  us <- optionMaybe $ many1 unit
-  return $ us <&> U.fromList . L.map (, 1 :: Int)
+units = many1 unit <&> Term . Scalar 1 . Just . U.fromList
+  where
+    unit = do
+      u <- identifier lexer <&> Unit
+      n <- option 1 $ lexeme lexer (char '^') >> integer lexer
+      return (u, n)
 
-unit = identifier lexer <&> Unit
-
-singleUnit = unit <&> Num . Scalar 1 . Just . U.singleton
-
-table =
+exprTable =
   [ [prefix "-" negate, prefix "+" id],
     [binary "*" (*) AssocLeft, binary "/" (/) AssocLeft],
     [binary "+" (+) AssocLeft, binary "-" (-) AssocLeft]
   ]
 
-binary name f = Infix (do reservedOp lexer name; return $ Binary f)
+unitsExprTable =
+  [ [binary "*" (*) AssocLeft, binary "/" (/) AssocLeft]
+  ]
 
-prefix name f = Prefix (do reservedOp lexer name; return $ Unary f)
+binary name f = Infix (do reservedOp lexer name; return $ Binary name f)
+
+prefix name f = Prefix (do reservedOp lexer name; return $ Unary name f)
+
+postfixUnits = Postfix $ do
+  (Term u) <- unitsTerm
+  return $ Unary "_" (* u)
