@@ -3,11 +3,9 @@
 
 module Calc.Parser where
 
-import Calc.Graph
 import Calc.Scalar
 import Calc.Units as U
 import Data.Functor
-import Data.List as L
 import Text.Parsec
 import Text.Parsec.Expr
 import Text.Parsec.Token
