@@ -69,7 +69,6 @@ conversionScale from to = do
       [] -> Nothing
       path -> Just $ L.foldl (*) 1.0 $ L.map snd $ L.filter ((/= a) . fst) path
 
-convertScalar :: Scalar -> Units -> Either String Scalar
 convertScalar (Scalar x Nothing) to = Right $ Scalar x $ Just to
 convertScalar s@(Scalar x (Just (Units from))) p@(Units to) =
   if from == to
@@ -93,4 +92,4 @@ convertScalar s@(Scalar x (Just (Units from))) p@(Units to) =
           if
               | fromE /= toE -> Nothing
               | fromE < 0 -> Just $ recip x
-              | True -> Just x
+              | True -> Just $ x ^ toE
