@@ -3,6 +3,7 @@
 
 module Calc.Parser where
 
+import Calc.Graph
 import Calc.Scalar
 import Calc.Units as U
 import Data.Functor
@@ -14,15 +15,17 @@ import Text.Parsec.Token
 -- valid expressions
 data Expr
   = Term Scalar
+  | Convert Expr Units
   | Unary String UnaryOp Expr
   | Binary String BinaryOp Expr Expr
-  | Convert Expr Units
+  | BinaryConvert String BinaryOp Expr Expr
 
 instance Show Expr where
   show (Term x) = show x
+  show (Convert x u) = show x ++ " : " ++ show u
   show (Unary n _ x) = n ++ show x
   show (Binary n _ x y) = show x ++ n ++ show y
-  show (Convert x u) = show x ++ " : " ++ show u
+  show (BinaryConvert n _ x y) = show x ++ n ++ show y
 
 -- unary expression operators
 type UnaryOp = Scalar -> Scalar
@@ -101,9 +104,11 @@ unitsTable =
 exprTable =
   [ [prefix "-" negate, prefix "+" id],
     [binary "*" (*) AssocLeft, binary "/" (/) AssocLeft],
-    [binary "+" (+) AssocLeft, binary "-" (-) AssocLeft]
+    [binaryConvert "+" (+) AssocLeft, binaryConvert "-" (-) AssocLeft]
   ]
 
 prefix name f = Prefix (do reservedOp lexer name; return $ Unary name f)
 
 binary name f = Infix (do reservedOp lexer name; return $ Binary name f)
+
+binaryConvert name f = Infix (do reservedOp lexer name; return $ BinaryConvert name f)
