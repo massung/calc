@@ -16,11 +16,13 @@ data Expr
   = Term Scalar
   | Unary String UnaryOp Expr
   | Binary String BinaryOp Expr Expr
+  | Convert Expr Units
 
 instance Show Expr where
   show (Term x) = show x
   show (Unary n _ x) = n ++ show x
   show (Binary n _ x y) = show x ++ n ++ show y
+  show (Convert x u) = show x ++ " : " ++ show u
 
 -- unary expression operators
 type UnaryOp = Scalar -> Scalar
@@ -52,13 +54,18 @@ parseExpr = parse (ws >> expr) ""
 exprParser :: Parsec String () Expr
 exprParser = buildExpressionParser exprTable exprTerm
 
-expr = exprParser
+expr = do
+  e <- exprParser
+  u <- optionMaybe $ reservedOp lexer ":" >> units
+  return $ case u of
+    Nothing -> e
+    Just u -> Convert e u
 
 exprTerm =
   parens lexer expr
     <|> brackets lexer expr
     <|> scalar
-    <|> unitScalar
+    <|> unitsTerm
 
 scalar = do
   n <- naturalOrFloat lexer
@@ -66,9 +73,11 @@ scalar = do
     Left i -> Term (Scalar (fromIntegral i) Nothing)
     Right f -> Term (Scalar f Nothing)
 
-unitScalar = units <&> Term
+unitsTerm = unitsScalar <&> Term
 
-units = many1 unit <&> Scalar 1 . Just . U.fromList
+unitsScalar = units <&> Scalar 1 . Just
+
+units = many1 unit <&> U.fromList
   where
     unit = do
       u <- identifier lexer <&> Unit
@@ -80,7 +89,6 @@ exprTable =
     [postfixUnits],
     [binary "*" (*) AssocLeft, binary "/" (/) AssocLeft],
     [binary "+" (+) AssocLeft, binary "-" (-) AssocLeft]
-    --[unitsConversion]
   ]
 
 binary name f = Infix (do reservedOp lexer name; return $ Binary name f)
@@ -89,10 +97,5 @@ prefix name f = Prefix (do reservedOp lexer name; return $ Unary name f)
 
 postfixUnits = Postfix $ do
   optional $ reservedOp lexer "_"
-  u <- units
+  u <- unitsScalar
   return $ Unary "_" (* u)
-
--- unitsConversion = Postfix $ do
---  reservedOp lexer ":"
---  u <- units
---  return $ UnaryOp (" : " ++ show u) (conv u)
