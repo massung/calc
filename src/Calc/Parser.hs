@@ -92,7 +92,7 @@ postfixUnits = Postfix $ do
   u <- units
   return $ Unary "_" (* u)
 
---unitsConversion = Postfix $ do
+-- unitsConversion = Postfix $ do
 --  reservedOp lexer ":"
 --  u <- units
 --  return $ UnaryOp (" : " ++ show u) (conv u)

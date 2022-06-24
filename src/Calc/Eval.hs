@@ -9,7 +9,7 @@ import Data.Map
 eval :: Expr -> Either String Expr
 eval (Unary _ f x) = evalUnary f x
 eval (Binary _ f x y) = evalBinary f x y
-eval (Term x) = Right . Term $ simplify x
+eval (Term x) = Right $ Term x
 
 evalUnary f (Term x) = eval $ Term (f x)
 evalUnary f x = eval x >>= evalUnary f
@@ -23,7 +23,7 @@ evalBinary f x y = do
 simplify s@(Scalar n (Just (Units u))) =
   case findConversion $ combinations (keys u) of
     Nothing -> s
-    Just n -> simplify (s * n)
+    Just n -> simplify (s * 1)
   where
     combinations xs = [(x, y) | x <- xs, y <- xs, x /= y]
 

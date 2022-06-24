@@ -67,4 +67,4 @@ conversionScale from to = do
     then Just 1
     else case unLPath $ lesp a b graph of
       [] -> Nothing
-      path -> Just $ L.foldl (*) 1.0 $ L.map snd $ L.tail $ L.reverse path
+      (_ : path) -> Just $ L.foldl (*) 1.0 [x | (_, x) <- path]
