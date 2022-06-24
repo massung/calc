@@ -54,9 +54,12 @@ parseExpr = parse (ws >> expr) ""
 exprParser :: Parsec String () Expr
 exprParser = buildExpressionParser exprTable exprTerm
 
+unitsParser :: Parsec String () Units
+unitsParser = buildExpressionParser unitsTable unitsTerm
+
 expr = do
   e <- exprParser
-  u <- optionMaybe $ reservedOp lexer ":" >> units
+  u <- optionMaybe $ reservedOp lexer ":" >> unitsParser
   return $ case u of
     Nothing -> e
     Just u -> Convert e u
@@ -65,17 +68,22 @@ exprTerm =
   parens lexer expr
     <|> brackets lexer expr
     <|> scalar
-    <|> unitsTerm
 
 scalar = do
   n <- naturalOrFloat lexer
+  u <- scalarUnits
   return $ case n of
-    Left i -> Term (Scalar (fromIntegral i) Nothing)
-    Right f -> Term (Scalar f Nothing)
+    Left i -> Term (Scalar (fromIntegral i) u)
+    Right f -> Term (Scalar f u)
 
-unitsTerm = unitsScalar <&> Term
+scalarUnits = optionMaybe $ do
+  optional $ reservedOp lexer "_"
+  try unitsParser <|> units
 
-unitsScalar = units <&> Scalar 1 . Just
+unitsTerm =
+  parens lexer units
+    <|> brackets lexer units
+    <|> units
 
 units = many1 unit <&> U.fromList
   where
@@ -84,9 +92,14 @@ units = many1 unit <&> U.fromList
       n <- option 1 $ lexeme lexer (char '^') >> integer lexer
       return (u, n)
 
+unitsTable =
+  [ [ Infix (do reservedOp lexer "*"; return multiplyUnits) AssocLeft,
+      Infix (do reservedOp lexer "/"; return divideUnits) AssocLeft
+    ]
+  ]
+
 exprTable =
   [ [prefix "-" negate, prefix "+" id],
-    [postfixUnits],
     [binary "*" (*) AssocLeft, binary "/" (/) AssocLeft],
     [binary "+" (+) AssocLeft, binary "-" (-) AssocLeft]
   ]
@@ -94,8 +107,3 @@ exprTable =
 binary name f = Infix (do reservedOp lexer name; return $ Binary name f)
 
 prefix name f = Prefix (do reservedOp lexer name; return $ Unary name f)
-
-postfixUnits = Postfix $ do
-  optional $ reservedOp lexer "_"
-  u <- unitsScalar
-  return $ Unary "_" (* u)
