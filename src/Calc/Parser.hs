@@ -104,6 +104,6 @@ exprTable =
     [binary "+" (+) AssocLeft, binary "-" (-) AssocLeft]
   ]
 
-binary name f = Infix (do reservedOp lexer name; return $ Binary name f)
-
 prefix name f = Prefix (do reservedOp lexer name; return $ Unary name f)
+
+binary name f = Infix (do reservedOp lexer name; return $ Binary name f)

@@ -2,9 +2,6 @@ module Calc.Eval where
 
 import Calc.Graph
 import Calc.Parser
-import Calc.Scalar
-import Calc.Units
-import Data.Map
 
 eval :: Expr -> Either String Expr
 eval (Term x) = Right $ Term x

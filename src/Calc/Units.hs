@@ -5,7 +5,6 @@ module Calc.Units where
 import Data.Foldable as F
 import Data.List as L
 import Data.Map as M
-import Data.String
 
 newtype Unit = Unit String
   deriving (Eq, Ord)
