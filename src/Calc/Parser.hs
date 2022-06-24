@@ -1,5 +1,4 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TupleSections #-}
 
 module Calc.Parser where
 
@@ -65,10 +64,7 @@ expr = do
     Nothing -> e
     Just u -> Convert e u
 
-exprTerm =
-  parens lexer expr
-    <|> brackets lexer expr
-    <|> scalar
+exprTerm = parens lexer expr <|> scalar
 
 scalar = do
   n <- naturalOrFloat lexer
@@ -81,10 +77,7 @@ scalarUnits = optionMaybe $ do
   optional $ reservedOp lexer "_"
   try unitsParser <|> units
 
-unitsTerm =
-  parens lexer units
-    <|> brackets lexer units
-    <|> units
+unitsTerm = parens lexer units <|> units
 
 units = many1 unit <&> U.fromList
   where
