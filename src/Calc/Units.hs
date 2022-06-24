@@ -12,7 +12,7 @@ newtype Unit = Unit String
 instance Show Unit where
   show (Unit u) = u
 
-newtype Units = Units (Map Unit Integer)
+newtype Units = Units (Map Unit Double)
   deriving (Eq)
 
 instance Show Units where
@@ -50,3 +50,6 @@ multiplyUnits (Units a) (Units b) =
 
 divideUnits a b =
   multiplyUnits a $ recipUnits b
+
+expUnits (Units u) n =
+  Units $ M.map (* n) u

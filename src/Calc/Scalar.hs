@@ -76,3 +76,7 @@ instance Fractional Scalar where
   -- reciprocal of the scalar
   recip (Scalar n Nothing) = Scalar (recip n) Nothing
   recip (Scalar n (Just u)) = Scalar (recip n) (Just $ recipUnits u)
+
+expScalar (Scalar _ _) (Scalar _ (Just _)) = error "Cannot add units to exponent."
+expScalar (Scalar x Nothing) (Scalar n _) = Scalar (x ** n) Nothing
+expScalar (Scalar x (Just u)) (Scalar n _) = Scalar (x ** n) $ Just (expUnits u n)

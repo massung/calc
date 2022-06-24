@@ -92,4 +92,4 @@ convertScalar s@(Scalar x (Just (Units from))) p@(Units to) =
           if
               | fromE /= toE -> Nothing
               | fromE < 0 -> Just $ recip x
-              | True -> Just $ x ^ toE
+              | True -> Just $ expScalar x (Scalar toE Nothing)

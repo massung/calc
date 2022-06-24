@@ -92,8 +92,11 @@ units = many1 unit <&> U.fromList
   where
     unit = do
       u <- identifier lexer <&> Unit
-      n <- option 1 $ lexeme lexer (char '^') >> integer lexer
-      return (u, n)
+      n <- optionMaybe $ lexeme lexer (char '^') >> naturalOrFloat lexer
+      return $ case n of
+        Nothing -> (u, 1)
+        Just (Left i) -> (u, fromInteger i)
+        Just (Right f) -> (u, f)
 
 unitsTable =
   [ [ Infix (do reservedOp lexer "*"; return multiplyUnits) AssocLeft,
@@ -103,6 +106,7 @@ unitsTable =
 
 exprTable =
   [ [prefix "-" negate, prefix "+" id],
+    [binary "^" expScalar AssocLeft],
     [binary "*" (*) AssocLeft, binary "/" (/) AssocLeft],
     [binaryConvert "+" (+) AssocLeft, binaryConvert "-" (-) AssocLeft]
   ]
