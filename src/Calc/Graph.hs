@@ -52,7 +52,7 @@ conversionScale from to = do
       [] -> Nothing
       path -> Just $ L.foldl (*) 1.0 $ L.map snd $ L.filter ((/= a) . fst) path
 
-convertScalar (Scalar x Nothing) to = Right $ Scalar x $ Just to
+convertScalar (Scalar x Nothing) to = Right $ Scalar x (Just to)
 convertScalar s@(Scalar x (Just (Units from))) p@(Units to) =
   if from == to
     then Right s
