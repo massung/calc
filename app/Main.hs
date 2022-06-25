@@ -5,7 +5,6 @@ module Main where
 import Calc.Eval
 import Calc.Parser
 import System.Console.CmdArgs
-import System.Environment
 
 -- command line options
 newtype Opts = Opts

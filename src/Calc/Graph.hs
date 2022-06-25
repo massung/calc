@@ -15,12 +15,12 @@ import Data.Graph.Inductive.Query.BFS
 import Data.List as L
 import Data.Map as M hiding (mapMaybe)
 import Data.Maybe
-import Data.Vector as V hiding (mapMaybe)
+import Data.Vector as V hiding ((++), mapMaybe)
 
 data Conv = Conv
   { from :: Unit,
     to :: Unit,
-    scale :: Scalar
+    scale :: Double
   }
   deriving (Show)
 
@@ -29,17 +29,66 @@ instance FromNamedRecord Conv where
     from <- r .: "from"
     to <- r .: "to"
     scale <- r .: "scale"
-    let n = Scalar scale (Just $ U.fromList [(from, -1), (to, 1)])
-     in return $ Conv {from = from, to = to, scale = n}
+    return $ Conv {from = from, to = to, scale = scale}
 
 instance FromField Unit where
   parseField s = pure $ Unit (BS.toString s)
 
-csv = $(embedStringFile "res/units.csv")
+data SIUnits = SIUnits
+  { category :: String,
+    baseUnit :: String
+  }
+  deriving(Show)
 
-conversions = case decodeByName csv of
+instance FromNamedRecord SIUnits where
+  parseNamedRecord r = do
+    category <- r .: "category"
+    unit <- r .: "unit"
+    return $ SIUnits {category=category, baseUnit=unit}
+
+csv = $(embedStringFile "res/units.csv")
+si = $(embedStringFile "res/si.csv")
+
+customConversions = case decodeByName csv of
   Left err -> []
   Right (_, convs) -> V.toList convs
+
+siConversions = case decodeByName si of
+  Left err -> []
+  Right (_, units) -> L.concatMap (convs . baseUnit) $ V.toList units
+    where
+      convs u =
+        [ conv "z" u 1e-24,
+          conv "y" u 1e-21,
+          conv "a" u 1e-18,
+          conv "f" u 1e-15,
+          conv "p" u 1e-12,
+          conv "n" u 1e-9,
+          conv "u" u 1e-6,
+          conv "m" u 1e-3,
+          conv "c" u 1e-2,
+          conv "d" u 1e-1,
+          conv "da" u 10,
+          conv "h" u 1e2,
+          conv "k" u 1e3,
+          conv "M" u 1e6,
+          conv "G" u 1e9,
+          conv "T" u 1e12,
+          conv "P" u 1e15,
+          conv "E" u 1e18,
+          conv "Z" u 1e21,
+          conv "Y" u 1e24
+        ]
+
+      -- apply si prefix to base units with scale factor
+      conv prefix u scale =
+        Conv {
+          from=Unit $ prefix ++ u,
+          to=Unit u,
+          scale=scale
+        }
+
+conversions = siConversions ++ customConversions
 
 distinctUnits = nub $ names conversions
   where
@@ -53,7 +102,7 @@ edges (conv : convs) = (a, b, x) : (b, a, recip x) : edges convs
   where
     a = unitsMap M.! from conv
     b = unitsMap M.! to conv
-    x = scale conv
+    x = Scalar (scale conv) (Just $ U.fromList [(from conv, -1), (to conv, 1)])
 
 graph :: Gr Unit Scalar
 graph = mkGraph nodes $ edges conversions
