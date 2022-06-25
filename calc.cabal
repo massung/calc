@@ -23,6 +23,7 @@ source-repository head
 
 library
   exposed-modules:
+      Calc.Alias
       Calc.Conv
       Calc.Eval
       Calc.Graph

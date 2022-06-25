@@ -39,7 +39,7 @@ calc =
       identStart = letter,
       identLetter = letter,
       opStart = oneOf "_:+-*/",
-      opLetter = oneOf "_:+-*/",
+      opLetter = parserZero,
       reservedNames = ["ans", "to"],
       reservedOpNames = ["_", "+", "-", "*", "/", ":"],
       caseSensitive = True
@@ -47,9 +47,12 @@ calc =
 
 lexer = makeTokenParser calc
 
-parseExpr = parse (ws >> expr) ""
+parseExpr = parse (whiteSpace lexer >> parser) ""
   where
-    ws = whiteSpace lexer
+    parser = do
+      e <- expr
+      eof
+      return e
 
 exprParser :: Parsec String () Expr
 exprParser = buildExpressionParser exprTable exprTerm
@@ -83,11 +86,16 @@ units = many1 unit <&> U.fromList
   where
     unit = do
       u <- identifier lexer <&> Unit
-      n <- optionMaybe $ lexeme lexer (char '^') >> naturalOrFloat lexer
-      return $ case n of
-        Nothing -> (u, 1)
-        Just (Left i) -> (u, fromInteger i)
-        Just (Right f) -> (u, f)
+      n <- option 1 unitsExponent
+      return (u, n)
+
+unitsExponent = do
+  reservedOp lexer "^"
+  sign <- option 1 (reservedOp lexer "-" >> return (-1))
+  n <- naturalOrFloat lexer
+  return $ case n of
+    Left i -> sign * fromInteger i
+    Right f -> sign * f
 
 unitsTable =
   [ [ Infix (do reservedOp lexer "*"; return multiplyUnits) AssocLeft,
