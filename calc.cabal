@@ -29,7 +29,6 @@ library
       Calc.Lexer
       Calc.Parser
       Calc.Scalar
-      Calc.Units
       Calc.Units.Base
       Calc.Units.Compound
       Calc.Units.Parser
