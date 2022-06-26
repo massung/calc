@@ -9,6 +9,7 @@ import Data.Foldable as F
 import Data.Functor
 import Data.List as L
 import Data.Map as M
+import Data.String
 import Text.Parsec
 import Text.Parsec.Expr
 import Text.Parsec.Token
@@ -18,6 +19,9 @@ newtype Unit = Unit String
 
 instance Show Unit where
   show (Unit u) = u
+
+instance IsString Unit where
+  fromString = Unit
 
 instance FromField Unit where
   parseField s = pure $ Unit (BS.toString s)
