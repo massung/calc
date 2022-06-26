@@ -1,12 +1,12 @@
 {-# LANGUAGE MultiWayIf #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TemplateHaskell #-}
 
 module Calc.Graph where
 
 import Calc.Conv
 import Calc.Scalar
-import Calc.Units as U
+import Calc.Units.Base
+import Calc.Units.Compound
 import Data.ByteString.UTF8 as BS
 import Data.Either
 import Data.FileEmbed
@@ -17,12 +17,6 @@ import Data.List as L
 import Data.Map as M hiding (mapMaybe)
 import Data.Maybe
 import Data.Vector as V hiding (mapMaybe, (++))
-
-csv = $(embedStringFile "res/units.csv")
-
-si = $(embedStringFile "res/si.csv")
-
-conversions = fromRight [] (parseConversions csv) ++ fromRight [] (parseSIConversions si)
 
 distinctUnits = nub $ names conversions
   where

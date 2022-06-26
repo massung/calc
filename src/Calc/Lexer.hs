@@ -13,7 +13,7 @@ lexer = makeTokenParser lang
       LanguageDef
         { commentStart = "",
           commentEnd = "",
-          commentLine = "#",
+          commentLine = "",
           nestedComments = False,
           identStart = letter,
           identLetter = letter,
