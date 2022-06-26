@@ -13,7 +13,7 @@ import Data.Vector as V hiding (mapMaybe, (++))
 import Text.Parsec
 
 data Alias = Alias
-  { alias :: String,
+  { alias :: Unit,
     units :: Units,
     scale :: Double
   }
@@ -30,6 +30,9 @@ instance FromField Units where
   parseField s = case parse unitsParser "aliases" (toString s) of
     Left err -> return $ U.fromList [] -- TODO: error
     Right units -> return units
+
+instance FromField Unit where
+  parseField = return . Unit . toString
 
 aliases = do
   case decodeByName $(embedStringFile "res/aliases.csv") of
