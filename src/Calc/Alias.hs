@@ -3,9 +3,8 @@
 
 module Calc.Alias where
 
-import Calc.Parser hiding (units)
 import Calc.Scalar
-import Calc.Units as U
+import Calc.Units as U hiding (units)
 import Data.ByteString.UTF8 as BS
 import Data.Csv
 import Data.FileEmbed
@@ -29,7 +28,7 @@ instance FromNamedRecord Alias where
 
 instance FromField Units where
   parseField s = case parse unitsParser "aliases" (toString s) of
-    Left err -> return $ U.fromList []  -- TODO: error
+    Left err -> return $ U.fromList [] -- TODO: error
     Right units -> return units
 
 aliases = do

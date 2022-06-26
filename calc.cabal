@@ -27,6 +27,7 @@ library
       Calc.Conv
       Calc.Eval
       Calc.Graph
+      Calc.Lexer
       Calc.Parser
       Calc.Scalar
       Calc.Units

@@ -2,9 +2,14 @@
 
 module Calc.Units where
 
+import Calc.Lexer
 import Data.Foldable as F
+import Data.Functor
 import Data.List as L
 import Data.Map as M
+import Text.Parsec
+import Text.Parsec.Expr
+import Text.Parsec.Token
 
 newtype Unit = Unit String
   deriving (Eq, Ord)
@@ -53,3 +58,29 @@ divideUnits a b =
 
 expUnits (Units u) n =
   Units $ M.map (* n) u
+
+unitsParser :: Parsec String () Units
+unitsParser = buildExpressionParser unitsTable unitsTerm
+
+unitsTerm = parens lexer units <|> units
+
+units = many1 unit <&> Calc.Units.fromList
+  where
+    unit = do
+      u <- identifier lexer <&> Unit
+      n <- option 1 unitsExponent
+      return (u, n)
+
+unitsExponent = do
+  reservedOp lexer "^"
+  sign <- option 1 (reservedOp lexer "-" >> return (-1))
+  n <- naturalOrFloat lexer
+  return $ case n of
+    Left i -> sign * fromInteger i
+    Right f -> sign * f
+
+unitsTable =
+  [ [ Infix (do reservedOp lexer "*"; return multiplyUnits) AssocLeft,
+      Infix (do reservedOp lexer "/"; return divideUnits) AssocLeft
+    ]
+  ]
