@@ -3,6 +3,8 @@
 module Calc.Units where
 
 import Calc.Lexer
+import Data.ByteString.UTF8 as BS
+import Data.Csv
 import Data.Foldable as F
 import Data.Functor
 import Data.List as L
@@ -16,6 +18,9 @@ newtype Unit = Unit String
 
 instance Show Unit where
   show (Unit u) = u
+
+instance FromField Unit where
+  parseField s = pure $ Unit (BS.toString s)
 
 newtype Units = Units (Map Unit Double)
   deriving (Eq)

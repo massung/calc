@@ -23,9 +23,6 @@ instance FromNamedRecord Conv where
     scale <- r .: "scale"
     return Conv {from = from, to = to, scale = scale}
 
-instance FromField Unit where
-  parseField s = pure $ Unit (BS.toString s)
-
 newtype SIUnits = SIUnits (String, String)
   deriving (Show)
 

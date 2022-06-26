@@ -31,9 +31,6 @@ instance FromField Units where
     Left err -> return $ U.fromList [] -- TODO: error
     Right units -> return units
 
-instance FromField Unit where
-  parseField = return . Unit . toString
-
 aliases = do
   case decodeByName $(embedStringFile "res/aliases.csv") of
     Left err -> M.empty
