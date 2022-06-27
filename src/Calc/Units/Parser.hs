@@ -4,12 +4,16 @@
 module Calc.Units.Parser where
 
 import Calc.Units.Compound
+import Data.Either
 import Data.Functor.Identity
 import Data.String
 import Data.Map as M
 import Text.Parsec
 import Text.Parsec.Expr
 import Text.Parsec.Token
+
+instance IsString Units where
+  fromString = fromRight (error "Illegal units") . parse unitsParser ""
 
 unitsLexer :: GenTokenParser String () Identity
 unitsLexer = makeTokenParser lang
@@ -30,7 +34,7 @@ unitsLexer = makeTokenParser lang
         }
 
 unitsParser :: Parsec String () Units
-unitsParser = buildExpressionParser exprTable unitsTerm
+unitsParser = buildExpressionParser unitsExprTable unitsTerm
 
 unitsTerm = parens unitsLexer units <|> units
 
@@ -52,7 +56,7 @@ exponentSign = option 1 (neg <|> pos)
     neg = reservedOp unitsLexer "-" >> return -1
     pos = reservedOp unitsLexer "+" >> return 1
 
-exprTable =
+unitsExprTable =
   [ [ Infix (do reservedOp unitsLexer "*"; return multiplyUnits) AssocLeft,
       Infix (do reservedOp unitsLexer "/"; return divideUnits) AssocLeft
     ]

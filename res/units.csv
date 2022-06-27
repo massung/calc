@@ -1,6 +1,4 @@
 name,symbol
-bits,b
-byte,B
 foot,ft
 hand,h
 yard,yd
@@ -13,25 +11,15 @@ cable,cable
 nautical mile,nmi
 link,link
 rod,rod
+ounce,oz
 pound,lb
 stone,st
 slug,slug
 quarter,qtr
 ton,t
-second,s
 minute,min
 hour,hr
 day,day
-week,wk
-gram,g
-liter,L
-meter,m
-joule,J
-watt,W
-coulomb,C
-ampere,A
-pascal,Pa
-volt,V
-newton,N
-hertz,hz
 acre,acre
+degree,deg
+radian,rad

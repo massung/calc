@@ -16,7 +16,7 @@ import Data.Map as M
 import Data.Vector as V
 import Text.Parsec
 
-data Conv = Conv {from :: Unit, to :: Units, scale :: Double}
+data Conv = Conv {from :: Units, to :: Units, scale :: Double}
   deriving (Show)
 
 instance FromField Unit where
@@ -44,4 +44,4 @@ conversions = fromRight [] $ V.toList . snd <$> decodeByName convCsv
 
 conversionScalar conv = Scalar (scale conv) (Just units)
   where
-    units = multiplyUnits (to conv) (U.singleton (from conv) -1)
+    units = multiplyUnits (to conv) (recipUnits $ from conv)

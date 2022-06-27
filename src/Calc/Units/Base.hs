@@ -3,7 +3,6 @@
 
 module Calc.Units.Base where
 
-import Data.ByteString.UTF8 as BS
 import Data.Csv
 import Data.Either
 import Data.FileEmbed
@@ -26,9 +25,9 @@ instance FromNamedRecord Unit where
     return $ Unit {name = Just name, symbol = symbol}
 
 instance IsString Unit where
-  fromString s = fromMaybe unknown $ M.lookup s unitsMap
-    where
-      unknown = Unit {name = Nothing, symbol = s}
+  fromString s = case M.lookup s unitsMap of
+    Nothing -> error $ "unknown units: " L.++ s
+    Just unit -> unit
 
 siPrefixes =
   [ ("yocto", "y", 1e-24),
@@ -41,7 +40,7 @@ siPrefixes =
     ("milli", "m", 1e-3),
     ("centi", "c", 1e-2),
     ("deci", "d", 1e-1),
-    ("deka", "da", 10),
+    ("deka", "da", 1e1),
     ("hecto", "h", 1e2),
     ("kilo", "k", 1e3),
     ("mega", "M", 1e6),
@@ -53,15 +52,27 @@ siPrefixes =
     ("yotta", "Y", 1e24)
   ]
 
-unitsCsv = $(embedStringFile "res/units.csv")
-
-unitsMap = fromRight M.empty $ V.foldl siUnits M.empty . snd <$> decodeByName unitsCsv
+mkSIUnits u = u : L.map mkUnits siPrefixes
   where
-    siUnits m u = L.foldl (insertSIUnits u) m siPrefixes
+    mkUnits (prefixName, prefixSymbol, _) =
+      Unit
+        { name = (prefixName L.++) <$> name u,
+          symbol = prefixSymbol L.++ symbol u
+        }
 
-    -- create new units with si prefixes
-    insertSIUnits u m (namePrefix, symbolPrefix, _) =
-      let s = namePrefix L.++ fromJust (name u)
-       in M.insert s (Unit {name=Just s, symbol=symbolPrefix L.++ symbol u}) m
+imperialUnitsCsv = $(embedStringFile "res/units.csv")
 
-units = [u | (_, u) <- M.toList unitsMap]
+siUnitsCsv = $(embedStringFile "res/siUnits.csv")
+
+imperialUnits = V.foldl insert M.empty . snd <$> decodeByName imperialUnitsCsv
+  where
+    insert m u = M.insert (symbol u) u m
+
+siUnits = V.foldl insert M.empty . snd <$> decodeByName siUnitsCsv
+  where
+    insert m u = L.foldl (\m u -> M.insert (symbol u) u m) m $ mkSIUnits u
+
+unitsMap = do
+  a <- imperialUnits
+  b <- siUnits
+  return $ M.unions [a, b]

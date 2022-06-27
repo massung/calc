@@ -3,13 +3,12 @@
 module Calc.Units.Compound where
 
 import Calc.Units.Base
-import Data.ByteString.UTF8 as BS
 import Data.Foldable as F
 import Data.List as L
 import Data.Map as M
 
 newtype Units = Units (Map Unit Double)
-  deriving (Eq)
+  deriving (Eq, Ord)
 
 instance Show Units where
   show (Units u) =
@@ -34,8 +33,7 @@ instance Show Units where
       expNum = unwords . L.map showUnitsAbs
       expDen = unwords . L.map showUnits
 
-empty =
-  Units M.empty
+baseUnits = [Units $ M.singleton u 1 | (_, u) <- M.toList unitsMap]
 
 singleton u n =
   Units $ M.singleton u n

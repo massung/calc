@@ -4,7 +4,8 @@ module Calc.Parser where
 
 import Calc.Lexer
 import Calc.Scalar
-import Calc.Units as U
+import Calc.Units.Compound
+import Calc.Units.Parser
 import Data.Functor
 import Text.Parsec
 import Text.Parsec.Expr
@@ -72,4 +73,4 @@ prefix name f = Prefix (do reservedOp lexer name; return $ Unary name f)
 
 binary name f = Infix (do reservedOp lexer name; return $ Binary name f)
 
-binaryConvert name f = Infix (do reservedOp lexer name; return $ BinaryConvert name f)
+binaryConvert name f = Infix (do reservedOp lexer name; return $ Binary name f)
