@@ -1,7 +1,7 @@
 module Calc.Eval where
 
+import Calc.Expr
 import Calc.Graph
-import Calc.Parser
 import Calc.Scalar
 
 eval :: Expr -> Either String Expr

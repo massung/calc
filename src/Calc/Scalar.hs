@@ -1,6 +1,6 @@
 module Calc.Scalar where
 
-import Calc.Units.Compound
+import Calc.Units
 
 data Scalar = Scalar Double (Maybe Units)
 

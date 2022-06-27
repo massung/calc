@@ -1,26 +1,25 @@
-from,to,scale
-B,b,8
-ft,in,12
-h,in,4
-yd,ft,3
-ch,yd,22
-fur,ch,10
-mi,fur,8
-lea,mi,3
-ftm,yd,2.02667
-cable,ftm,100
-nmi,cable,10
-link,in,7.92
-rod,link,25
-lb,oz,16
-st,lb,14
-qtr,lb,28
-cwt,lb,112
-t,lb,2240
-slug,lb,32.17404856
-lb,kg,0.45359237
-min,s,60
-hr,min,60
-day,hr,24
-wk,day,7
-hz,s^-1,1
+from,to
+B,8 b
+ft,12 in
+h,4 in
+yd,3 ft
+ch,22 yd
+fur,10 ch
+mi,8 fur
+lea,3 mi
+ftm,2.02667 yd
+cable,100 ftm
+nmi,10 cable
+link,7.92 in
+rod,25 link
+lb,16 oz
+st,14 lb
+qtr,28 lb
+cwt,112 lb
+t,2240 lb
+slug,32.17404856 lb
+lb,0.45359237 kg
+min,60 s
+hr,60 min
+day,24 hr
+wk,7 day

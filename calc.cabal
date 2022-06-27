@@ -25,13 +25,15 @@ library
   exposed-modules:
       Calc.Conv
       Calc.Eval
+      Calc.Expr
       Calc.Graph
       Calc.Lexer
       Calc.Parser
       Calc.Scalar
+      Calc.Units
       Calc.Units.Base
-      Calc.Units.Compound
-      Calc.Units.Parser
+      Calc.Units.Lexer
+      Calc.Units.SI
   other-modules:
       Paths_calc
   hs-source-dirs:

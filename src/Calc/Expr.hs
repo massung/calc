@@ -4,8 +4,8 @@ module Calc.Parser where
 
 import Calc.Lexer
 import Calc.Scalar
-import Calc.Units.Compound
-import Calc.Units.Parser
+import Calc.Units
+import Calc.Units.Lexer
 import Data.Functor
 import Text.Parsec
 import Text.Parsec.Expr
@@ -60,7 +60,7 @@ scalar = do
 
 scalarUnits = optionMaybe $ do
   optional $ reservedOp lexer "_"
-  try unitsParser <|> units
+  try unitsParser <|> unitsTerm
 
 exprTable =
   [ [prefix "-" negate, prefix "+" id],

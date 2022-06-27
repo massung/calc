@@ -5,7 +5,7 @@ module Calc.Graph where
 
 import Calc.Conv
 import Calc.Scalar
-import Calc.Units.Compound
+import Calc.Units
 import Data.Graph.Inductive.Graph hiding (edges)
 import Data.Graph.Inductive.PatriciaTree
 import Data.Graph.Inductive.Query.BFS
@@ -19,7 +19,7 @@ graph = mkGraph nodes $ L.concatMap edges conversions
   where
     nodes = L.map swap $ M.toList nodeMap
 
-nodeMap = M.fromList $ L.zip baseUnits [1..]
+nodeMap = M.fromList $ L.zip (M.keys unitsMap) [1..]
 
 edges conv = [(a, b, x), (b, a, recip x)]
   where
