@@ -1,4 +1,3 @@
-{-# LANGUAGE MultiWayIf #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Calc.Graph where
@@ -10,7 +9,8 @@ import Data.Graph.Inductive.Graph hiding (edges)
 import Data.Graph.Inductive.PatriciaTree
 import Data.Graph.Inductive.Query.BFS
 import Data.List as L
-import Data.Map as M hiding (mapMaybe)
+import Data.List.Extra
+import Data.Map as M hiding (mapMaybe, (\\))
 import Data.Tuple
 
 graph :: Gr Units Scalar
@@ -39,33 +39,15 @@ conversionScale from to = do
       [] -> Nothing
       path -> Just $ L.foldl (*) 1.0 $ L.map snd $ L.filter ((/= a) . fst) path
 
--- convert (Scalar x Nothing) = Right . Scalar x . Just
--- convert s@(Scalar x (Just from)) to =
---   if from == to
---     then Right s
---     else case
+convert (Scalar x Nothing) to = Right (Scalar x $ Just to)
+convert s@(Scalar x (Just (Units from))) (Units to)
+  | from == to = Right s
+  | otherwise = case conversion of
+    Nothing -> Left "no conversion possible"
+    Just scale -> convert (s * scale) (Units to)
+  where
+    unitsFrom = [Units $ M.fromList u | u <- tail $ subsequences $ M.toList from]
+    unitsTo = [Units $ M.fromList u | u <- tail $ subsequences $ M.toList to]
 
--- convertScalar (Scalar x Nothing) to = Right $ Scalar x (Just to)
--- convertScalar s@(Scalar x (Just (Units from))) p@(Units to) =
---   if from == to
---     then Right s
---     else case listToMaybe $ mapMaybe (matchConversion unconvertedFrom) unconvertedTo of
---       Nothing -> Left "no conversion possible"
---       Just scale -> convertScalar (s * scale) p
---   where
---     unitsFrom = M.toList from
---     unitsTo = M.toList to
-
---     -- the next unit that needs to be converted and left to convert to
---     unconvertedFrom = L.head $ unitsFrom L.\\ unitsTo
---     unconvertedTo = unitsTo L.\\ unitsFrom
-
---     -- see if there's a valid match from
---     matchConversion (fromU, fromE) (toU, toE) =
---       case conversionScale fromU toU of
---         Nothing -> Nothing
---         Just x ->
---           if
---               | fromE /= toE -> Nothing
---               | fromE < 0 -> Just $ recip x
---               | True -> Just $ expScalar x (Scalar toE Nothing)
+    -- find the first path in the graph from -> to
+    conversion = firstJust (uncurry conversionScale) [(x, y) | x <- unitsFrom, y <- unitsTo]
