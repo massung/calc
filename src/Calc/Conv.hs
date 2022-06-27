@@ -6,29 +6,33 @@ module Calc.Conv where
 
 import Calc.Scalar
 import Calc.Units
+import Calc.Units.Base
 import Data.ByteString.UTF8 as BS
 import Data.Csv as Csv
 import Data.Either
 import Data.FileEmbed
-import Data.Map as M
-import Data.Vector as V
-import Text.Parsec
+import Data.List as L
+import Data.Vector as V hiding ((++))
 
-data Conv = Conv {from :: Units, to :: Scalar}
+data Conv = Conv {from :: Unit, to :: Scalar}
   deriving (Show)
 
 instance FromNamedRecord Conv where
   parseNamedRecord r = do
     from <- r .: "from"
     to <- r .: "to"
-    scale <- r .: "scale"
-    return Conv {from = from, to = to, scale = scale}
+    return Conv {from = from, to = to}
 
 convCsv = $(embedStringFile "res/conv.csv")
 
-conversions :: [Conv]
-conversions = fromRight [] $ V.toList . snd <$> decodeByName convCsv
-
-conversionScalar conv = Scalar (scale conv) (Just units)
+conversions = base ++ siConversions
   where
-    units = multiplyUnits (to conv) (recipUnits $ from conv)
+    base = fromRight [] $ V.toList . snd <$> decodeByName convCsv
+
+siConversions = L.concat [L.map (convs u) si | (u, si) <- siUnits]
+  where
+    convs base (unit, n) =
+      Conv
+        { from = base,
+          to = Scalar (recip n) (Just $ singletonUnits unit)
+        }

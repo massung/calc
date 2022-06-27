@@ -1,5 +1,6 @@
 from,to
 B,8 b
+ft,0.3048 m
 ft,12 in
 h,4 in
 yd,3 ft
@@ -13,6 +14,7 @@ nmi,10 cable
 link,7.92 in
 rod,25 link
 lb,16 oz
+lb,453.5924 g
 st,14 lb
 qtr,28 lb
 cwt,112 lb
@@ -22,4 +24,5 @@ lb,0.45359237 kg
 min,60 s
 hr,60 min
 day,24 hr
-wk,7 day
+bar,100000 Pa
+acre,43560.04 ft^2

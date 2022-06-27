@@ -1,12 +1,26 @@
 module Calc.Scalar where
 
 import Calc.Units
+import Calc.Units.Lexer
+import Data.ByteString.UTF8 as BS
+import Data.Csv
+import Data.String as S
+import Text.Parsec
+import Text.Parsec.Token
 
 data Scalar = Scalar Double (Maybe Units)
+
+instance IsString Scalar where
+  fromString s = case parse scalarParser "" s of
+    Left err -> error $ show err
+    Right scalar -> scalar
 
 instance Show Scalar where
   show (Scalar n Nothing) = show n
   show (Scalar n (Just u)) = show n ++ " " ++ show u
+
+instance FromField Scalar where
+  parseField = pure . S.fromString . BS.toString
 
 instance Eq Scalar where
   (==) (Scalar n1 u1) (Scalar n2 u2) = u1 == u2 && n1 == n2
@@ -19,8 +33,6 @@ instance Ord Scalar where
 
 instance Num Scalar where
   -- adding scalars with the same units
-  (+) (Scalar n1 Nothing) (Scalar n2 Nothing) =
-    Scalar (n1 + n2) Nothing
   (+) (Scalar n1 (Just u1)) (Scalar n2 Nothing) =
     Scalar (n1 + n2) (Just u1)
   (+) (Scalar n1 Nothing) (Scalar n2 (Just u2)) =
@@ -31,8 +43,6 @@ instance Num Scalar where
       else error "Cannot add disparately typed scalars."
 
   -- subtracting scalars with the same units
-  (-) (Scalar n1 Nothing) (Scalar n2 Nothing) =
-    Scalar (n1 - n2) Nothing
   (-) (Scalar n1 (Just u1)) (Scalar n2 Nothing) =
     Scalar (n1 - n2) (Just u1)
   (-) (Scalar n1 Nothing) (Scalar n2 (Just u2)) =
@@ -80,3 +90,16 @@ instance Fractional Scalar where
 expScalar (Scalar _ _) (Scalar _ (Just _)) = error "Cannot add units to exponent."
 expScalar (Scalar x Nothing) (Scalar n _) = Scalar (x ** n) Nothing
 expScalar (Scalar x (Just u)) (Scalar n _) = Scalar (x ** n) $ Just (expUnits u n)
+
+fromUnits = Scalar 1 . Just
+
+scalarParser = do
+  n <- naturalOrFloat unitsLexer
+  u <- scalarUnits
+  return $ case n of
+    Left i -> Scalar (fromIntegral i) u
+    Right f -> Scalar f u
+
+scalarUnits = optionMaybe $ do
+  optional $ reservedOp unitsLexer "_"
+  try unitsParser <|> unitsTerm

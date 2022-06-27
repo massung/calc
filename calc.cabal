@@ -28,10 +28,10 @@ library
       Calc.Expr
       Calc.Graph
       Calc.Lexer
-      Calc.Parser
       Calc.Scalar
       Calc.Units
       Calc.Units.Base
+      Calc.Units.Dim
       Calc.Units.Lexer
       Calc.Units.SI
   other-modules:
@@ -46,6 +46,7 @@ library
     , cmdargs
     , containers
     , errors
+    , extra
     , fgl
     , file-embed
     , mtl
@@ -73,6 +74,7 @@ executable calc
     , cmdargs
     , containers
     , errors
+    , extra
     , fgl
     , file-embed
     , mtl
@@ -101,6 +103,7 @@ test-suite calc-test
     , cmdargs
     , containers
     , errors
+    , extra
     , fgl
     , file-embed
     , hspec

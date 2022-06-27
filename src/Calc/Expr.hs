@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Calc.Parser where
+module Calc.Expr where
 
 import Calc.Lexer
 import Calc.Scalar
@@ -49,18 +49,7 @@ expr = do
     Nothing -> e
     Just u -> Convert e u
 
-exprTerm = parens lexer expr <|> scalar
-
-scalar = do
-  n <- naturalOrFloat lexer
-  u <- scalarUnits
-  return $ case n of
-    Left i -> Term (Scalar (fromIntegral i) u)
-    Right f -> Term (Scalar f u)
-
-scalarUnits = optionMaybe $ do
-  optional $ reservedOp lexer "_"
-  try unitsParser <|> unitsTerm
+exprTerm = parens lexer expr <|> Term <$> scalarParser
 
 exprTable =
   [ [prefix "-" negate, prefix "+" id],

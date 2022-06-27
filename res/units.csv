@@ -1,9 +1,10 @@
 dim,name,symbol
+length,inch,in
 length,foot,ft
 length,hand,h
 length,yard,yd
 length,chain,ch
-length,furlong,fu
+length,furlong,fur
 length,mile,mi
 length,league,lea
 length,fathom,ftm
@@ -16,9 +17,12 @@ mass,pound,lb
 mass,stone,st
 mass,slug,slug
 mass,quarter,qtr
+mass,hundredweight,cwt
 mass,ton,t
-time,minute,min
-time,hour,hr
-time,day,day
+duration,minute,min
+duration,hour,hr
+duration,day,day
 angle,degree,deg
 angle,radian,rad
+area,acre,acre
+power,horsepower,HP

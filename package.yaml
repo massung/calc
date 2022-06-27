@@ -26,6 +26,7 @@ dependencies:
 - cmdargs
 - containers
 - errors
+- extra
 - fgl
 - file-embed
 - mtl

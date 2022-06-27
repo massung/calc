@@ -2,11 +2,12 @@
 
 module Calc.Units.Base where
 
+import Calc.Units.Dim
 import Data.ByteString.Lazy as BS
 import Data.Csv
-import Data.Vector as V
+import Data.Vector as V hiding ((++))
 
-data Unit = Unit {dim :: String, name :: String, symbol :: String}
+data Unit = Unit {dim :: Dim, name :: String, symbol :: String}
   deriving (Eq, Ord)
 
 instance Show Unit where

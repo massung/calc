@@ -27,10 +27,11 @@ siPrefixes =
     ("exa", "E", 1e18)
   ]
 
-mkSIUnits u = (u, [u {name=siName p, symbol=siSymbol p} | p <- siPrefixes])
+mkSIUnits u = (u, [(u {name = siName p, symbol = siSymbol p}, siScale p) | p <- siPrefixes])
   where
     siName (prefix, _, _) = prefix ++ name u
     siSymbol (_, prefix, _) = prefix ++ symbol u
+    siScale (_, _, scale) = scale
 
-decodeSIUnits :: BS.ByteString -> Either String [(Unit, [Unit])]
+decodeSIUnits :: BS.ByteString -> Either String [(Unit, [(Unit, Double)])]
 decodeSIUnits s = L.map mkSIUnits . V.toList . snd <$> decodeByName s

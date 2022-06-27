@@ -11,11 +11,11 @@ import Data.ByteString.UTF8 as BS
 import Data.Csv
 import Data.FileEmbed
 import Data.Foldable as F
-import Data.Graph.Inductive.Query.Monad
 import Data.List as L
 import Data.Map as M hiding ((++))
 import Data.Maybe
 import Data.String as S
+import Data.Tuple.Extra
 import Text.Parsec
 import Text.Parsec.Expr
 import Text.Parsec.Token hiding (symbol)
@@ -35,7 +35,7 @@ instance Show Units where
   show (Units u)
     | F.null den = showUnits num
     | F.null num = showUnits den
-    | otherwise  = showUnits num ++ "/" ++ showUnits (L.map (mapSnd abs) den)
+    | otherwise  = showUnits num ++ "/" ++ showUnits (L.map (second abs) den)
     where
       (num, den) = L.partition ((> 0) . snd) $ M.toList u
 
@@ -49,6 +49,9 @@ instance Show Units where
 instance IsString Unit where
   fromString s = fromMaybe (error $ "unknown unit: " ++ s) $ M.lookup s unitsMap
 
+instance FromField Unit where
+  parseField = pure . S.fromString . BS.toString
+
 units = case decodeUnits $(embedStringFile "res/units.csv") of
   Left err -> error $ show err
   Right units -> units
@@ -59,7 +62,9 @@ siUnits = case decodeSIUnits $(embedStringFile "res/siUnits.csv") of
 
 unitsMap = M.fromList [(symbol u, u) | u <- units ++ allSIUnits]
   where
-    allSIUnits = L.concatMap (uncurry (:)) siUnits
+    allSIUnits = L.concat [u : L.map fst si | (u, si) <- siUnits]
+
+singletonUnits u = Units $ M.singleton u 1
 
 recipUnits (Units a) = Units $ M.map negate a
 

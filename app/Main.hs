@@ -3,8 +3,9 @@
 module Main where
 
 import Calc.Eval
-import Calc.Parser
+import Calc.Expr
 import System.Console.CmdArgs
+import Text.Parsec
 
 -- command line options
 newtype Opts = Opts
