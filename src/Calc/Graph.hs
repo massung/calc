@@ -18,9 +18,7 @@ graph = mkGraph nodes $ L.concatMap edges conversions
   where
     nodes = L.map swap $ M.toList nodeMap
 
-nodeMap = M.fromList $ L.zip units [1 ..]
-  where
-    units = [singletonUnits u | (_, u) <- M.toList unitsMap]
+nodeMap = M.fromList $ L.zip conversionUnits [1 ..]
 
 edges Conv {to = Scalar _ Nothing} = []
 edges Conv {from = from, to = s@(Scalar _ (Just to))} = [(a, b, x), (b, a, recip x)]
@@ -46,8 +44,8 @@ convert s@(Scalar x (Just (Units from))) (Units to)
     Nothing -> Left "no conversion possible"
     Just scale -> convert (s * scale) (Units to)
   where
-    unitsFrom = [Units $ M.fromList u | u <- tail $ subsequences $ M.toList from]
-    unitsTo = [Units $ M.fromList u | u <- tail $ subsequences $ M.toList to]
+    xs = [Units $ M.fromList u | u <- tail $ subsequences $ M.toList from]
+    ys = [Units $ M.fromList u | u <- tail $ subsequences $ M.toList to]
 
     -- find the first path in the graph from -> to
-    conversion = firstJust (uncurry conversionScale) [(x, y) | x <- unitsFrom, y <- unitsTo]
+    conversion = firstJust (uncurry conversionScale) [(x, y) | x <- xs, y <- ys]

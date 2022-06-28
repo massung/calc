@@ -49,7 +49,8 @@ expr = do
     Nothing -> e
     Just u -> Convert e u
 
-exprTerm = parens lexer expr <|> Term <$> scalarParser
+exprTerm =
+  parens lexer expr <|> Term <$> scalarParser
 
 exprTable =
   [ [prefix "-" negate, prefix "+" id],

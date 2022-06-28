@@ -36,3 +36,8 @@ siConversions = L.concat [L.map (convs u) si | (u, si) <- siUnits]
         { from = base,
           to = Scalar (recip n) (Just $ singletonUnits unit)
         }
+
+conversionUnits = nub $ L.concatMap units conversions
+  where
+    units Conv {from=from, to=Scalar _ Nothing} = [singletonUnits from]
+    units Conv {from=from, to=Scalar _ (Just x)} = [singletonUnits from, x]
