@@ -12,7 +12,7 @@ import Data.Csv
 import Data.FileEmbed
 import Data.Foldable as F
 import Data.List as L
-import Data.Map as M hiding ((++))
+import Data.Map as M hiding ((++), (\\))
 import Data.Maybe
 import Data.String as S
 import Data.Tuple.Extra
@@ -35,7 +35,7 @@ instance Show Units where
   show (Units u)
     | F.null den = showUnits num
     | F.null num = showUnits den
-    | otherwise  = showUnits num ++ "/" ++ showUnits (L.map (second abs) den)
+    | otherwise = showUnits num ++ "/" ++ showUnits (L.map (second abs) den)
     where
       (num, den) = L.partition ((> 0) . snd) $ M.toList u
 
@@ -73,6 +73,22 @@ multiplyUnits (Units a) (Units b) = Units $ M.filter (/= 0) $ M.unionWith (+) a 
 divideUnits a b = multiplyUnits a $ recipUnits b
 
 expUnits (Units u) n = Units $ M.map (* n) u
+
+simplifyUnits (Units from) (Units to) = simplify (sort $ M.toList from) (sort $ M.toList to)
+  where
+    simplify [] _ = Nothing
+    simplify _ [] = Nothing
+    simplify ((u1, e1) : xs) ((u2, e2) : ys)
+      | u1 /= u2 = Nothing
+      | otherwise = simplifyExp xs ys (e2 / e1)
+
+    simplifyExp [] [] factor = Just factor
+    simplifyExp [] _ factor = Nothing
+    simplifyExp _ [] factor = Nothing
+    simplifyExp ((u1, e1) : xs) ((u2, e2) : ys) factor
+      | u1 /= u2 = Nothing
+      | e2 / e1 /= factor = Nothing
+      | otherwise = simplifyExp xs ys factor
 
 unitsParser :: Parsec String () Units
 unitsParser = buildExpressionParser unitsExprTable unitsTerm
