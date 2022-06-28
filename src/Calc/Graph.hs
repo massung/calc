@@ -35,7 +35,7 @@ conversionScale from to = do
     then Just 1
     else case unLPath $ lesp a b graph of
       [] -> Nothing
-      path -> Just $ L.foldl (*) 1.0 $ L.map snd $ L.filter ((/= a) . fst) path
+      path -> Just $ product [x | (n, x) <- path, n /= a]
 
 convert (Scalar x Nothing) to = Right (Scalar x $ Just to)
 convert s@(Scalar x (Just (Units from))) (Units to)
