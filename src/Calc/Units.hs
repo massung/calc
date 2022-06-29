@@ -80,14 +80,14 @@ simplifyUnits (Units from) (Units to) = simplify (sort $ M.toList from) (sort $ 
     simplify _ [] = Nothing
     simplify ((u1, e1) : xs) ((u2, e2) : ys)
       | u1 /= u2 = Nothing
-      | otherwise = simplifyExp xs ys (e2 / e1)
+      | otherwise = simplifyExp xs ys (e1 / e2)
 
     simplifyExp [] [] factor = Just factor
     simplifyExp [] _ factor = Nothing
     simplifyExp _ [] factor = Nothing
     simplifyExp ((u1, e1) : xs) ((u2, e2) : ys) factor
       | u1 /= u2 = Nothing
-      | e2 / e1 /= factor = Nothing
+      | e1 / e2 /= factor = Nothing
       | otherwise = simplifyExp xs ys factor
 
 unitsParser :: Parsec String () Units
