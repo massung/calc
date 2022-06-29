@@ -64,6 +64,8 @@ unitsMap = M.fromList [(symbol u, u) | u <- units ++ allSIUnits]
   where
     allSIUnits = L.concat [u : L.map fst si | (u, si) <- siUnits]
 
+unitsDim (Units u) = M.fromListWith (+) [(dim u, e) | (u, e) <- M.toList u]
+
 singletonUnits u = Units $ M.singleton u 1
 
 recipUnits (Units a) = Units $ M.map negate a
@@ -99,7 +101,7 @@ unitsTerm = parens unitsLexer terms <|> terms
 
 unitTerm = do
   u <- S.fromString <$> identifier unitsLexer
-  n <- option 1 unitExponent
+  n <- option 1 $ lexeme unitsLexer unitExponent
   return (u, n)
 
 unitExponent = do

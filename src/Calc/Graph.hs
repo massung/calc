@@ -43,6 +43,7 @@ conversionScale from to = do
       [] -> Nothing
       path -> Just $ product [x | (n, x) <- path, n /= a]
 
+convert :: Scalar -> Units -> Either String Scalar
 convert (Scalar x Nothing) to = Right (Scalar x $ Just to)
 convert s@(Scalar x (Just (Units from))) (Units to)
   | from == to = Right s
