@@ -6,7 +6,7 @@ module Calc.Graph where
 import Calc.Conv
 import Calc.Scalar
 import Calc.Units
-import Data.Graph.Inductive.Graph hiding (edges, nodes)
+import Data.Graph.Inductive.Graph hiding (edges)
 import Data.Graph.Inductive.PatriciaTree
 import Data.Graph.Inductive.Query.BFS
 import Data.List as L
@@ -20,19 +20,17 @@ graph = mkGraph nodes $ L.concatMap edges conversions
   where
     nodes = L.map swap $ M.toList nodeMap
 
-nodes = [u | (u, _) <- M.toList nodeMap]
-
 nodeMap = M.fromList $ L.zip conversionUnits [1 ..]
 
 edges Conv {to = Scalar _ Nothing} = []
 edges Conv {from = from, to = s@(Scalar _ (Just to))} = [(a, b, x), (b, a, recip x)]
   where
-    u = singletonUnits from
+    u = from
     a = nodeMap M.! u
     b = nodeMap M.! to
     x = s / fromUnits u
 
-simplifiedUnits units = mapMaybe match nodes
+reducedUnits units = mapMaybe match [u | (u, _) <- M.toList nodeMap]
   where
     match node = (node,) <$> simplifyUnits units node
 
@@ -52,8 +50,19 @@ convert s@(Scalar x (Just (Units from))) (Units to)
     Nothing -> Left "no conversion possible"
     Just scale -> convert (s * scale) (Units to)
   where
-    xs = [Units $ M.fromList u | u <- tail $ subsequences $ M.toList from]
-    ys = [Units $ M.fromList u | u <- tail $ subsequences $ M.toList to]
+    unitsFrom = M.toList from
+    unitsTo = M.toList to
 
-    -- find the first path in the graph from -> to
-    conversion = firstJust (uncurry conversionScale) [(x, y) | x <- xs, y <- ys]
+    -- units left to be converted
+    unconvertedFrom = unitsFrom \\ unitsTo
+    unconvertedTo = unitsTo \\ unitsFrom
+
+    -- all possible combinations of reduced units
+    xs = L.concatMap (reducedUnits . Units . M.fromList) $ tail $ subsequences unconvertedFrom
+    ys = L.concatMap (reducedUnits . Units . M.fromList) $ tail $ subsequences unconvertedTo
+
+    -- limit possible conversions to matching scale factors
+    zs = [(x, y, Scalar fx Nothing) | (x, fx) <- xs, (y, fy) <- ys, fx == fy]
+
+    -- find a conversion path in the graph from x -> y
+    conversion = firstJust (\(x, y, f) -> (`expScalar` f) <$> conversionScale x y) zs

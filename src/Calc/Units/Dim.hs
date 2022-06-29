@@ -22,19 +22,19 @@ data Dim
   deriving (Eq, Ord, Show)
 
 instance FromField Dim where
-  parseField r
-    | r == "angle" = pure Angle
-    | r == "area" = pure Area
-    | r == "duration" = pure Duration
-    | r == "energy" = pure Energy
-    | r == "force" = pure Force
-    | r == "frequency" = pure Frequency
-    | r == "length" = pure Length
-    | r == "mass" = pure Mass
-    | r == "power" = pure Power
-    | r == "pressure" = pure Pressure
-    | r == "speed" = pure Speed
-    | r == "storage" = pure Storage
-    | r == "temperature" = pure Temperature
-    | r == "volume" = pure Volume
-    | otherwise = fail $ show r
+  parseField s
+    | s == "angle" = pure Angle
+    | s == "area" = pure Area
+    | s == "duration" = pure Duration
+    | s == "energy" = pure Energy
+    | s == "force" = pure Force
+    | s == "frequency" = pure Frequency
+    | s == "length" = pure Length
+    | s == "mass" = pure Mass
+    | s == "power" = pure Power
+    | s == "pressure" = pure Pressure
+    | s == "speed" = pure Speed
+    | s == "storage" = pure Storage
+    | s == "temperature" = pure Temperature
+    | s == "volume" = pure Volume
+    | otherwise = fail $ show s
