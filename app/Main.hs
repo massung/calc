@@ -1,25 +1,33 @@
 {-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Main where
 
 import Calc.Eval
 import Calc.Expr
+import Calc.Units
+import Data.Either.Extra
 import System.Console.CmdArgs
 import Text.Parsec
 
 -- command line options
-newtype Opts = Opts
-  { evalExpr :: String
+data Opts = Opts
+  { outputUnits :: Maybe String,
+    exprString :: String
   }
   deriving (Data, Typeable, Show, Eq)
 
 opts =
-  Opts {evalExpr = def &= name "e" &= help "Expression to evaluate"}
-    &= verbosity
-    &= summary "calc v0.1.0, (c) Jeffrey Massung"
+  Opts
+    { exprString = def &= name "e" &= typ "EXPR" &= help "Expression",
+      outputUnits = def &= name "o" &= typ "UNITS" &= help "Output units"
+    }
+    &= summary "calc v1.0, (c) Jeffrey Massung"
 
-main = do
-  args <- cmdArgs opts
-  case parseExpr (evalExpr args) of
-    Right expr -> print $ eval expr
-    Left err -> print err
+evalExpr args = mapLeft show (parseExpr $ exprString args) >>= eval
+
+run args = case evalExpr args of
+  Right result -> print result
+  Left err -> print err
+
+main = cmdArgs opts >>= run
