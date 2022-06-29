@@ -8,7 +8,6 @@ import Calc.Expr
 import Calc.Units
 import Data.Either.Extra
 import System.Console.CmdArgs
-import Text.Parsec
 
 -- command line options
 data Opts = Opts
