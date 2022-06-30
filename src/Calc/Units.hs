@@ -4,11 +4,12 @@
 
 module Calc.Units where
 
+import Calc.Lexer
 import Calc.Units.Base
-import Calc.Units.Lexer
+import Calc.Units.Dim
 import Calc.Units.SI
 import Data.ByteString.UTF8 as BS
-import Data.Csv
+import Data.Csv hiding (runParser)
 import Data.FileEmbed
 import Data.Foldable as F
 import Data.List as L
@@ -24,7 +25,7 @@ newtype Units = Units (Map Unit Double)
   deriving (Eq, Ord)
 
 instance IsString Units where
-  fromString s = case parse unitsParser "" s of
+  fromString s = case runParser unitsParser M.empty "" s of
     Left err -> error $ show err
     Right units -> units
 
@@ -64,7 +65,7 @@ unitsMap = M.fromList [(symbol u, u) | u <- units ++ allSIUnits]
   where
     allSIUnits = L.concat [u : L.map fst si | (u, si) <- siUnits]
 
-unitsDim (Units u) = M.fromListWith (+) [(dim u, e) | (u, e) <- M.toList u]
+unitsDims (Units u) = [Dims (dim u, e) | (u, e) <- M.toList u]
 
 singletonUnits u = Units $ M.singleton u 1
 
@@ -92,31 +93,31 @@ simplifyUnits (Units from) (Units to) = simplify (sort $ M.toList from) (sort $ 
       | e1 / e2 /= factor = Nothing
       | otherwise = simplifyExp xs ys factor
 
-unitsParser :: Parsec String () Units
+unitsParser :: Parsec String st Units
 unitsParser = buildExpressionParser unitsExprTable unitsTerm
 
-unitsTerm = parens unitsLexer terms <|> terms
+unitsTerm = parens lexer terms <|> terms
   where
     terms = Units . M.fromList <$> many1 unitTerm
 
 unitTerm = do
-  u <- S.fromString <$> identifier unitsLexer
-  n <- option 1 $ lexeme unitsLexer unitExponent
+  u <- S.fromString <$> identifier lexer
+  n <- option 1 $ lexeme lexer unitExponent
   return (u, n)
 
 unitExponent = do
-  reservedOp unitsLexer "^"
+  reservedOp lexer "^"
   s <- exponentSign
-  e <- (fromInteger <$> decimal unitsLexer) <|> float unitsLexer
+  e <- (fromInteger <$> decimal lexer) <|> float lexer
   return (e * s)
 
 exponentSign = option 1 (neg <|> pos)
   where
-    neg = reservedOp unitsLexer "-" >> return -1
-    pos = reservedOp unitsLexer "+" >> return 1
+    neg = reservedOp lexer "-" >> return -1
+    pos = reservedOp lexer "+" >> return 1
 
 unitsExprTable =
-  [ [ Infix (do reservedOp unitsLexer "*"; return multiplyUnits) AssocLeft,
-      Infix (do reservedOp unitsLexer "/"; return divideUnits) AssocLeft
+  [ [ Infix (do reservedOp lexer "*"; return multiplyUnits) AssocLeft,
+      Infix (do reservedOp lexer "/"; return divideUnits) AssocLeft
     ]
   ]

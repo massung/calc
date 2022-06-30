@@ -5,8 +5,7 @@ module Calc.Expr where
 import Calc.Lexer
 import Calc.Scalar
 import Calc.Units
-import Calc.Units.Lexer
-import Data.Functor
+import Data.Map as M
 import Text.Parsec
 import Text.Parsec.Expr
 import Text.Parsec.Token
@@ -30,14 +29,14 @@ type UnaryOp = Scalar -> Scalar
 -- binary expression operators
 type BinaryOp = Scalar -> Scalar -> Scalar
 
-parseExpr = parse (whiteSpace lexer >> parser) ""
+parseExpr vars = runParser (whiteSpace lexer >> parser) vars ""
   where
     parser = do
       e <- expr
       eof
       return e
 
-exprParser :: Parsec String () Expr
+exprParser :: Parsec String (Map String Expr) Expr
 exprParser = buildExpressionParser exprTable exprTerm
 
 expr = do
@@ -47,7 +46,18 @@ expr = do
     Nothing -> e
     Just u -> Convert e u
 
-exprTerm = parens lexer expr <|> Term <$> scalarParser
+exprTerm =
+  parens lexer expr
+    <|> Term <$> scalarParser
+    <|> Term . Scalar 1 . Just <$> unitsTerm
+    <|> lexeme lexer exprVariable
+
+exprVariable = do
+  var <- char '?' >> identifier lexer
+  vars <- getState
+  case M.lookup var vars of
+    Nothing -> fail $ "undefined variable: " ++ var
+    Just expr -> pure expr
 
 exprTable =
   [ [prefix "-" negate, prefix "+" id],

@@ -3,10 +3,11 @@
 module Calc.Lexer where
 
 import Data.Functor.Identity
+import Data.Map as M
 import Text.Parsec
 import Text.Parsec.Token
 
-lexer :: GenTokenParser String () Identity
+lexer :: GenTokenParser String st Identity
 lexer = makeTokenParser lang
   where
     lang =

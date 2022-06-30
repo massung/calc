@@ -3,6 +3,7 @@
 module Calc.Units.Dim where
 
 import Data.Csv
+import Data.Map as M
 
 data Dim
   = Angle
@@ -20,6 +21,19 @@ data Dim
   | Temperature
   | Volume
   deriving (Eq, Ord, Show)
+
+newtype Dims = Dims (Dim, Double)
+  deriving (Show)
+
+instance Eq Dims where
+  -- allow conversion <-> Length and Area
+  (==) (Dims (Area, a)) (Dims (Length, b)) = a == b * 2
+  (==) (Dims (Length, a)) (Dims (Area, b)) = a * 2 == b
+  -- allow conversion <-> Length and Volume
+  (==) (Dims (Volume, a)) (Dims (Length, b)) = a == b * 3
+  (==) (Dims (Length, a)) (Dims (Volume, b)) = a * 3 == b
+  -- do dimensions match?
+  (==) (Dims a) (Dims b) = a == b
 
 instance FromField Dim where
   parseField s

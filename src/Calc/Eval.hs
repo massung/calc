@@ -18,10 +18,12 @@ evalConvert x to = do
 evalUnary f (Term x) = eval $ Term (f x)
 evalUnary f x = eval x >>= evalUnary f
 
+evalBinary f (Term x@(Scalar _ Nothing)) (Term y) = eval $ Term (f x y)
 evalBinary f (Term x) (Term y@(Scalar _ Nothing)) = eval $ Term (f x y)
-evalBinary f (Term x) (Term y@(Scalar _ (Just u))) = case convert x u of
-  Left _ -> eval $ Term (f x y)
-  Right x' -> eval $ Term (f x' y)
+evalBinary f (Term x) (Term y@(Scalar _ (Just u))) =
+  case convert x u of
+    Left _ -> eval $ Term (f x y)
+    Right x' -> eval $ Term (f x' y)
 evalBinary f x y = do
   x' <- eval x
   y' <- eval y

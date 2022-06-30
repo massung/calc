@@ -1,9 +1,10 @@
 module Calc.Scalar where
 
+import Calc.Lexer
 import Calc.Units
-import Calc.Units.Lexer
 import Data.ByteString.UTF8 as BS
-import Data.Csv
+import Data.Csv hiding (runParser)
+import Data.Map as M
 import Data.String as S
 import Text.Parsec
 import Text.Parsec.Token
@@ -11,7 +12,7 @@ import Text.Parsec.Token
 data Scalar = Scalar Double (Maybe Units)
 
 instance IsString Scalar where
-  fromString s = case parse scalarParser "" s of
+  fromString s = case runParser scalarParser M.empty "" s of
     Left err -> error $ show err
     Right scalar -> scalar
 
@@ -94,12 +95,12 @@ expScalar (Scalar x (Just u)) (Scalar n _) = Scalar (x ** n) $ Just (expUnits u 
 fromUnits = Scalar 1 . Just
 
 scalarParser = do
-  n <- naturalOrFloat unitsLexer
+  n <- naturalOrFloat lexer
   u <- scalarUnits
   return $ case n of
     Left i -> Scalar (fromIntegral i) u
     Right f -> Scalar f u
 
 scalarUnits = optionMaybe $ do
-  optional $ reservedOp unitsLexer "_"
+  optional $ reservedOp lexer "_"
   try unitsParser <|> unitsTerm

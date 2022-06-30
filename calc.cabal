@@ -32,7 +32,6 @@ library
       Calc.Units
       Calc.Units.Base
       Calc.Units.Dim
-      Calc.Units.Lexer
       Calc.Units.SI
   other-modules:
       Paths_calc
