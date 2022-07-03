@@ -1,8 +1,11 @@
+{-# LANGUAGE NegativeLiterals #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Calc.Expr where
+module Calc.Parser.Expr where
 
-import Calc.Lexer
+import Calc.Parser.Lexer
+import Calc.Parser.Scalar
+import Calc.Parser.Units
 import Calc.Scalar
 import Calc.Units
 import Data.Map as M
@@ -10,31 +13,11 @@ import Text.Parsec
 import Text.Parsec.Expr
 import Text.Parsec.Token
 
--- valid expressions
 data Expr
   = Term Scalar
   | Convert Expr Units
-  | Unary String UnaryOp Expr
-  | Binary String BinaryOp Expr Expr
-
-instance Show Expr where
-  show (Term x) = show x
-  show (Convert x u) = show x ++ " : " ++ show u
-  show (Unary n _ x) = n ++ show x
-  show (Binary n _ x y) = show x ++ n ++ show y
-
--- unary expression operators
-type UnaryOp = Scalar -> Scalar
-
--- binary expression operators
-type BinaryOp = Scalar -> Scalar -> Scalar
-
-parseExpr vars = runParser (whiteSpace lexer >> parser) vars ""
-  where
-    parser = do
-      e <- expr
-      eof
-      return e
+  | Unary String (Scalar -> Scalar) Expr
+  | Binary String (Scalar -> Scalar -> Scalar) Expr Expr
 
 exprParser :: Parsec String (Map String Expr) Expr
 exprParser = buildExpressionParser exprTable exprTerm
@@ -49,7 +32,7 @@ expr = do
 exprTerm =
   parens lexer expr
     <|> Term <$> scalarParser
-    <|> Term . Scalar 1 . Just <$> unitsTerm
+    <|> Term . fromUnits <$> unitsTerm
     <|> lexeme lexer exprVariable
 
 exprVariable = do
@@ -61,7 +44,7 @@ exprVariable = do
 
 exprTable =
   [ [prefix "-" negate, prefix "+" id],
-    [binary "^" expScalar AssocLeft],
+    --[binary "^" expScalar AssocLeft],
     [binary "*" (*) AssocLeft, binary "/" (/) AssocLeft],
     [binary "+" (+) AssocLeft, binary "-" (-) AssocLeft]
   ]

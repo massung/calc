@@ -1,46 +1,44 @@
-{-# LANGUAGE NegativeLiterals #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 module Calc.Conv where
 
+import Calc.Parser.Scalar
+import Calc.Parser.Units
 import Calc.Scalar
 import Calc.Units
-import Calc.Units.Base
-import Calc.Units.Dim
-import Data.ByteString.UTF8 as BS
 import Data.Csv as Csv
 import Data.Either
 import Data.FileEmbed
-import Data.List as L
-import Data.Vector as V hiding ((++))
+import Data.Foldable as F
+import Data.List
 
-data Conv = Conv {from :: Units, to :: Scalar}
+data Conv = Conv Units Scalar
   deriving (Show)
 
 instance FromNamedRecord Conv where
   parseNamedRecord r = do
     from <- r .: "from"
     to <- r .: "to"
-    return Conv {from = from, to = to}
+    return $ Conv from to
 
-convCsv = $(embedStringFile "res/conv.csv")
-
-conversions = let all = base ++ siConversions in all ++ expConversions all
+conversions :: [Conv]
+conversions = fromRight (error "ack!") $ F.toList . snd <$> decodeByName csv
   where
-    base = fromRight [] $ V.toList . snd <$> decodeByName convCsv
+    csv = $(embedStringFile "units/conv.csv")
 
-siConversions = L.concat [L.map (convs $ singletonUnits u) si | (u, si) <- siUnits]
+derivedConvs = [derived u p | u <- siUnits, p <- siPrefixes]
   where
-    convs base (unit, n) =
-      Conv {from = base, to = Scalar (recip n) (Just $ singletonUnits unit)}
+    derived u (prefix, x) =
+      let to = fromUnit u { symbol= prefix ++ symbol u } 1
+       in Conv (fromUnit u 1) (Scalar x $ Just to)
 
-expConversions [] = []
-expConversions (Conv {from = from, to = to} : convs) = L.map expConv [2 .. 3] ++ expConversions convs
-  where
-    expConv e = Conv {from = expUnits from e, to = expScalar to (Scalar e Nothing)}
+recipConv (Conv from (Scalar x to)) =
+  let from' = maybe (error "ACK!") recipUnits to
+   in Conv from' $ Scalar (recip x) (Just $ recipUnits from)
 
-conversionUnits = nub $ L.concatMap units conversions
+conversionUnits = nub $ concat [[from, to] | Conv from (Scalar _ (Just to)) <- conversions]
+
+conversionDims = nub $ concat [dims from to | Conv from (Scalar _ (Just to)) <- conversions]
   where
-    units Conv {from = from, to = Scalar _ Nothing} = [from]
-    units Conv {from = from, to = Scalar _ (Just x)} = [from, x]
+    dims from to = [unitsDims from, unitsDims to]

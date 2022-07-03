@@ -1,12 +1,6 @@
 dim,name,symbol
-storage,bits,b
-storage,byte,B
 duration,second,s
 mass,gram,g
 volume,liter,L
 length,meter,m
-energy,joule,J
-power,watt,W
 pressure,pascal,Pa
-frequency,hertz,hz
-pressure,bar,bar

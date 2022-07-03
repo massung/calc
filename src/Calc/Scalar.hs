@@ -1,106 +1,45 @@
 module Calc.Scalar where
 
-import Calc.Lexer
 import Calc.Units
-import Data.ByteString.UTF8 as BS
-import Data.Csv hiding (runParser)
-import Data.Map as M
-import Data.String as S
-import Text.Parsec
-import Text.Parsec.Token
+import Data.Csv
 
 data Scalar = Scalar Double (Maybe Units)
+  deriving (Eq)
 
-instance IsString Scalar where
-  fromString s = case runParser scalarParser M.empty "" s of
-    Left err -> error $ show err
-    Right scalar -> scalar
+instance FromUnits Scalar where
+  fromUnits = Scalar 1 . Just
+
+instance FromUnit Scalar where
+  fromUnit u e = fromUnits $ fromUnit u e
 
 instance Show Scalar where
-  show (Scalar n Nothing) = show n
-  show (Scalar n (Just u)) = show n ++ " " ++ show u
-
-instance FromField Scalar where
-  parseField = pure . S.fromString . BS.toString
-
-instance Eq Scalar where
-  (==) (Scalar n1 u1) (Scalar n2 u2) = u1 == u2 && n1 == n2
-
-instance Ord Scalar where
-  (<=) (Scalar n1 u1) (Scalar n2 u2) =
-    if u1 == u2
-      then n1 <= n2
-      else error "Cannot compare disparately typed scalars."
+  show (Scalar x Nothing) = show x
+  show (Scalar x (Just u)) = show x ++ " " ++ show u
 
 instance Num Scalar where
-  -- adding scalars with the same units
-  (+) (Scalar n1 (Just u1)) (Scalar n2 Nothing) =
-    Scalar (n1 + n2) (Just u1)
-  (+) (Scalar n1 Nothing) (Scalar n2 (Just u2)) =
-    Scalar (n1 + n2) (Just u2)
-  (+) (Scalar n1 u1) (Scalar n2 u2) =
-    if u1 == u2
-      then Scalar (n1 + n2) u1
-      else error "Cannot add disparately typed scalars."
+  fromInteger n = Scalar (fromInteger n) Nothing
 
-  -- subtracting scalars with the same units
-  (-) (Scalar n1 (Just u1)) (Scalar n2 Nothing) =
-    Scalar (n1 - n2) (Just u1)
-  (-) (Scalar n1 Nothing) (Scalar n2 (Just u2)) =
-    Scalar (n1 - n2) (Just u2)
-  (-) (Scalar n1 u1) (Scalar n2 u2) =
-    if u1 == u2
-      then Scalar (n1 - n2) u1
-      else error "Cannot subtract disparately typed scalars."
+  -- add scalars
+  (+) (Scalar x ux) (Scalar y uy)
+    | ux == uy = Scalar (x+y) ux
+    | otherwise = error "Cannot add disparate units"
 
-  -- multiplication of scalars
-  (*) (Scalar n1 Nothing) (Scalar n2 Nothing) =
-    Scalar (n1 * n2) Nothing
-  (*) (Scalar n1 (Just u1)) (Scalar n2 Nothing) =
-    Scalar (n1 * n2) (Just u1)
-  (*) (Scalar n1 Nothing) (Scalar n2 (Just u2)) =
-    Scalar (n1 * n2) (Just u2)
-  (*) (Scalar n1 (Just u1)) (Scalar n2 (Just u2)) =
-    Scalar (n1 * n2) (Just $ multiplyUnits u1 u2)
+  -- multiply scalars
+  (*) (Scalar x Nothing) (Scalar y uy) = Scalar (x*y) uy
+  (*) (Scalar x ux) (Scalar y Nothing) = Scalar (x*y) ux
+  (*) (Scalar x (Just ux)) (Scalar y (Just uy)) = scalar (x*y) (ux <> uy)
 
-  -- create a new scalar from an integer
-  fromInteger i = Scalar (fromInteger i) Nothing
-
-  -- numeric operations on scalars
-  negate (Scalar n u) = Scalar (negate n) u
-  abs (Scalar n u) = Scalar (abs n) u
-  signum (Scalar n u) = Scalar (signum n) u
+  -- mapped functions
+  negate = mapScalar negate
+  abs = mapScalar abs
+  signum = mapScalar signum
 
 instance Fractional Scalar where
   fromRational r = Scalar (fromRational r) Nothing
 
-  -- divide scalars and simplify units
-  (/) (Scalar n1 Nothing) (Scalar n2 Nothing) =
-    Scalar (n1 / n2) Nothing
-  (/) (Scalar n1 (Just u1)) (Scalar n2 Nothing) =
-    Scalar (n1 / n2) (Just u1)
-  (/) (Scalar n1 Nothing) (Scalar n2 (Just u2)) =
-    Scalar (n1 / n2) (Just $ recipUnits u2)
-  (/) (Scalar n1 (Just u1)) (Scalar n2 (Just u2)) =
-    Scalar (n1 / n2) (Just $ divideUnits u1 u2)
+  -- scalar inverse
+  recip (Scalar x u) = Scalar (recip x) $ fmap (mapUnits negate) u
 
-  -- reciprocal of the scalar
-  recip (Scalar n Nothing) = Scalar (recip n) Nothing
-  recip (Scalar n (Just u)) = Scalar (recip n) (Just $ recipUnits u)
+scalar x = Scalar x . Just
 
-expScalar (Scalar _ _) (Scalar _ (Just _)) = error "Cannot add units to exponent."
-expScalar (Scalar x Nothing) (Scalar n _) = Scalar (x ** n) Nothing
-expScalar (Scalar x (Just u)) (Scalar n _) = Scalar (x ** n) $ Just (expUnits u n)
-
-fromUnits = Scalar 1 . Just
-
-scalarParser = do
-  n <- naturalOrFloat lexer
-  u <- scalarUnits
-  return $ case n of
-    Left i -> Scalar (fromIntegral i) u
-    Right f -> Scalar f u
-
-scalarUnits = optionMaybe $ do
-  optional $ reservedOp lexer "_"
-  try unitsParser <|> unitsTerm
+mapScalar f (Scalar x u) = Scalar (f x) u

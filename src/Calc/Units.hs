@@ -1,123 +1,107 @@
-{-# LANGUAGE NegativeLiterals #-}
+{-# LANGUAGE DeriveLift #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 module Calc.Units where
 
-import Calc.Lexer
-import Calc.Units.Base
-import Calc.Units.Dim
-import Calc.Units.SI
-import Data.ByteString.UTF8 as BS
-import Data.Csv hiding (runParser)
+import Calc.Dim
+import Data.Csv
+import Data.Either
 import Data.FileEmbed
 import Data.Foldable as F
 import Data.List as L
-import Data.Map as M hiding ((++), (\\))
-import Data.Maybe
-import Data.String as S
-import Data.Tuple.Extra
-import Text.Parsec
-import Text.Parsec.Expr
-import Text.Parsec.Token hiding (symbol)
+import Data.Map.Strict as M
+import Data.String
+import Language.Haskell.TH.Syntax
+
+data Unit = Unit { symbol :: String, dim :: Dim }
+  deriving (Eq, Ord, Lift)
+
+instance IsString Unit where
+  fromString = (units !)
+
+instance Show Unit where
+  show = symbol
+
+instance FromNamedRecord Unit where
+  parseNamedRecord r = do
+    dim <- r .: "dim"
+    symbol <- r .: "symbol"
+    return $ Unit { symbol=symbol, dim=dim }
 
 newtype Units = Units (Map Unit Double)
   deriving (Eq, Ord)
 
-instance IsString Units where
-  fromString s = case runParser unitsParser M.empty "" s of
-    Left err -> error $ show err
-    Right units -> units
+instance Semigroup Units where
+  (<>) (Units a) (Units b) = Units $ M.filter (/= 0) $ unionWith (+) a b
 
-instance FromField Units where
-  parseField = pure . S.fromString . BS.toString
+instance Monoid Units where
+  mempty = Units mempty
+
+class FromUnit a where
+  fromUnit :: Unit -> Double -> a
+
+class FromUnits a where
+  fromUnits :: Units -> a
+
+instance FromUnit Units where
+  fromUnit u e = Units $ M.singleton u e
 
 instance Show Units where
   show (Units u)
-    | F.null den = showUnits num
     | F.null num = showUnits den
-    | otherwise = showUnits num ++ "/" ++ showUnits (L.map (second abs) den)
+    | F.null den = showUnits num
+    | otherwise  = showUnits num ++ "/" ++ showUnits (M.map abs den)
     where
-      (num, den) = L.partition ((> 0) . snd) $ M.toList u
+      (num, den) = M.partition (> 0) u
 
-      -- show unit symbol and optional exponent
+      -- display a single unit with exponent
       showUnit (u, 1) = show u
       showUnit (u, n) = show u ++ "^" ++ show n
 
-      -- show list of unit symbols
-      showUnits = unwords . L.map showUnit
+      -- concatenate units together
+      showUnits = unwords . L.map showUnit . M.toList
 
-instance IsString Unit where
-  fromString s = fromMaybe (error $ "unknown unit: " ++ s) $ M.lookup s unitsMap
-
-instance FromField Unit where
-  parseField = pure . S.fromString . BS.toString
-
-units = case decodeUnits $(embedStringFile "res/units.csv") of
-  Left err -> error $ show err
-  Right units -> units
-
-siUnits = case decodeSIUnits $(embedStringFile "res/siUnits.csv") of
-  Left err -> error $ show err
-  Right units -> units
-
-unitsMap = M.fromList [(symbol u, u) | u <- units ++ allSIUnits]
+imperialUnits = fromRight (fail "ack!") $ F.toList . snd <$> decodeByName csv
   where
-    allSIUnits = L.concat [u : L.map fst si | (u, si) <- siUnits]
+    csv = $(embedStringFile "units/imperial.csv")
 
-unitsDims (Units u) = [Dims (dim u, e) | (u, e) <- M.toList u]
-
-singletonUnits u = Units $ M.singleton u 1
-
-recipUnits (Units a) = Units $ M.map negate a
-
-multiplyUnits (Units a) (Units b) = Units $ M.filter (/= 0) $ M.unionWith (+) a b
-
-divideUnits a b = multiplyUnits a $ recipUnits b
-
-expUnits (Units u) n = Units $ M.map (* n) u
-
-simplifyUnits (Units from) (Units to) = simplify (sort $ M.toList from) (sort $ M.toList to)
+siUnits = fromRight (error "ack!") $ F.toList . snd <$> decodeByName csv
   where
-    simplify [] _ = Nothing
-    simplify _ [] = Nothing
-    simplify ((u1, e1) : xs) ((u2, e2) : ys)
-      | u1 /= u2 = Nothing
-      | otherwise = simplifyExp xs ys (e1 / e2)
+    csv = $(embedStringFile "units/si.csv")
 
-    simplifyExp [] [] factor = Just factor
-    simplifyExp [] _ factor = Nothing
-    simplifyExp _ [] factor = Nothing
-    simplifyExp ((u1, e1) : xs) ((u2, e2) : ys) factor
-      | u1 /= u2 = Nothing
-      | e1 / e2 /= factor = Nothing
-      | otherwise = simplifyExp xs ys factor
-
-unitsParser :: Parsec String st Units
-unitsParser = buildExpressionParser unitsExprTable unitsTerm
-
-unitsTerm = parens lexer terms <|> terms
-  where
-    terms = Units . M.fromList <$> many1 unitTerm
-
-unitTerm = do
-  u <- S.fromString <$> identifier lexer
-  n <- option 1 $ lexeme lexer unitExponent
-  return (u, n)
-
-unitExponent = do
-  reservedOp lexer "^"
-  s <- exponentSign
-  e <- (fromInteger <$> decimal lexer) <|> float lexer
-  return (e * s)
-
-exponentSign = option 1 (neg <|> pos)
-  where
-    neg = reservedOp lexer "-" >> return -1
-    pos = reservedOp lexer "+" >> return 1
-
-unitsExprTable =
-  [ [ Infix (do reservedOp lexer "*"; return multiplyUnits) AssocLeft,
-      Infix (do reservedOp lexer "/"; return divideUnits) AssocLeft
-    ]
+siPrefixes =
+  [ ("a", 1e-18),
+    ("f", 1e-15),
+    ("p", 1e-12),
+    ("n", 1e-9),
+    ("u", 1e-6),
+    ("m", 1e-3),
+    ("c", 1e-2),
+    ("d", 1e-1),
+    ("da", 1e1),
+    ("h", 1e2),
+    ("k", 1e3),
+    ("M", 1e6),
+    ("G", 1e9),
+    ("T", 1e12),
+    ("P", 1e15),
+    ("E", 1e18)
   ]
+
+derivedUnits = [derived u p | u <- siUnits, p <- siPrefixes]
+  where
+    derived u (p, _) = u { symbol=p ++ symbol u }
+
+units :: Map String Unit
+units = F.foldl' insert mempty $ concat [imperialUnits, siUnits, derivedUnits]
+  where
+    insert m u = M.insert (show u) u m
+
+mapUnits f (Units u) = Units (M.map f u)
+
+recipUnits = mapUnits negate
+
+divideUnits a b = mappend a (recipUnits b)
+
+unitsDims (Units u) = dims [(dim u, exp) | (u, exp) <- M.toList u]

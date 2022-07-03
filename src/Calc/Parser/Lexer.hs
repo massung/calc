@@ -1,9 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Calc.Lexer where
+module Calc.Parser.Lexer where
 
 import Data.Functor.Identity
-import Data.Map as M
 import Text.Parsec
 import Text.Parsec.Token
 

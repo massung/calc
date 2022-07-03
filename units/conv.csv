@@ -1,5 +1,4 @@
 from,to
-B,8 b
 ft,0.3048 m
 ft,12 in
 h,4 in
@@ -25,6 +24,6 @@ min,60 s
 hr,60 min
 day,24 hr
 bar,100000 Pa
-bar,14.50377 lb/s^2
-psi,1 lb/s^2
+bar,14.50377 psi
+psi,1 lb/in^2
 acre,43560.04 ft^2
