@@ -11,6 +11,7 @@ import Calc.Units
 import Data.Graph.Inductive.Graph hiding (edges)
 import Data.Graph.Inductive.PatriciaTree
 import Data.Graph.Inductive.Query.BFS
+import Data.List
 import Data.Map.Strict as M hiding (mapMaybe, (\\))
 import Data.Tuple
 
@@ -39,16 +40,15 @@ unitsGraph = mkGraph nodes $ concatMap nodeEdges edges
     edges = [(from, to, x) | Conv from x@(Scalar _ (Just to)) <- conversions ++ derivedConvs]
 
     nodeEdges (from, to, x) =
-      [ (fromNode, toNode, x),
-        (toNode, fromNode, recip x)
-      ]
-      where
-        fromNode = unitsNodeMap ! from
-        toNode = unitsNodeMap ! to
+      let fromNode = unitsNodeMap ! from
+          toNode = unitsNodeMap ! to
+       in [ (fromNode, toNode, x),
+            (toNode, fromNode, recip x)
+          ]
 
-dimsNodeMap = fromList $ zip conversionDims [1..]
+dimsNodeMap = fromList $ zip conversionDims [1 ..]
 
-unitsNodeMap = fromList $ zip conversionUnits [1..]
+unitsNodeMap = fromList $ zip (nub $ baseUnits ++ conversionUnits) [1 ..]
 
 convertDims :: Units -> Units -> Maybe [Conv]
 convertDims from to =
@@ -66,33 +66,20 @@ convertDims from to =
             xs -> Just [x | (n, x) <- xs, n /= fromNode]
 
 convertUnits :: Units -> Units -> Maybe Scalar
-convertUnits from to =
+convertUnits (Units from) (Units to) =
   if from == to
     then Just 1
     else do
-      fromNode <- M.lookup from unitsNodeMap
-      toNode <- M.lookup to unitsNodeMap
+      fromNode <- M.lookup (Units from') unitsNodeMap
+      toNode <- M.lookup (Units to') unitsNodeMap
 
       -- find the path connecting units
       case unLPath $ lesp fromNode toNode unitsGraph of
         [] -> Nothing
         xs -> Just $ product [x | (n, x) <- xs, n /= fromNode]
-
--- convert :: Units -> Units -> Maybe Scalar
--- convert fromUnits toUnits = do
---   from <- unitsNodeMap fromUnits
---   to <- unitsNodeMap toUnits
-
---   --
---   if | from == to -> return 1
---      | fromDims == toDims -> convPath from to
---      |
---     then return 1
---     else do
---       let fromDims = unitsDims from
---           toDims = unitsDims to
---        in if fromDims == toDims
-
+  where
+    (from', factor) = simplify from
+    to' = simplifyBy factor to
 
 --   | from == to = Nothing
 --   | fromDims == toDims = convPath
@@ -100,9 +87,6 @@ convertUnits from to =
 --   where
 --     fromDims = unitsDims from
 --     toDims = unitsDims to
-
-
-
 
 -- conversionScale from to = do
 --   a <- M.lookup from nodeMap

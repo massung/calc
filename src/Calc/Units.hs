@@ -14,7 +14,7 @@ import Data.Map.Strict as M
 import Data.String
 import Language.Haskell.TH.Syntax
 
-data Unit = Unit { symbol :: String, dim :: Dim }
+data Unit = Unit {symbol :: String, dim :: Dim}
   deriving (Eq, Ord, Lift)
 
 instance IsString Unit where
@@ -27,7 +27,7 @@ instance FromNamedRecord Unit where
   parseNamedRecord r = do
     dim <- r .: "dim"
     symbol <- r .: "symbol"
-    return $ Unit { symbol=symbol, dim=dim }
+    return $ Unit {symbol = symbol, dim = dim}
 
 newtype Units = Units (Map Unit Double)
   deriving (Eq, Ord)
@@ -51,7 +51,7 @@ instance Show Units where
   show (Units u)
     | F.null num = showUnits den
     | F.null den = showUnits num
-    | otherwise  = showUnits num ++ "/" ++ showUnits (M.map abs den)
+    | otherwise = showUnits num ++ "/" ++ showUnits (M.map abs den)
     where
       (num, den) = M.partition (> 0) u
 
@@ -91,12 +91,15 @@ siPrefixes =
 
 derivedUnits = [derived u p | u <- siUnits, p <- siPrefixes]
   where
-    derived u (p, _) = u { symbol=p ++ symbol u }
+    derived u (p, _) = u {symbol = p ++ symbol u}
 
 units :: Map String Unit
 units = F.foldl' insert mempty $ concat [imperialUnits, siUnits, derivedUnits]
   where
     insert m u = M.insert (show u) u m
+
+baseUnits :: [Units]
+baseUnits = [fromUnit u 1 | (_, u) <- M.toList units]
 
 mapUnits f (Units u) = Units (M.map f u)
 
@@ -105,3 +108,9 @@ recipUnits = mapUnits negate
 divideUnits a b = mappend a (recipUnits b)
 
 unitsDims (Units u) = dims [(dim u, exp) | (u, exp) <- M.toList u]
+
+simplify :: Map a Double -> (Map a Double, Double)
+simplify m = let factor = minimum m in (M.map (/ factor) m, factor)
+
+simplifyBy :: Double -> Map a Double -> Map a Double
+simplifyBy factor = M.map (/ factor)
