@@ -11,6 +11,7 @@ import Data.Foldable as F
 import Data.List as L
 import Data.Map.Strict as M
 import Data.String
+import Data.Traversable
 import Data.Tuple.Extra
 
 data Unit = Unit {symbol :: String, dim :: Dim}
@@ -111,6 +112,12 @@ unitsDims (Units u) = dims [(dim u, exp) | (u, exp) <- M.toList u]
 simplify m = (M.map (`div` factor) m, factor)
   where
     factor = M.foldl' gcd (maximum m) m
+
+simplifyBy factor = traverse simplify
+  where
+    simplify x = case quotRem x factor of
+      (q, 0) -> Just q
+      (_, _) -> Nothing
 
 simplifyUnits (Units u) = first Units $ simplify u
 

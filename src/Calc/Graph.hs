@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TupleSections #-}
 
 module Calc.Graph where
 
@@ -43,14 +44,14 @@ convertUnits (Units from) (Units to) = firstJust conversion conversions
 
     -- units left to be converted
     unconvertedFrom = unitsFrom \\ unitsTo
-    unconvertedTo = unitsTo \\ unitsFrom
+    unconvertedTo = fromList $ unitsTo \\ unitsFrom
 
     -- all possible combinations of units
     xs = [simplify $ fromList x | x <- tail $ subsequences unconvertedFrom]
-    ys = [simplify $ fromList y | y <- tail $ subsequences unconvertedTo]
+    zs = mapMaybe (\(x,f) -> (x,,f) <$> simplifyBy f unconvertedTo) xs
 
     -- possible matching conversions with matching factors
-    conversions = [(Units x, Units y, fx) | (x, fx) <- xs, (y, fy) <- ys, fx == fy]
+    conversions = [(Units x, Units y, f) | (x, y, f) <- zs]
 
     -- search graph for conversion scale
     conversion (x, y, f) = (`expScalar` f) <$> conversionScale x y
