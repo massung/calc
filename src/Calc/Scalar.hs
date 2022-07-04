@@ -21,13 +21,13 @@ instance Num Scalar where
 
   -- add scalars
   (+) (Scalar x ux) (Scalar y uy)
-    | ux == uy = Scalar (x+y) ux
+    | ux == uy = Scalar (x + y) ux
     | otherwise = error "Cannot add disparate units"
 
   -- multiply scalars
-  (*) (Scalar x Nothing) (Scalar y uy) = Scalar (x*y) uy
-  (*) (Scalar x ux) (Scalar y Nothing) = Scalar (x*y) ux
-  (*) (Scalar x (Just ux)) (Scalar y (Just uy)) = scalar (x*y) (ux <> uy)
+  (*) (Scalar x Nothing) (Scalar y uy) = Scalar (x * y) uy
+  (*) (Scalar x ux) (Scalar y Nothing) = Scalar (x * y) ux
+  (*) (Scalar x (Just ux)) (Scalar y (Just uy)) = scalar (x * y) (ux <> uy)
 
   -- mapped functions
   negate = mapScalar negate
@@ -47,4 +47,4 @@ scalarUnits (Scalar _ units) = units
 mapScalar f (Scalar x u) = Scalar (f x) u
 
 expScalar (Scalar x Nothing) e = Scalar (x ** fromInteger e) Nothing
-expScalar (Scalar x (Just u)) e = Scalar (x ** fromInteger e) (Just $ mapUnits (^ e) u)
+expScalar (Scalar x (Just u)) e = Scalar (x ** fromInteger e) (Just $ mapUnits (* e) u)
