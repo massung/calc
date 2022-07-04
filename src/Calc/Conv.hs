@@ -11,34 +11,34 @@ import Data.Csv as Csv
 import Data.Either
 import Data.FileEmbed
 import Data.Foldable as F
-import Data.List
+import Data.List as L
+import Data.Maybe
 
-data Conv = Conv Units Scalar
+data Conv = Conv {from :: Units, to :: Units, scale :: Scalar}
   deriving (Show)
 
 instance FromNamedRecord Conv where
   parseNamedRecord r = do
     from <- r .: "from"
-    to <- r .: "to"
-    return $ Conv from to
+    scale <- r .: "to"
+    return $ Conv from (fromJust $ scalarUnits scale) (scale / fromUnits from)
 
-conversions :: [Conv]
-conversions = fromRight (error "ack!") $ F.toList . snd <$> decodeByName csv
+baseConversions :: [Conv]
+baseConversions = fromRight (error "ack!") $ F.toList . snd <$> decodeByName csv
   where
     csv = $(embedStringFile "units/conv.csv")
 
-derivedConvs = [derived u p | u <- siUnits, p <- siPrefixes]
+siConversions = [siConv to p | to <- siUnits, p <- siPrefixes]
   where
-    derived u (prefix, x) =
-      let to = fromUnit u { symbol= prefix ++ symbol u } 1
-       in Conv (fromUnit u 1) (Scalar x $ Just to)
+    siConv to (p, x) = Conv from (fromUnit to 1) scale
+      where
+        from = fromUnit (to {symbol=p ++ symbol to}) 1
+        scale = Scalar x (Just $ fromUnit to 1) / fromUnits from
 
-recipConv (Conv from (Scalar x to)) =
-  let from' = maybe (error "ACK!") recipUnits to
-   in Conv from' $ Scalar (recip x) (Just $ recipUnits from)
-
-conversionUnits = nub $ concat [[from, to] | Conv from (Scalar _ (Just to)) <- conversions]
-
-conversionDims = nub $ concat [dims from to | Conv from (Scalar _ (Just to)) <- conversions]
+conversions = all ++ map recipConversion all
   where
-    dims from to = [unitsDims from, unitsDims to]
+    all = baseConversions ++ siConversions
+
+recipConversion (Conv from to scale) = Conv to from $ recip scale
+
+conversionUnits = nub $ concat [[from, to] | Conv from to _ <- conversions]

@@ -33,13 +33,13 @@ unitsTerm = parens lexer terms <|> terms
 
 unitTerm = do
   u <- fromString <$> identifier lexer
-  n <- option 1 $ lexeme lexer unitExponent
+  n <- try (lexeme lexer unitExponent) <|> return 1
   return $ fromUnit u n
 
 unitExponent = do
   reservedOp lexer "^"
   s <- unitsSign
-  e <- (fromInteger <$> decimal lexer) <|> float lexer
+  e <- decimal lexer
   return (e * s)
 
 unitsSign = option 1 (neg <|> pos)

@@ -1,11 +1,9 @@
-{-# LANGUAGE DeriveLift #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Calc.Dim where
 
 import Data.Csv
 import Data.Map.Strict as M
-import Language.Haskell.TH.Syntax
 
 data Dim
   = Angle
@@ -17,7 +15,7 @@ data Dim
   | Power
   | Pressure
   | Volume
-  deriving (Eq, Ord, Show, Lift)
+  deriving (Eq, Ord, Show)
 
 instance FromField Dim where
   parseField s
@@ -32,7 +30,7 @@ instance FromField Dim where
     | s == "volume" = pure Volume
     | otherwise = fail $ show s ++ " ?"
 
-newtype Dims = Dims (Map Dim Double)
+newtype Dims = Dims (Map Dim Integer)
   deriving (Eq, Ord, Show)
 
 instance Semigroup Dims where

@@ -1,4 +1,3 @@
-{-# LANGUAGE DeriveLift #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
 
@@ -12,13 +11,13 @@ import Data.Foldable as F
 import Data.List as L
 import Data.Map.Strict as M
 import Data.String
-import Language.Haskell.TH.Syntax
+import Data.Tuple.Extra
 
 data Unit = Unit {symbol :: String, dim :: Dim}
-  deriving (Eq, Ord, Lift)
+  deriving (Eq, Ord)
 
 instance IsString Unit where
-  fromString = (units !)
+  fromString = (unitsMap !)
 
 instance Show Unit where
   show = symbol
@@ -29,7 +28,7 @@ instance FromNamedRecord Unit where
     symbol <- r .: "symbol"
     return $ Unit {symbol = symbol, dim = dim}
 
-newtype Units = Units (Map Unit Double)
+newtype Units = Units (Map Unit Integer)
   deriving (Eq, Ord)
 
 instance Semigroup Units where
@@ -39,7 +38,7 @@ instance Monoid Units where
   mempty = Units mempty
 
 class FromUnit a where
-  fromUnit :: Unit -> Double -> a
+  fromUnit :: Unit -> Integer -> a
 
 class FromUnits a where
   fromUnits :: Units -> a
@@ -93,13 +92,13 @@ derivedUnits = [derived u p | u <- siUnits, p <- siPrefixes]
   where
     derived u (p, _) = u {symbol = p ++ symbol u}
 
-units :: Map String Unit
-units = F.foldl' insert mempty $ concat [imperialUnits, siUnits, derivedUnits]
+unitsMap :: Map String Unit
+unitsMap = F.foldl' insert mempty $ concat [imperialUnits, siUnits, derivedUnits]
   where
     insert m u = M.insert (show u) u m
 
-baseUnits :: [Units]
-baseUnits = [fromUnit u 1 | (_, u) <- M.toList units]
+units :: [Units]
+units = nub [fromUnit u 1 | (_, u) <- M.toList unitsMap]
 
 mapUnits f (Units u) = Units (M.map f u)
 
@@ -109,8 +108,10 @@ divideUnits a b = mappend a (recipUnits b)
 
 unitsDims (Units u) = dims [(dim u, exp) | (u, exp) <- M.toList u]
 
-simplify :: Map a Double -> (Map a Double, Double)
-simplify m = let factor = minimum m in (M.map (/ factor) m, factor)
+simplify m = (M.map (`div` factor) m, factor)
+  where
+    factor = M.foldl' gcd (maximum m) m
 
-simplifyBy :: Double -> Map a Double -> Map a Double
-simplifyBy factor = M.map (/ factor)
+simplifyUnits (Units u) = first Units $ simplify u
+
+simplifyDims (Dims d) = first Dims $ simplify d
