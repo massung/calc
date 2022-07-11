@@ -25,10 +25,10 @@ instance Show Expr where
   show (Binary op _ x y) = "(" ++ show x ++ op ++ show y ++ ")"
 
 exprParser :: Parsec String (Map String Expr) Expr
-exprParser = buildExpressionParser exprTable exprTerm
+exprParser = buildExpressionParser exprTable expr
 
 expr = do
-  e <- exprParser
+  e <- exprTerm
   u <- optionMaybe $ reservedOp lexer ":" >> unitsParser
   return $ case u of
     Nothing -> e

@@ -1,4 +1,3 @@
-{-# LANGUAGE NegativeLiterals #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Calc.Parser.Scalar where

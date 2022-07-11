@@ -129,6 +129,8 @@ divideUnits a b = mappend a (recipUnits b)
 
 simplify m = (M.map (`div` factor) m, factor)
   where
-    factor = M.foldl' gcd (maximum m) m
+    factor =
+      let x = M.foldl' gcd (maximum m) m
+       in if all (< 0) m then negate x else x
 
 simplifyUnits (Units u) = first Units $ simplify u
