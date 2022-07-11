@@ -4,57 +4,59 @@
 module Calc.Graph where
 
 import Calc.Conv
-import Calc.Dim
 import Calc.Scalar
 import Calc.Units
-import Data.Graph.Inductive.Graph hiding (edges)
+import Data.Foldable as F
+import Data.Graph.Inductive.Graph hiding (edges, nodes)
 import Data.Graph.Inductive.PatriciaTree
 import Data.Graph.Inductive.Query.BFS
-import Data.List as L
 import Data.List.Extra
 import Data.Map.Strict as M hiding (mapMaybe, (\\))
-import Data.Maybe
 import Data.Tuple
 
-unitsGraph :: Gr Units Scalar
-unitsGraph = mkGraph nodes $ mapMaybe edge conversions
+graph :: Gr Units Conv
+graph = mkGraph nodes edges
   where
-    nodes = [swap d | d <- toList unitsNodeMap]
-    edge (Conv from to x) = do
-      from' <- M.lookup from unitsNodeMap
-      to' <- M.lookup to unitsNodeMap
-      return (from', to', x)
+    nodes = [swap d | d <- M.toList nodeMap]
 
-unitsNodeMap = fromList $ zip (nub $ units ++ conversionUnits) [1 ..]
+nodeMap = M.fromList $ zip units [1 ..]
 
-conversionScale from to = do
-  a <- M.lookup from unitsNodeMap
-  b <- M.lookup to unitsNodeMap
-  if a == b
-    then Just 1
-    else case unLPath $ lesp a b unitsGraph of
-      [] -> Nothing
-      xs -> Just $ product [x | (n, x) <- xs, n /= a]
+edges = concat [mkEdges from x to $ simplifyUnits to | (from, Scalar x (Just to)) <- conversions]
+  where
+    mkEdges from x to (to', factor) =
+      let fromNode = nodeMap ! from
+          toNode = nodeMap ! to'
+       in [ (fromNode, toNode, Conv (Scalar x (Just to) / fromUnits from) factor),
+            (toNode, fromNode, Conv (Scalar (recip x) (Just from) / fromUnits to) factor)
+          ]
+
+conversionScale from fromFactor to toFactor = do
+  fromNode <- M.lookup from nodeMap
+  toNode <- M.lookup to nodeMap
+  case unLPath (lesp fromNode toNode graph) of
+    [] -> Nothing
+    xs ->
+      let Conv x factor = prod fromNode xs
+       in if factor == toFactor then Just x else Nothing
+  where
+    prod fromNode xs =
+      let nodes = [x | (node, x) <- xs, node /= fromNode]
+       in F.foldl' (>*>) (Conv 1 fromFactor) nodes
 
 convertUnits :: Units -> Units -> Maybe Scalar
-convertUnits (Units from) (Units to) = firstJust conversion conversions
+convertUnits (Units from) (Units to) =
+  msum [conversionScale (Units from) x (Units to) y | (from, x) <- xs, (to, y) <- ys]
   where
     unitsFrom = M.toList from
     unitsTo = M.toList to
 
     -- units left to be converted
     unconvertedFrom = unitsFrom \\ unitsTo
-    unconvertedTo = fromList $ unitsTo \\ unitsFrom
+    unconvertedTo = unitsTo \\ unitsFrom
 
     -- all possible combinations of units
     xs = [simplify $ fromList x | x <- tail $ subsequences unconvertedFrom]
-    zs = mapMaybe (\(x,f) -> (x,,f) <$> simplifyBy f unconvertedTo) xs
-
-    -- possible matching conversions with matching factors
-    conversions = [(Units x, Units y, f) | (x, y, f) <- zs]
-
-    -- search graph for conversion scale
-    conversion (x, y, f) = (`expScalar` f) <$> conversionScale x y
+    ys = [simplify $ fromList y | y <- tail $ subsequences unconvertedTo]
 
 convert :: Scalar -> Units -> Either String Scalar
 convert (Scalar x Nothing) to = Right $ Scalar x (Just to)

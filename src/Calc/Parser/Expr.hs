@@ -1,4 +1,3 @@
-{-# LANGUAGE NegativeLiterals #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Calc.Parser.Expr where
@@ -18,6 +17,12 @@ data Expr
   | Convert Expr Units
   | Unary String (Scalar -> Scalar) Expr
   | Binary String (Scalar -> Scalar -> Scalar) Expr Expr
+
+instance Show Expr where
+  show (Term x) = show x
+  show (Convert x u) = show x ++ " : " ++ show u
+  show (Unary op _ x) = "(" ++ op ++ show x ++ ")"
+  show (Binary op _ x y) = "(" ++ show x ++ op ++ show y ++ ")"
 
 exprParser :: Parsec String (Map String Expr) Expr
 exprParser = buildExpressionParser exprTable exprTerm

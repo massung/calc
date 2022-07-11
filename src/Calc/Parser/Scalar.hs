@@ -7,7 +7,6 @@ import Calc.Parser.Lexer
 import Calc.Parser.Units
 import Calc.Scalar
 import Data.ByteString.UTF8 as BS hiding (fromString)
-import Data.Csv
 import Data.Either
 import Data.String
 import Text.Parsec
@@ -20,9 +19,6 @@ instance IsString Scalar where
         x <- scalarParser
         eof
         return x
-
-instance FromField Scalar where
-  parseField = pure . fromString . BS.toString
 
 scalarParser = do
   n <- naturalOrFloat lexer

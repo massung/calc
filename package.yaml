@@ -22,19 +22,16 @@ dependencies:
 - base
 - bytestring
 - case-insensitive
-- cassava
 - cmdargs
 - containers
 - errors
 - extra
 - fgl
-- file-embed
 - mtl
 - parsec
 - random
 - scientific
 - symbol
-- template-haskell
 - utf8-string
 - vector
 

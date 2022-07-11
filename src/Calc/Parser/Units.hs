@@ -6,8 +6,8 @@ module Calc.Parser.Units where
 import Calc.Parser.Lexer
 import Calc.Units
 import Data.ByteString.UTF8 as BS hiding (fromString)
-import Data.Csv
 import Data.Either
+import Data.Map.Strict as M
 import Data.String
 import Text.Parsec
 import Text.Parsec.Expr
@@ -21,9 +21,6 @@ instance IsString Units where
         eof
         return x
 
-instance FromField Units where
-  parseField = pure . fromString . BS.toString
-
 unitsParser :: Parsec String st Units
 unitsParser = buildExpressionParser unitsExprTable unitsTerm
 
@@ -34,7 +31,7 @@ unitsTerm = parens lexer terms <|> terms
 unitTerm = do
   u <- fromString <$> identifier lexer
   n <- try (lexeme lexer unitExponent) <|> return 1
-  return $ fromUnit u n
+  return $ Units (M.singleton u n)
 
 unitExponent = do
   reservedOp lexer "^"

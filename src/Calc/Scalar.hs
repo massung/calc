@@ -1,7 +1,6 @@
 module Calc.Scalar where
 
 import Calc.Units
-import Data.Csv
 
 data Scalar = Scalar Double (Maybe Units)
   deriving (Eq)
@@ -10,7 +9,7 @@ instance FromUnits Scalar where
   fromUnits = Scalar 1 . Just
 
 instance FromUnit Scalar where
-  fromUnit u e = fromUnits $ fromUnit u e
+  fromUnit u = fromUnits $ fromUnit u
 
 instance Show Scalar where
   show (Scalar x Nothing) = show x
@@ -27,7 +26,7 @@ instance Num Scalar where
   -- multiply scalars
   (*) (Scalar x Nothing) (Scalar y uy) = Scalar (x * y) uy
   (*) (Scalar x ux) (Scalar y Nothing) = Scalar (x * y) ux
-  (*) (Scalar x (Just ux)) (Scalar y (Just uy)) = scalar (x * y) (ux <> uy)
+  (*) (Scalar x (Just ux)) (Scalar y (Just uy)) = Scalar (x * y) $ Just (ux <> uy)
 
   -- mapped functions
   negate = mapScalar negate
@@ -39,8 +38,6 @@ instance Fractional Scalar where
 
   -- scalar inverse
   recip (Scalar x u) = Scalar (recip x) $ fmap (mapUnits negate) u
-
-scalar x = Scalar x . Just
 
 scalarUnits (Scalar _ units) = units
 

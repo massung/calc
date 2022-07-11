@@ -1,33 +1,23 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TemplateHaskell #-}
 
 module Calc.Units where
 
 import Calc.Dim
-import Data.Csv
-import Data.Either
-import Data.FileEmbed
 import Data.Foldable as F
 import Data.List as L
 import Data.Map.Strict as M
+import Data.Maybe
 import Data.String
-import Data.Traversable
 import Data.Tuple.Extra
 
-data Unit = Unit {symbol :: String, dim :: Dim}
+data Unit = Unit {name :: String, symbol :: String, dim :: Dim}
   deriving (Eq, Ord)
 
 instance IsString Unit where
-  fromString = (unitsMap !)
+  fromString s = fromMaybe (error $ "no unit " ++ show s) $ M.lookup s unitMap
 
 instance Show Unit where
   show = symbol
-
-instance FromNamedRecord Unit where
-  parseNamedRecord r = do
-    dim <- r .: "dim"
-    symbol <- r .: "symbol"
-    return $ Unit {symbol = symbol, dim = dim}
 
 newtype Units = Units (Map Unit Integer)
   deriving (Eq, Ord)
@@ -39,13 +29,13 @@ instance Monoid Units where
   mempty = Units mempty
 
 class FromUnit a where
-  fromUnit :: Unit -> Integer -> a
+  fromUnit :: Unit -> a
 
 class FromUnits a where
   fromUnits :: Units -> a
 
 instance FromUnit Units where
-  fromUnit u e = Units $ M.singleton u e
+  fromUnit u = Units $ M.singleton u 1
 
 instance Show Units where
   show (Units u)
@@ -62,44 +52,74 @@ instance Show Units where
       -- concatenate units together
       showUnits = unwords . L.map showUnit . M.toList
 
-imperialUnits = fromRight (fail "ack!") $ F.toList . snd <$> decodeByName csv
-  where
-    csv = $(embedStringFile "units/imperial.csv")
-
-siUnits = fromRight (error "ack!") $ F.toList . snd <$> decodeByName csv
-  where
-    csv = $(embedStringFile "units/si.csv")
-
-siPrefixes =
-  [ ("a", 1e-18),
-    ("f", 1e-15),
-    ("p", 1e-12),
-    ("n", 1e-9),
-    ("u", 1e-6),
-    ("m", 1e-3),
-    ("c", 1e-2),
-    ("d", 1e-1),
-    ("da", 1e1),
-    ("h", 1e2),
-    ("k", 1e3),
-    ("M", 1e6),
-    ("G", 1e9),
-    ("T", 1e12),
-    ("P", 1e15),
-    ("E", 1e18)
+imperialUnits =
+  [ Unit {name = "inch", symbol = "in", dim = Length},
+    Unit {name = "hand", symbol = "h", dim = Length},
+    Unit {name = "foot", symbol = "ft", dim = Length},
+    Unit {name = "yard", symbol = "yd", dim = Length},
+    Unit {name = "chain", symbol = "ch", dim = Length},
+    Unit {name = "furlong", symbol = "fur", dim = Length},
+    Unit {name = "mile", symbol = "mi", dim = Length},
+    Unit {name = "league", symbol = "lea", dim = Length},
+    Unit {name = "fathom", symbol = "ftm", dim = Length},
+    Unit {name = "cable", symbol = "cable", dim = Length},
+    Unit {name = "nautical mile", symbol = "nmi", dim = Length},
+    Unit {name = "link", symbol = "link", dim = Length},
+    Unit {name = "rod", symbol = "rod", dim = Length},
+    Unit {name = "acre", symbol = "acre", dim = Area},
+    Unit {name = "ounce", symbol = "oz", dim = Mass},
+    Unit {name = "pound", symbol = "lb", dim = Mass},
+    Unit {name = "stone", symbol = "st", dim = Mass},
+    Unit {name = "slug", symbol = "slug", dim = Mass},
+    Unit {name = "quarter", symbol = "qtr", dim = Mass},
+    Unit {name = "hundredweight", symbol = "cwt", dim = Mass},
+    Unit {name = "ton", symbol = "t", dim = Mass},
+    Unit {name = "minute", symbol = "min", dim = Duration},
+    Unit {name = "hour", symbol = "hr", dim = Duration},
+    Unit {name = "day", symbol = "day", dim = Duration},
+    Unit {name = "horsepower", symbol = "HP", dim = Power},
+    Unit {name = "pounds per sqin", symbol = "psi", dim = Pressure},
+    Unit {name = "bar", symbol = "bar", dim = Pressure}
   ]
 
-derivedUnits = [derived u p | u <- siUnits, p <- siPrefixes]
-  where
-    derived u (p, _) = u {symbol = p ++ symbol u}
+metricUnits =
+  [ Unit {name = "second", symbol = "s", dim = Duration},
+    Unit {name = "gram", symbol = "g", dim = Mass},
+    Unit {name = "meter", symbol = "m", dim = Length},
+    Unit {name = "liter", symbol = "L", dim = Volume},
+    Unit {name = "pascal", symbol = "Pa", dim = Pressure}
+  ]
 
-unitsMap :: Map String Unit
-unitsMap = F.foldl' insert mempty $ concat [imperialUnits, siUnits, derivedUnits]
+siPrefixes =
+  [ ("atto", "a", 1e-18),
+    ("femto", "f", 1e-15),
+    ("pico", "p", 1e-12),
+    ("nano", "n", 1e-9),
+    ("micro", "u", 1e-6),
+    ("milli", "m", 1e-3),
+    ("centi", "c", 1e-2),
+    ("deci", "d", 1e-1),
+    ("deca", "da", 1e1),
+    ("hecto", "h", 1e2),
+    ("kilo", "k", 1e3),
+    ("mega", "M", 1e6),
+    ("giga", "G", 1e9),
+    ("tera", "T", 1e12),
+    ("peta", "P", 1e15),
+    ("exa", "E", 1e18)
+  ]
+
+siUnits = [derived u n p | u <- metricUnits, (n, p, _) <- siPrefixes]
   where
-    insert m u = M.insert (show u) u m
+    derived u n p = u {name = n ++ name u, symbol = p ++ symbol u}
+
+unitMap :: Map String Unit
+unitMap = F.foldl' insert mempty $ concat [imperialUnits, metricUnits, siUnits]
+  where
+    insert m u = M.insert (symbol u) u m
 
 units :: [Units]
-units = nub [fromUnit u 1 | (_, u) <- M.toList unitsMap]
+units = L.map (fromUnit . snd) $ M.toList unitMap
 
 mapUnits f (Units u) = Units (M.map f u)
 
@@ -107,18 +127,8 @@ recipUnits = mapUnits negate
 
 divideUnits a b = mappend a (recipUnits b)
 
-unitsDims (Units u) = dims [(dim u, exp) | (u, exp) <- M.toList u]
-
 simplify m = (M.map (`div` factor) m, factor)
   where
     factor = M.foldl' gcd (maximum m) m
 
-simplifyBy factor = traverse simplify
-  where
-    simplify x = case quotRem x factor of
-      (q, 0) -> Just q
-      (_, _) -> Nothing
-
 simplifyUnits (Units u) = first Units $ simplify u
-
-simplifyDims (Dims d) = first Dims $ simplify d
