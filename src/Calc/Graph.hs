@@ -29,18 +29,20 @@ edges = concat [mkEdges from x to $ simplifyUnits to | (from, Scalar x (Just to)
             (toNode, fromNode, Conv (Scalar (recip x) (Just from) / fromUnits to) factor)
           ]
 
-conversionScale from fromFactor to toFactor = do
+conversionPath from to = do
   fromNode <- M.lookup from nodeMap
   toNode <- M.lookup to nodeMap
   case unLPath (lesp fromNode toNode graph) of
     [] -> Nothing
-    xs ->
-      let Conv x factor = prod fromNode xs
-       in if factor == toFactor then Just x else Nothing
+    xs -> Just [x | (node, x) <- xs, node /= fromNode]
+
+conversionScale from fromFactor to toFactor = do
+  Conv x factor <- foldConv <$> conversionPath from to
+  if factor == toFactor
+    then Just x
+    else Nothing
   where
-    prod fromNode xs =
-      let nodes = [x | (node, x) <- xs, node /= fromNode]
-       in F.foldl' (>*>) (Conv 1 fromFactor) nodes
+    foldConv = F.foldl' (>*>) (Conv 1 fromFactor)
 
 convertUnits :: Units -> Units -> Maybe Scalar
 convertUnits (Units from) (Units to) = msum convs

@@ -7,7 +7,6 @@ import Calc.SI
 import Calc.Scalar
 import Calc.Units
 import Data.Map.Strict as M
-import Data.Scientific
 
 data Conv = Conv {scalar :: Scalar, factor :: Integer}
   deriving (Eq, Show)
