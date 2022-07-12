@@ -23,4 +23,4 @@ scalarParser = do
   u <- optionMaybe $ try unitsParser <|> unitsTerm
   return $ case n of
     Left i -> Scalar (fromIntegral i) u
-    Right f -> Scalar f u
+    Right f -> Scalar (toRational f) u

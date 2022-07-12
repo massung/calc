@@ -2,7 +2,7 @@ module Calc.Scalar where
 
 import Calc.Units
 
-data Scalar = Scalar Double (Maybe Units)
+data Scalar = Scalar Rational (Maybe Units)
   deriving (Eq)
 
 instance FromUnits Scalar where
@@ -12,8 +12,8 @@ instance FromUnit Scalar where
   fromUnit u = fromUnits $ fromUnit u
 
 instance Show Scalar where
-  show (Scalar x Nothing) = show x
-  show (Scalar x (Just u)) = show x ++ " " ++ show u
+  show (Scalar x Nothing) = show (fromRational x)
+  show (Scalar x (Just u)) = show (fromRational x) ++ " " ++ show u
 
 instance Num Scalar where
   fromInteger n = Scalar (fromInteger n) Nothing

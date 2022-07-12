@@ -46,7 +46,6 @@ imperialConversions =
     ("day", ["24 hr"]),
     ("bar", ["100000 Pa", "14.50377 psi"]),
     ("hz", ["1 s^-1"])
-    --("psi", ["1 lb/in^2"])
   ]
 
 storageConversions =
@@ -55,7 +54,7 @@ storageConversions =
 
 siConversion u p x =
   let u' = unitMap ! (p ++ symbol u)
-      x' = toRealFloat $ recip x
+      x' = toRational $ recip x
    in Scalar x' $ Just (fromUnit u')
 
 siConversions = [(fromUnit u, [siConversion u p x]) | u <- metricUnits, (_, p, x) <- siPrefixes]
