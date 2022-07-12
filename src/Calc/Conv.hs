@@ -50,10 +50,9 @@ storageConversions =
   [ ("B", ["8 b"])
   ]
 
-siConversions = [(fromUnit u, [conv u p x]) | u <- metricUnits, (_, p, x) <- siPrefixes]
-  where
-    conv u p x = let u' = unitMap ! (p ++ symbol u) in Scalar (recip x) $ Just (fromUnit u')
+siConversion u p x =
+  let u' = unitMap ! (p ++ symbol u) in Scalar (recip x) $ Just (fromUnit u')
 
-siStorageConversions = [(fromUnit u, [conv u p x]) | u <- storageUnits, (_, p, x) <- siStoragePrefixes]
-  where
-    conv u p x = let u' = unitMap ! (p ++ symbol u) in Scalar (recip x) $ Just (fromUnit u')
+siConversions = [(fromUnit u, [siConversion u p x]) | u <- metricUnits, (_, p, x) <- siPrefixes]
+
+siStorageConversions = [(fromUnit u, [siConversion u p x]) | u <- storageUnits, (_, p, x) <- siStoragePrefixes]
