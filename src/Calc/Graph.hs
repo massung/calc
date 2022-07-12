@@ -44,8 +44,7 @@ conversionScale from fromFactor to toFactor = do
        in F.foldl' (>*>) (Conv 1 fromFactor) nodes
 
 convertUnits :: Units -> Units -> Maybe Scalar
-convertUnits (Units from) (Units to) =
-  msum [conversionScale (Units from) x (Units to) y | (from, x) <- xs, (to, y) <- ys]
+convertUnits (Units from) (Units to) = msum convs
   where
     unitsFrom = M.toList from
     unitsTo = M.toList to
@@ -57,6 +56,9 @@ convertUnits (Units from) (Units to) =
     -- all possible combinations of units
     xs = [simplify $ fromList x | x <- tail $ subsequences unconvertedFrom]
     ys = [simplify $ fromList y | y <- tail $ subsequences unconvertedTo]
+
+    -- try to convert between unit combinations
+    convs = [conversionScale (Units from) x (Units to) y | (from, x) <- xs, (to, y) <- ys]
 
 convert :: Scalar -> Units -> Either String Scalar
 convert (Scalar x Nothing) to = Right $ Scalar x (Just to)
