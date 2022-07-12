@@ -68,6 +68,7 @@ imperialUnits =
     Unit {name = "link", symbol = "link", dim = Length},
     Unit {name = "rod", symbol = "rod", dim = Length},
     Unit {name = "acre", symbol = "acre", dim = Area},
+    Unit {name = "hectare", symbol = "ha", dim = Area},
     Unit {name = "ounce", symbol = "oz", dim = Mass},
     Unit {name = "pound", symbol = "lb", dim = Mass},
     Unit {name = "stone", symbol = "st", dim = Mass},
@@ -92,8 +93,8 @@ metricUnits =
   ]
 
 storageUnits =
-  [ Unit {name="bit", symbol="b", dim=Storage},
-    Unit {name="byte", symbol="B", dim=Storage}
+  [ Unit {name = "bit", symbol = "b", dim = Storage},
+    Unit {name = "byte", symbol = "B", dim = Storage}
   ]
 
 siUnits = [derivedUnit u n p | u <- metricUnits, (n, p, _) <- siPrefixes]

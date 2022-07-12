@@ -33,6 +33,7 @@ imperialConversions =
     ("link", ["7.92 in"]),
     ("rod", ["25 link"]),
     ("acre", ["43560.04 ft^2"]),
+    ("ha", ["10000 m^2"]),
     ("lb", ["16 oz", "453.5924 g"]),
     ("st", ["14 lb"]),
     ("qtr", ["28 lb"]),
