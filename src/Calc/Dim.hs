@@ -9,6 +9,7 @@ data Dim
   | Area
   | Duration
   | Energy
+  | Frequency
   | Length
   | Mass
   | Power

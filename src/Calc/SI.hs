@@ -1,24 +1,29 @@
+{-# LANGUAGE NegativeLiterals #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Calc.SI where
 
+import Data.Scientific
+
+-- NOTE: Use of scientific so recip is exact.
+
 siPrefixes =
-  [ ("atto", "a", 1e-18),
-    ("femto", "f", 1e-15),
-    ("pico", "p", 1e-12),
-    ("nano", "n", 1e-9),
-    ("micro", "u", 1e-6),
-    ("milli", "m", 1e-3),
-    ("centi", "c", 1e-2),
-    ("deci", "d", 1e-1),
-    ("deca", "da", 1e1),
-    ("hecto", "h", 1e2),
-    ("kilo", "k", 1e3),
-    ("mega", "M", 1e6),
-    ("giga", "G", 1e9),
-    ("tera", "T", 1e12),
-    ("peta", "P", 1e15),
-    ("exa", "E", 1e18)
+  [ ("atto", "a", scientific 1 -18),
+    ("femto", "f", scientific 1 -15),
+    ("pico", "p", scientific 1 -12),
+    ("nano", "n", scientific 1 -9),
+    ("micro", "u", scientific 1 -6),
+    ("milli", "m", scientific 1 -3),
+    ("centi", "c", scientific 1 -2),
+    ("deci", "d", scientific 1 -1),
+    ("deca", "da", scientific 1 1),
+    ("hecto", "h", scientific 1 2),
+    ("kilo", "k", scientific 1 3),
+    ("mega", "M", scientific 1 6),
+    ("giga", "G", scientific 1 9),
+    ("tera", "T", scientific 1 12),
+    ("peta", "P", scientific 1 15),
+    ("exa", "E", scientific 1 18)
   ]
 
 siStoragePrefixes =

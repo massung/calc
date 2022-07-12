@@ -5,7 +5,6 @@ module Calc.Parser.Scalar where
 import Calc.Parser.Lexer
 import Calc.Parser.Units
 import Calc.Scalar
-import Data.ByteString.UTF8 as BS hiding (fromString)
 import Data.Either
 import Data.String
 import Text.Parsec

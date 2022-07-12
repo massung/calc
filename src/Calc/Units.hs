@@ -80,7 +80,7 @@ imperialUnits =
     Unit {name = "hour", symbol = "hr", dim = Duration},
     Unit {name = "day", symbol = "day", dim = Duration},
     Unit {name = "horsepower", symbol = "HP", dim = Power},
-    Unit {name = "pounds per sqin", symbol = "psi", dim = Pressure},
+    Unit {name = "pounds per sq. inch", symbol = "psi", dim = Pressure},
     Unit {name = "bar", symbol = "bar", dim = Pressure}
   ]
 
@@ -89,7 +89,8 @@ metricUnits =
     Unit {name = "gram", symbol = "g", dim = Mass},
     Unit {name = "meter", symbol = "m", dim = Length},
     Unit {name = "liter", symbol = "L", dim = Volume},
-    Unit {name = "pascal", symbol = "Pa", dim = Pressure}
+    Unit {name = "pascal", symbol = "Pa", dim = Pressure},
+    Unit {name = "hertz", symbol = "hz", dim = Frequency}
   ]
 
 storageUnits =

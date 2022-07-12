@@ -43,5 +43,5 @@ scalarUnits (Scalar _ units) = units
 
 mapScalar f (Scalar x u) = Scalar (f x) u
 
-expScalar (Scalar x Nothing) e = Scalar (x ** fromInteger e) Nothing
-expScalar (Scalar x (Just u)) e = Scalar (x ** fromInteger e) (Just $ mapUnits (* e) u)
+expScalar (Scalar x Nothing) e = Scalar (x ^^ fromInteger e) Nothing
+expScalar (Scalar x (Just u)) e = Scalar (x ^^ fromInteger e) (Just $ mapUnits (* e) u)
