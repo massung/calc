@@ -25,17 +25,19 @@ instance Show Expr where
   show (Binary op _ x y) = "(" ++ show x ++ op ++ show y ++ ")"
 
 exprParser :: Parsec String (Map String Expr) Expr
-exprParser = buildExpressionParser exprTable expr
+exprParser = buildExpressionParser exprTable exprTerm
 
-expr = do
-  e <- exprTerm
-  u <- optionMaybe $ reservedOp lexer ":" >> unitsParser
+exprTerm = do
+  e <- expr
+  u <- optionMaybe exprCast
   return $ case u of
     Nothing -> e
     Just u -> Convert e u
 
-exprTerm =
-  parens lexer expr
+exprCast = (reservedOp lexer ":" <|> reserved lexer "to") >> unitsParser
+
+expr =
+  parens lexer exprTerm
     <|> Term <$> scalarParser
     <|> Term . fromUnits <$> unitsTerm
     <|> lexeme lexer exprVariable
@@ -44,7 +46,7 @@ exprVariable = do
   var <- char '?' >> identifier lexer
   vars <- getState
   case M.lookup var vars of
-    Nothing -> fail $ "undefined variable: " ++ var
+    Nothing -> fail $ "undefined variable: " ++ show var
     Just expr -> pure expr
 
 exprTable =

@@ -4,6 +4,7 @@ module Calc.Conv where
 
 import Calc.Parser.Scalar
 import Calc.Scalar
+import Calc.SI
 import Calc.Units
 import Data.Map.Strict as M
 
@@ -14,7 +15,7 @@ data Conv = Conv {scalar :: Scalar, factor :: Integer}
   Conv {scalar = a * expScalar b f, factor = f * g}
 
 conversions :: [(Units, Scalar)]
-conversions = concatMap explode $ imperialConversions ++ siConversions
+conversions = concatMap explode $ concat [imperialConversions, siConversions, storageConversions, siStorageConversions]
   where
     explode (from, tos) = [(from, to) | to <- tos]
 
@@ -44,6 +45,14 @@ imperialConversions =
     ("bar", ["100000 Pa", "14.50377 psi"])
   ]
 
+storageConversions =
+  [ ("B", ["8 b"])
+  ]
+
 siConversions = [(fromUnit u, [conv u p x]) | u <- metricUnits, (_, p, x) <- siPrefixes]
+  where
+    conv u p x = let u' = unitMap ! (p ++ symbol u) in Scalar (recip x) $ Just (fromUnit u')
+
+siStorageConversions = [(fromUnit u, [conv u p x]) | u <- storageUnits, (_, p, x) <- siStoragePrefixes]
   where
     conv u p x = let u' = unitMap ! (p ++ symbol u) in Scalar (recip x) $ Just (fromUnit u')

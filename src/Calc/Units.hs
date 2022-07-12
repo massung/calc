@@ -3,6 +3,7 @@
 module Calc.Units where
 
 import Calc.Dim
+import Calc.SI
 import Data.Foldable as F
 import Data.List as L
 import Data.Map.Strict as M
@@ -90,31 +91,19 @@ metricUnits =
     Unit {name = "pascal", symbol = "Pa", dim = Pressure}
   ]
 
-siPrefixes =
-  [ ("atto", "a", 1e-18),
-    ("femto", "f", 1e-15),
-    ("pico", "p", 1e-12),
-    ("nano", "n", 1e-9),
-    ("micro", "u", 1e-6),
-    ("milli", "m", 1e-3),
-    ("centi", "c", 1e-2),
-    ("deci", "d", 1e-1),
-    ("deca", "da", 1e1),
-    ("hecto", "h", 1e2),
-    ("kilo", "k", 1e3),
-    ("mega", "M", 1e6),
-    ("giga", "G", 1e9),
-    ("tera", "T", 1e12),
-    ("peta", "P", 1e15),
-    ("exa", "E", 1e18)
+storageUnits =
+  [ Unit {name="bit", symbol="b", dim=Storage},
+    Unit {name="byte", symbol="B", dim=Storage}
   ]
 
-siUnits = [derived u n p | u <- metricUnits, (n, p, _) <- siPrefixes]
-  where
-    derived u n p = u {name = n ++ name u, symbol = p ++ symbol u}
+siUnits = [derivedUnit u n p | u <- metricUnits, (n, p, _) <- siPrefixes]
+
+siStorageUnits = [derivedUnit u n p | u <- storageUnits, (n, p, _) <- siStoragePrefixes]
+
+derivedUnit u n p = u {name = n ++ name u, symbol = p ++ symbol u}
 
 unitMap :: Map String Unit
-unitMap = F.foldl' insert mempty $ concat [imperialUnits, metricUnits, siUnits]
+unitMap = F.foldl' insert mempty $ concat [imperialUnits, metricUnits, siUnits, storageUnits, siStorageUnits]
   where
     insert m u = M.insert (symbol u) u m
 

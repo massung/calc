@@ -32,6 +32,7 @@ library
       Calc.Parser.Scalar
       Calc.Parser.Units
       Calc.Scalar
+      Calc.SI
       Calc.Units
   other-modules:
       Paths_calc

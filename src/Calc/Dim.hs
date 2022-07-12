@@ -13,6 +13,7 @@ data Dim
   | Mass
   | Power
   | Pressure
+  | Storage
   | Volume
   deriving (Eq, Ord, Show)
 
