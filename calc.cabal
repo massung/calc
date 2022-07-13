@@ -25,8 +25,8 @@ library
   exposed-modules:
       Calc.Conv
       Calc.Dim
+      Calc.Error
       Calc.Eval
-      Calc.Graph
       Calc.Parser.Expr
       Calc.Parser.Lexer
       Calc.Parser.Scalar
@@ -47,7 +47,6 @@ library
     , data-default
     , errors
     , extra
-    , fgl
     , mtl
     , parsec
     , random
@@ -74,7 +73,6 @@ executable calc
     , data-default
     , errors
     , extra
-    , fgl
     , mtl
     , parsec
     , random
@@ -102,7 +100,6 @@ test-suite calc-test
     , data-default
     , errors
     , extra
-    , fgl
     , hspec
     , mtl
     , parsec

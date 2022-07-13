@@ -1,26 +1,34 @@
 module Calc.Eval where
 
 import Calc.Conv
-import Calc.Graph
+import Calc.Error
 import Calc.Parser.Expr
 import Calc.Scalar
+import Calc.Units
+import Data.Either.Extra
+import Text.Parsec
 
-eval :: Expr -> Either String Expr
-eval (Term x) = Right $ Term x
-eval (Convert x to) = evalConvert x to
-eval (Unary _ f x) = evalUnary f x
-eval (Binary _ f x y) = evalBinary f x y
+eval st source s =
+  evalExpr <$> mapLeft ExprError (runParser exprParser st source s)
 
-evalConvert (Term x) to = convert x to >>= eval . Term
+evalExpr (Term x) = Right $ Term x
+evalExpr (Convert x to) = evalConvert x to
+evalExpr (Unary _ f x) = evalUnary f x
+evalExpr (Binary _ f x y) = evalBinary f x y
+
+evalConvert (Term x) to = convert x to >>= evalExpr . Term
 evalConvert x to = do
-  x' <- eval x
+  x' <- evalExpr x
   evalConvert x' to
 
-evalUnary f (Term x) = eval $ Term (f x)
-evalUnary f x = eval x >>= evalUnary f
+evalUnary f (Term x) = evalExpr $ Term (f x)
+evalUnary f x = evalExpr x >>= evalUnary f
 
-evalBinary f (Term x) (Term y@(Scalar _ u)) = Term . (`f` y) <$> convert x u
+evalBinary f (Term x@(Scalar _ from)) (Term y@(Scalar _ to)) =
+  if nullUnits to
+    then Term . (x `f`) <$> convert y from
+    else Term . (`f` y) <$> convert x to
 evalBinary f x y = do
-  x' <- eval x
-  y' <- eval y
+  x' <- evalExpr x
+  y' <- evalExpr y
   evalBinary f x' y'

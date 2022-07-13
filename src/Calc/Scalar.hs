@@ -21,6 +21,8 @@ instance Num Scalar where
 
   -- add scalars
   (+) (Scalar x ux) (Scalar y uy)
+    | nullUnits uy = Scalar (x + y) ux
+    | nullUnits ux = Scalar (x + y) uy
     | ux == uy = Scalar (x + y) ux
     | otherwise = error "Cannot add disparate units"
 

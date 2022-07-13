@@ -2,11 +2,11 @@
 
 module Calc.Conv where
 
+import Calc.Error
 import Calc.Parser.Scalar
 import Calc.SI
 import Calc.Scalar
 import Calc.Units
-import Data.Either.Extra
 import Data.Foldable as F
 import Data.List as L
 import Data.Map.Strict as M hiding (member)
@@ -60,12 +60,11 @@ imperialConvs =
     ("hr", ["60 min"]),
     ("day", ["24 hr"]),
     ("bar", ["100000 Pa", "14.50377 psi"]),
+    ("psi", ["1 lb/in^2"]),
     ("hz", ["1 s^-1"])
   ]
 
-storageConvs =
-  [ ("B", ["8 b"])
-  ]
+storageConvs = [("B", ["8 b"])]
 
 siConv u p x =
   let u' = unitMap ! (p ++ symbol u)
@@ -76,37 +75,35 @@ metricConvs = [(fromUnit u, [siConv u p x]) | u <- metricUnits, (_, p, x) <- siP
 
 siStorageConvs = [(fromUnit u, [siConv u p x]) | u <- storageUnits, (_, p, x) <- storagePrefixes]
 
-ccc x@(Scalar _ from) to =
-  if from == to
-    then Right x
-    else case msum convs of
-      Nothing -> Left "no conv"
-      Just x' -> ccc x' to
+convert x@(Scalar f from) to
+  | nullUnits to = Right x
+  | nullUnits from = Right $ Scalar f to
+  | from == to = Right x
+  | otherwise = case msum convs of
+    Nothing -> Left $ ConversionError from to
+    Just x' -> convert (x * product x') to
   where
     xs = tail $ subsequences $ M.toList $ unconvertedUnits from to
     ys = tail $ subsequences $ M.toList $ unconvertedUnits to from
 
-    -- first
-    convs = [convertX (Scalar 1 $ Units $ M.fromList from') (Units $ M.fromList to') | from' <- xs, to' <- ys]
+    -- find the first successful units conversion
+    convs = [convertUnits (Units $ M.fromList from') (Units $ M.fromList to') | from' <- xs, to' <- ys]
 
-convert x to = maybeToEither noConversion $ convertX x to
-  where
-    noConversion = "no conversion: " ++ show (scalarUnits x) ++ " to " ++ show to
-
-convertX x@(Scalar _ from) to =
-  msum [dfs (x * x') (S.fromList [from, from']) to | (u, x') <- unitsConvs from]
+convertUnits from to
+  | nullUnits to = Just []
+  | otherwise = dfs [] from to (S.fromList [from, from'])
   where
     (from', _) = simplifyUnits from
 
-dfs x@(Scalar _ from) ex to =
+dfs xs from to ex =
   if from == to
-    then Just x
-    else msum [dfs (x * x') (S.insert u ex) to | (u, x') <- unitsConvs from, S.notMember u ex]
+    then Just xs
+    else msum [dfs (x:xs) u to (S.insert u ex) | (u, x) <- unitsConvs from, S.notMember u ex]
 
 unitsConvs from =
   if exp == 1
     then convs from
-    else convs from ++ [(u, expScalar x exp) | (u, x) <- convs from']
+    else convs from ++ [(mapUnits (* exp) u, expScalar x exp) | (u, x) <- convs from']
   where
     convs = fromMaybe [] . (convMap !?)
 

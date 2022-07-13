@@ -27,7 +27,6 @@ dependencies:
 - data-default
 - errors
 - extra
-- fgl
 - mtl
 - parsec
 - random

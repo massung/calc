@@ -1,9 +1,9 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TupleSections #-}
 
 module Main where
 
+import Calc.Error
 import Calc.Eval
 import Calc.Parser.Expr
 import Data.Either.Extra
@@ -30,15 +30,14 @@ opts =
 
 evalVars args = sequence [evalVar x v | (x, v) <- L.zip ["x", "y", "z"] (vars args)]
   where
-    evalVar x v = mapRight (x,) $ runParser exprParser M.empty "" v
+    evalVar x v = case runParser exprParser M.empty "" v of
+      Left err -> Left $ ExprError err
+      Right expr -> Right (x, expr)
 
-evalExpr args = do
-  varMap <- mapLeft show $ evalVars args
-  expr <- mapLeft show $ runParser exprParser (M.fromList varMap) "" (exprString args)
-  eval expr
+run args = either show show result
+  where
+    result = do
+      varMap <- M.fromList <$> evalVars args
+      eval varMap "" (exprString args)
 
-run args = case evalExpr args of
-  Right result -> print result
-  Left err -> print err
-
-main = cmdArgs opts >>= run
+main = cmdArgs opts >>= print . run
