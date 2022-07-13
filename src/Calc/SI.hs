@@ -25,3 +25,12 @@ siPrefixes =
     ("peta", "P", scientific 1 15),
     ("exa", "E", scientific 1 18)
   ]
+
+storagePrefixes =
+  [ ("kilo", "k", 1024 :: Scientific),
+    ("mega", "M", 1024 ^ 2),
+    ("giga", "G", 1024 ^ 3),
+    ("tera", "T", 1024 ^ 4),
+    ("peta", "P", 1024 ^ 5),
+    ("exa", "E", 1024 ^ 8)
+  ]

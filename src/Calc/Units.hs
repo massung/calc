@@ -105,9 +105,16 @@ siStorageUnits = [derivedUnit u n p | u <- storageUnits, (n, p, x) <- siPrefixes
 derivedUnit u n p = u {name = n ++ name u, symbol = p ++ symbol u}
 
 unitMap :: Map String Unit
-unitMap = F.foldl' insert mempty $ concat [imperialUnits, metricUnits, siUnits, storageUnits, siStorageUnits]
+unitMap = F.foldl' (\m u -> M.insert (symbol u) u m) mempty allUnits
   where
-    insert m u = M.insert (symbol u) u m
+    allUnits =
+      concat
+        [ imperialUnits,
+          metricUnits,
+          siUnits,
+          storageUnits,
+          siStorageUnits
+        ]
 
 units :: [Units]
 units = L.map (fromUnit . snd) $ M.toList unitMap

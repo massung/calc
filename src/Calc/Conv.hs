@@ -6,6 +6,7 @@ import Calc.Parser.Scalar
 import Calc.SI
 import Calc.Scalar
 import Calc.Units
+import Data.Either.Extra
 import Data.Foldable as F
 import Data.List as L
 import Data.Map.Strict as M hiding (member)
@@ -18,7 +19,7 @@ convMap = M.fromListWith (++) (conversions ++ recips)
     recips = concat [recipConv conv | conv <- conversions]
 
 conversions :: [(Units, [(Units, Scalar)])]
-conversions =  [conv from xs | (from, xs) <- convs]
+conversions = [conv from xs | (from, xs) <- convs]
   where
     convs =
       concat
@@ -73,37 +74,28 @@ siConv u p x =
       x' = toRational $ recip x
    in Scalar x' $ fromUnit u'
 
-siStorageConvs = [(fromUnit u, [siConv u p x]) | u <- storageUnits, (_, p, x) <- siPrefixes, x > 1]
-
 metricConvs = [(fromUnit u, [siConv u p x]) | u <- metricUnits, (_, p, x) <- siPrefixes]
 
-convert a b = Right 1
+siStorageConvs = [(fromUnit u, [siConv u p x]) | u <- storageUnits, (_, p, x) <- storagePrefixes]
+
+convert x to = maybeToEither "no conversion" $ convertX x to
 
 convertX x@(Scalar _ from) to =
-  msum [dfs (x * expScalar x' e) (S.singleton from') to | (u, x') <- convs from']
+  msum [dfs (x * x') (S.fromList [from, from']) to | (u, x') <- unitsConvs from]
   where
-    (from', e) = simplifyUnits from
+    (from', _) = simplifyUnits from
 
 dfs x@(Scalar _ from) ex to =
   if from == to
     then Just x
-    else
-      let (from', e) = simplifyUnits from
-       in msum [dfs (x * expScalar x' e) (S.insert u ex) to | (u, x') <- paths from']
+    else msum [dfs (x * x') (S.insert u ex) to | (u, x') <- unitsConvs from, S.notMember u ex]
+
+unitsConvs from =
+  if exp == 1
+    then convs from
+    else convs from ++ [(u, expScalar x exp) | (u, x) <- convs from']
   where
-    paths = L.filter ((`S.notMember` ex) . fst) . convs
+    convs = fromMaybe [] . (convMap !?)
 
-convs u = fromMaybe [] $ convMap !? u
-
-{-
-bfs :: [Scalar] -> [(Scalar, Integer)] -> Set Units -> Units -> Maybe [Scalar]
-bfs path [] _ _ = Nothing
-bfs path ((Scalar _ Nothing, factor):xs) ex to = Nothing
-bfs path ((x@(Scalar _ (Just u)), factor):xs) ex to
-  | u == to = Just (expScalar x factor:path)
-  | member u ex = bfs path xs ex to
-  | otherwise = bfs (x:path) (xs ++ next) (insert u ex) to
-  where
-    next = [expScalar conv factor | conv <- fromMaybe [] $ M.lookup u convMap]
--}
-
+    -- simplified units
+    (from', exp) = simplifyUnits from
