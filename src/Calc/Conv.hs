@@ -6,20 +6,37 @@ import Calc.Parser.Scalar
 import Calc.SI
 import Calc.Scalar
 import Calc.Units
-import Data.Map.Strict as M
+import Data.Foldable as F
+import Data.List as L
+import Data.Map.Strict as M hiding (member)
+import Data.Maybe
+import Data.Set as S
 
-data Conv = Conv {scalar :: Scalar, factor :: Integer}
-  deriving (Eq, Show)
-
-(>*>) Conv {scalar = a, factor = f} Conv {scalar = b, factor = g} =
-  Conv {scalar = a * expScalar b f, factor = f * g}
-
-conversions :: [(Units, Scalar)]
-conversions = concatMap explode $ concat [imperialConversions, siConversions, storageConversions, siStorageConversions]
+convMap :: Map Units [(Units, Scalar)]
+convMap = M.fromListWith (++) (conversions ++ recips)
   where
-    explode (from, tos) = [(from, to) | to <- tos]
+    recips = concat [recipConv conv | conv <- conversions]
 
-imperialConversions =
+conversions :: [(Units, [(Units, Scalar)])]
+conversions =  [conv from xs | (from, xs) <- convs]
+  where
+    convs =
+      concat
+        [ imperialConvs,
+          metricConvs,
+          storageConvs,
+          siStorageConvs
+        ]
+
+conv :: Units -> [Scalar] -> (Units, [(Units, Scalar)])
+conv from xs = (from, [(u, to / from') | to@(Scalar _ u) <- xs])
+  where
+    from' = fromUnits from
+
+recipConv :: (Units, [(Units, Scalar)]) -> [(Units, [(Units, Scalar)])]
+recipConv (from, xs) = [(to, [(from, recip x)]) | (to, x) <- xs]
+
+imperialConvs =
   [ ("h", ["4 in"]),
     ("ft", ["12 in", "0.3048 m"]),
     ("yd", ["3 ft"]),
@@ -47,15 +64,46 @@ imperialConversions =
     ("hz", ["1 s^-1"])
   ]
 
-storageConversions =
+storageConvs =
   [ ("B", ["8 b"])
   ]
 
-siConversion u p x =
+siConv u p x =
   let u' = unitMap ! (p ++ symbol u)
       x' = toRational $ recip x
-   in Scalar x' $ Just (fromUnit u')
+   in Scalar x' $ fromUnit u'
 
-siConversions = [(fromUnit u, [siConversion u p x]) | u <- metricUnits, (_, p, x) <- siPrefixes]
+siStorageConvs = [(fromUnit u, [siConv u p x]) | u <- storageUnits, (_, p, x) <- siPrefixes, x > 1]
 
-siStorageConversions = [(fromUnit u, [siConversion u p x]) | u <- storageUnits, (_, p, x) <- siStoragePrefixes]
+metricConvs = [(fromUnit u, [siConv u p x]) | u <- metricUnits, (_, p, x) <- siPrefixes]
+
+convert a b = Right 1
+
+convertX x@(Scalar _ from) to =
+  msum [dfs (x * expScalar x' e) (S.singleton from') to | (u, x') <- convs from']
+  where
+    (from', e) = simplifyUnits from
+
+dfs x@(Scalar _ from) ex to =
+  if from == to
+    then Just x
+    else
+      let (from', e) = simplifyUnits from
+       in msum [dfs (x * expScalar x' e) (S.insert u ex) to | (u, x') <- paths from']
+  where
+    paths = L.filter ((`S.notMember` ex) . fst) . convs
+
+convs u = fromMaybe [] $ convMap !? u
+
+{-
+bfs :: [Scalar] -> [(Scalar, Integer)] -> Set Units -> Units -> Maybe [Scalar]
+bfs path [] _ _ = Nothing
+bfs path ((Scalar _ Nothing, factor):xs) ex to = Nothing
+bfs path ((x@(Scalar _ (Just u)), factor):xs) ex to
+  | u == to = Just (expScalar x factor:path)
+  | member u ex = bfs path xs ex to
+  | otherwise = bfs (x:path) (xs ++ next) (insert u ex) to
+  where
+    next = [expScalar conv factor | conv <- fromMaybe [] $ M.lookup u convMap]
+-}
+

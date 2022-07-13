@@ -25,6 +25,3 @@ siPrefixes =
     ("peta", "P", scientific 1 15),
     ("exa", "E", scientific 1 18)
   ]
-
-siStoragePrefixes =
-  [p | p@(_, _, x) <- siPrefixes, x > 1.0]

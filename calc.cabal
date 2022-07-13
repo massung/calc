@@ -44,6 +44,7 @@ library
     , case-insensitive
     , cmdargs
     , containers
+    , data-default
     , errors
     , extra
     , fgl
@@ -70,6 +71,7 @@ executable calc
     , case-insensitive
     , cmdargs
     , containers
+    , data-default
     , errors
     , extra
     , fgl
@@ -97,6 +99,7 @@ test-suite calc-test
     , case-insensitive
     , cmdargs
     , containers
+    , data-default
     , errors
     , extra
     , fgl

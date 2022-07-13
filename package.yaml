@@ -24,6 +24,7 @@ dependencies:
 - case-insensitive
 - cmdargs
 - containers
+- data-default
 - errors
 - extra
 - fgl

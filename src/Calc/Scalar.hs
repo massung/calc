@@ -2,21 +2,22 @@ module Calc.Scalar where
 
 import Calc.Units
 
-data Scalar = Scalar Rational (Maybe Units)
+data Scalar = Scalar Rational Units
   deriving (Eq)
 
 instance FromUnits Scalar where
-  fromUnits = Scalar 1 . Just
+  fromUnits = Scalar 1
 
 instance FromUnit Scalar where
   fromUnit u = fromUnits $ fromUnit u
 
 instance Show Scalar where
-  show (Scalar x Nothing) = show (fromRational x)
-  show (Scalar x (Just u)) = show (fromRational x) ++ " " ++ show u
+  show (Scalar x u)
+    | nullUnits u = show (fromRational x)
+    | otherwise = show (fromRational x) ++ " " ++ show u
 
 instance Num Scalar where
-  fromInteger n = Scalar (fromInteger n) Nothing
+  fromInteger n = Scalar (fromInteger n) noUnits
 
   -- add scalars
   (+) (Scalar x ux) (Scalar y uy)
@@ -24,9 +25,7 @@ instance Num Scalar where
     | otherwise = error "Cannot add disparate units"
 
   -- multiply scalars
-  (*) (Scalar x Nothing) (Scalar y uy) = Scalar (x * y) uy
-  (*) (Scalar x ux) (Scalar y Nothing) = Scalar (x * y) ux
-  (*) (Scalar x (Just ux)) (Scalar y (Just uy)) = Scalar (x * y) $ Just (ux <> uy)
+  (*) (Scalar x ux) (Scalar y uy) = Scalar (x * y) (ux <> uy)
 
   -- mapped functions
   negate = mapScalar negate
@@ -34,14 +33,13 @@ instance Num Scalar where
   signum = mapScalar signum
 
 instance Fractional Scalar where
-  fromRational r = Scalar (fromRational r) Nothing
+  fromRational r = Scalar (fromRational r) noUnits
 
   -- scalar inverse
-  recip (Scalar x u) = Scalar (recip x) $ fmap (mapUnits negate) u
+  recip (Scalar x u) = Scalar (recip x) $ mapUnits negate u
 
 scalarUnits (Scalar _ units) = units
 
 mapScalar f (Scalar x u) = Scalar (f x) u
 
-expScalar (Scalar x Nothing) e = Scalar (x ^ e) Nothing
-expScalar (Scalar x (Just u)) e = Scalar (x ^ e) (Just $ mapUnits (* e) u)
+expScalar (Scalar x u) e = Scalar (x ^^ e) (mapUnits (* e) u)

@@ -100,7 +100,7 @@ storageUnits =
 
 siUnits = [derivedUnit u n p | u <- metricUnits, (n, p, _) <- siPrefixes]
 
-siStorageUnits = [derivedUnit u n p | u <- storageUnits, (n, p, _) <- siStoragePrefixes]
+siStorageUnits = [derivedUnit u n p | u <- storageUnits, (n, p, x) <- siPrefixes, x > 1]
 
 derivedUnit u n p = u {name = n ++ name u, symbol = p ++ symbol u}
 
@@ -111,6 +111,10 @@ unitMap = F.foldl' insert mempty $ concat [imperialUnits, metricUnits, siUnits, 
 
 units :: [Units]
 units = L.map (fromUnit . snd) $ M.toList unitMap
+
+noUnits = Units M.empty
+
+nullUnits (Units u) = M.null u
 
 mapUnits f (Units u) = Units (M.map f u)
 

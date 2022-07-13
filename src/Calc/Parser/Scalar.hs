@@ -5,6 +5,7 @@ module Calc.Parser.Scalar where
 import Calc.Parser.Lexer
 import Calc.Parser.Units
 import Calc.Scalar
+import Calc.Units
 import Data.Either
 import Data.String
 import Text.Parsec
@@ -20,7 +21,7 @@ instance IsString Scalar where
 
 scalarParser = do
   n <- naturalOrFloat lexer
-  u <- optionMaybe $ try unitsParser <|> unitsTerm
+  u <- option noUnits $ try unitsParser <|> unitsTerm
   return $ case n of
     Left i -> Scalar (fromIntegral i) u
     Right f -> Scalar (toRational f) u
