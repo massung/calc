@@ -30,9 +30,7 @@ conversions = [conv from xs | (from, xs) <- convs]
         ]
 
 conv :: Units -> [Scalar] -> (Units, [(Units, Scalar)])
-conv from xs = (from, [(u, to / from') | to@(Scalar _ u) <- xs])
-  where
-    from' = fromUnits from
+conv from xs = (from, [(u, to / fromUnits from) | to@(Scalar _ u) <- xs])
 
 recipConv :: (Units, [(Units, Scalar)]) -> [(Units, [(Units, Scalar)])]
 recipConv (from, xs) = [(to, [(from, recip x)]) | (to, x) <- xs]
@@ -78,7 +76,22 @@ metricConvs = [(fromUnit u, [siConv u p x]) | u <- metricUnits, (_, p, x) <- siP
 
 siStorageConvs = [(fromUnit u, [siConv u p x]) | u <- storageUnits, (_, p, x) <- storagePrefixes]
 
-convert x to = maybeToEither "no conversion" $ convertX x to
+ccc x@(Scalar _ from) to =
+  if from == to
+    then Right x
+    else case msum convs of
+      Nothing -> Left "no conv"
+      Just x' -> ccc x' to
+  where
+    xs = tail $ subsequences $ M.toList $ unconvertedUnits from to
+    ys = tail $ subsequences $ M.toList $ unconvertedUnits to from
+
+    -- first
+    convs = [convertX (Scalar 1 $ Units $ M.fromList from') (Units $ M.fromList to') | from' <- xs, to' <- ys]
+
+convert x to = maybeToEither noConversion $ convertX x to
+  where
+    noConversion = "no conversion: " ++ show (scalarUnits x) ++ " to " ++ show to
 
 convertX x@(Scalar _ from) to =
   msum [dfs (x * x') (S.fromList [from, from']) to | (u, x') <- unitsConvs from]
@@ -99,3 +112,5 @@ unitsConvs from =
 
     -- simplified units
     (from', exp) = simplifyUnits from
+
+unconvertedUnits (Units a) (Units b) = (M.\\) a b
