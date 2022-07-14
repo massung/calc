@@ -24,7 +24,7 @@ instance Show Expr where
   show (Unary op _ x) = "(" ++ op ++ show x ++ ")"
   show (Binary op _ x y) = "(" ++ show x ++ op ++ show y ++ ")"
 
-exprParser :: Parsec String (Map String Expr) Expr
+exprParser :: Parsec String Scalar Expr
 exprParser = buildExpressionParser exprTable exprTerm
 
 exprTerm = do
@@ -40,14 +40,11 @@ expr =
   parens lexer exprTerm
     <|> Term <$> scalarParser
     <|> Term . fromUnits <$> unitsTerm
-    <|> lexeme lexer exprVariable
+    <|> Term <$> exprAnswer
 
-exprVariable = do
-  var <- char '@' >> identifier lexer
-  vars <- getState
-  case M.lookup var vars of
-    Nothing -> fail $ "undefined variable: " ++ show var
-    Just expr -> pure expr
+exprAnswer = do
+  reserved lexer "_"
+  getState
 
 exprTable =
   [ [prefix "-" negate, prefix "+" id],

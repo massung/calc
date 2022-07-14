@@ -15,11 +15,11 @@ lexer = makeTokenParser lang
           commentEnd = "",
           commentLine = "",
           nestedComments = False,
-          identStart = letter,
+          identStart = letter <|> char '_',
           identLetter = letter,
-          opStart = oneOf "_:+-*/",
+          opStart = oneOf ":+-*/",
           opLetter = parserZero,
-          reservedNames = ["ans", "to"],
-          reservedOpNames = ["_", "+", "-", "*", "/", ":"],
+          reservedNames = ["_", "to"],
+          reservedOpNames = ["+", "-", "*", "/", ":"],
           caseSensitive = True
         }

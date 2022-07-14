@@ -8,8 +8,12 @@ import Calc.Units
 import Data.Either.Extra
 import Text.Parsec
 
-eval st source s =
-  mapLeft ExprError (runParser exprParser st source s) >>= evalExpr
+eval ans source s = do
+  expr <- mapLeft ExprError (runParser exprParser ans source s)
+  term <- evalExpr expr
+  case term of
+    Term ans' -> return ans'
+    _ -> error "Unreachable!"
 
 evalExpr (Term x) = Right $ Term x
 evalExpr (Convert x to) = evalConvert x to

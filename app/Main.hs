@@ -6,21 +6,25 @@ module Main where
 import Calc.Error
 import Calc.Eval
 import Calc.Parser.Expr
+import Calc.Parser.Scalar
 import Calc.Scalar
 import Calc.Units hiding (name)
-import Data.List as L
-import Data.Map as M
+import Control.Monad
+import Data.Either.Extra
 import Data.Maybe
 import System.Console.CmdArgs
+import System.IO
+import System.IO.Unsafe
 import Text.Parsec
 import Text.Printf
 
 -- command line options
 data Opts = Opts
-  { exprString :: String,
+  { exprString :: Maybe String,
     dontShowUnits :: Bool,
+    interactive :: Bool,
     precision :: Maybe Int,
-    vars :: [String]
+    ans :: Maybe String
   }
   deriving (Data, Typeable, Show, Eq)
 
@@ -28,21 +32,15 @@ opts =
   Opts
     { exprString = def &= explicit &= name "e" &= name "expression" &= typ "EXPR",
       dontShowUnits = def &= explicit &= name "n" &= name "no-units",
+      interactive = def &= explicit &= name "i" &= name "interactive",
       precision = def &= explicit &= name "p" &= name "precision" &= typ "INT",
-      vars = def &= args &= typ "VARS"
+      ans = def &= argPos 0 &= typ "EXPR"
     }
     &= summary "calc v1.0, (c) Jeffrey Massung"
     &= noAtExpand
 
-evalVars args = sequence [evalVar x v | (x, v) <- L.zip ["x", "y", "z"] (vars args)]
-  where
-    evalVar x v = case runParser exprParser M.empty "" v of
-      Left err -> Left $ ExprError err
-      Right expr -> Right (x, expr)
-
-run args = do
-  varMap <- M.fromList <$> evalVars args
-  eval varMap "" (exprString args)
+getAns :: Opts -> Either Error Scalar
+getAns args = maybe (Right 0) (mapLeft ExprError . parse scalarParser "") $ ans args
 
 outputScalar args x@(Scalar _ u)
   | nullUnits u = printf prec x
@@ -51,11 +49,36 @@ outputScalar args x@(Scalar _ u)
   where
     prec = "%0." ++ show (fromMaybe 3 $ precision args) ++ "g"
 
-output args (Term x) = outputScalar args x
-output args _ = return ()
+prompt = do
+  putStr ">> "
+  hFlush stdout
+  getLine
 
+runInteractive :: Opts -> Scalar -> IO ()
+runInteractive args ans = do
+  expr <- prompt
+  putStr "== "
+  case runExpr args {exprString = Just expr} ans of
+    Left err -> print err >> runInteractive args ans
+    Right ans' -> outputScalar args ans' >> runInteractive args ans'
+
+runExpr :: Opts -> Scalar -> Either Error Scalar
+runExpr args ans =
+  case exprString args of
+    Nothing -> Right ans
+    Just expr -> eval ans "" expr
+
+run :: Opts -> Either Error Scalar
+run args = do
+  ans <- getAns args
+  ans' <- runExpr args ans
+  if interactive args
+    then const (Right ans') $! unsafePerformIO (runInteractive args ans')
+    else return ans'
+
+main :: IO ()
 main = do
   args <- cmdArgs opts
-  case run args of
-    Left err -> print err
-    Right ans -> output args ans >> putChar '\n'
+
+  -- show an error or answer
+  either print (outputScalar args) $ run args
