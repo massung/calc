@@ -1,6 +1,7 @@
 module Calc.Scalar where
 
 import Calc.Units
+import Text.Printf
 
 data Scalar = Scalar Rational Units
   deriving (Eq)
@@ -15,6 +16,12 @@ instance Show Scalar where
   show (Scalar x u)
     | nullUnits u = show (fromRational x)
     | otherwise = show (fromRational x) ++ " " ++ show u
+
+instance PrintfArg Scalar where
+  formatArg (Scalar x u) fmt
+    | fmtChar (vFmt 'g' fmt) == 'g' = formatRealFloat (fromRational x) fmt
+    | fmtChar (vFmt 'U' fmt) == 'U' = formatString (show u) fmt {fmtChar = 's'}
+    | otherwise = errorBadFormat $ fmtChar fmt
 
 instance Num Scalar where
   fromInteger n = Scalar (fromInteger n) noUnits

@@ -9,7 +9,7 @@ import Data.Either.Extra
 import Text.Parsec
 
 eval st source s =
-  evalExpr <$> mapLeft ExprError (runParser exprParser st source s)
+  mapLeft ExprError (runParser exprParser st source s) >>= evalExpr
 
 evalExpr (Term x) = Right $ Term x
 evalExpr (Convert x to) = evalConvert x to

@@ -76,7 +76,6 @@ metricConvs = [(fromUnit u, [siConv u p x]) | u <- metricUnits, (_, p, x) <- siP
 siStorageConvs = [(fromUnit u, [siConv u p x]) | u <- storageUnits, (_, p, x) <- storagePrefixes]
 
 convert x@(Scalar f from) to
-  | nullUnits to = Right x
   | nullUnits from = Right $ Scalar f to
   | from == to = Right x
   | otherwise = case msum convs of
