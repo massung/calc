@@ -58,4 +58,4 @@ main = do
   args <- cmdArgs opts
   case run args of
     Left err -> print err
-    Right ans -> output args ans
+    Right ans -> output args ans >> putChar '\n'
