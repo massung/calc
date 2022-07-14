@@ -91,12 +91,12 @@ convert x@(Scalar f from) to =
       Nothing -> Left $ ConversionError from to
       Just conv -> Right $ x * conv
 
-convertUnits from to
-  | nullUnits to = Just 1
-  | from == to = Just 1
-  | otherwise = case product <$> msum convs of
-    Nothing -> Nothing
-    Just conv -> (conv *) <$> convertUnits (from <> scalarUnits conv) to
+convertUnits from to =
+  if nullUnits to || from == to
+    then Just 1
+    else case product <$> msum convs of
+      Nothing -> Nothing
+      Just conv -> (conv *) <$> convertUnits (from <> scalarUnits conv) to
   where
     xs = L.map fromUnitList $ tail $ subsequences $ M.toList $ unconvertedUnits from to
     ys = L.map fromUnitList $ tail $ subsequences $ M.toList $ unconvertedUnits to from
