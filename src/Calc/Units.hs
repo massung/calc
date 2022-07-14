@@ -81,7 +81,10 @@ imperialUnits =
     Unit {name = "day", symbol = "day", dim = Duration},
     Unit {name = "horsepower", symbol = "HP", dim = Power},
     Unit {name = "pounds per sq. inch", symbol = "psi", dim = Pressure},
-    Unit {name = "bar", symbol = "bar", dim = Pressure}
+    Unit {name = "bar", symbol = "bar", dim = Pressure},
+    Unit {name = "british thermal unit", symbol="BTU", dim=Energy},
+    Unit {name = "pound force", symbol="lbf", dim=Force},
+    Unit {name = "knot", symbol="knot", dim=Speed}
   ]
 
 metricUnits =
@@ -90,7 +93,18 @@ metricUnits =
     Unit {name = "meter", symbol = "m", dim = Length},
     Unit {name = "liter", symbol = "L", dim = Volume},
     Unit {name = "pascal", symbol = "Pa", dim = Pressure},
-    Unit {name = "hertz", symbol = "hz", dim = Frequency}
+    Unit {name = "hertz", symbol = "hz", dim = Frequency},
+    Unit {name = "watt", symbol="W", dim=Power},
+    Unit {name = "joule", symbol="J", dim=Energy},
+    Unit {name="newton", symbol="N", dim=Force}
+  ]
+
+angleUnits =
+  [ Unit {name = "radian", symbol="rad", dim=Angle},
+    Unit {name = "degree", symbol="deg", dim=Angle},
+    Unit {name = "revolution", symbol="rev", dim=Angle},
+    Unit {name = "arcsecond", symbol="arcs", dim=Angle},
+    Unit {name = "arcminute", symbol="arcm", dim=Angle}
   ]
 
 storageUnits =
@@ -111,6 +125,7 @@ unitMap = F.foldl' (\m u -> M.insert (symbol u) u m) mempty allUnits
       concat
         [ imperialUnits,
           metricUnits,
+          angleUnits,
           siUnits,
           storageUnits,
           siStorageUnits

@@ -9,11 +9,13 @@ data Dim
   | Area
   | Duration
   | Energy
+  | Force
   | Frequency
   | Length
   | Mass
   | Power
   | Pressure
+  | Speed
   | Storage
   | Volume
   deriving (Eq, Ord, Show)
