@@ -43,7 +43,7 @@ expr =
     <|> lexeme lexer exprVariable
 
 exprVariable = do
-  var <- char '?' >> identifier lexer
+  var <- char '@' >> identifier lexer
   vars <- getState
   case M.lookup var vars of
     Nothing -> fail $ "undefined variable: " ++ show var
@@ -51,7 +51,7 @@ exprVariable = do
 
 exprTable =
   [ [prefix "-" negate, prefix "+" id],
-    --[binary "^" expScalar AssocLeft],
+    --[binary "^" (^) AssocLeft],
     [binary "*" (*) AssocLeft, binary "/" (/) AssocLeft],
     [binary "+" (+) AssocLeft, binary "-" (-) AssocLeft]
   ]

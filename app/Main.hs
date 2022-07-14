@@ -8,7 +8,6 @@ import Calc.Eval
 import Calc.Parser.Expr
 import Calc.Scalar
 import Calc.Units hiding (name)
-import Data.Either.Extra
 import Data.List as L
 import Data.Map as M
 import Data.Maybe
@@ -33,6 +32,7 @@ opts =
       vars = def &= args &= typ "VARS"
     }
     &= summary "calc v1.0, (c) Jeffrey Massung"
+    &= noAtExpand
 
 evalVars args = sequence [evalVar x v | (x, v) <- L.zip ["x", "y", "z"] (vars args)]
   where

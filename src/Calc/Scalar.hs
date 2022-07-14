@@ -51,4 +51,4 @@ scalarUnits (Scalar _ units) = units
 
 mapScalar f (Scalar x u) = Scalar (f x) u
 
-expScalar (Scalar x u) e = Scalar (x ^^ e) (mapUnits (* e) u)
+--expScalar x@(Scalar _ _) (Scalar y ) = Scalar (x ^^ e) (mapUnits (* e) u)

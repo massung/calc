@@ -102,7 +102,7 @@ dfs xs from to ex =
 unitsConvs from =
   if exp == 1
     then convs from
-    else convs from ++ [(mapUnits (* exp) u, expScalar x exp) | (u, x) <- convs from']
+    else convs from ++ [(mapUnits (* exp) u, x ^^ exp) | (u, x) <- convs from']
   where
     convs = fromMaybe [] . (convMap !?)
 
