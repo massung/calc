@@ -86,27 +86,27 @@ siStorageConvs = [(fromUnit u, [siConv u p x]) | u <- storageUnits, (_, p, x) <-
 
 convert x@(Scalar f from) to
   | nullUnits from = Right $ Scalar f to
-  | from == to = Right x
-  | otherwise = case msum convs of
+  | otherwise = case convertUnits from to of
     Nothing -> Left $ ConversionError from to
-    Just x' -> convert (x * product x') to
-  where
-    xs = tail $ subsequences $ M.toList $ unconvertedUnits from to
-    ys = tail $ subsequences $ M.toList $ unconvertedUnits to from
-
-    -- find the first successful units conversion
-    convs = [convertUnits (Units $ M.fromList from') (Units $ M.fromList to') | from' <- xs, to' <- ys]
+    Just conv -> Right $ x * conv
 
 convertUnits from to
-  | nullUnits to = Just []
-  | otherwise = dfs [] from to (S.fromList [from, from'])
+  | nullUnits to = Just 1
+  | from == to = Just 1
+  | otherwise = case product <$> msum convs of
+    Nothing -> Nothing
+    Just conv -> (conv *) <$> convertUnits (from <> scalarUnits conv) to
   where
-    (from', _) = simplifyUnits from
+    xs = L.map fromUnitList $ tail $ subsequences $ M.toList $ unconvertedUnits from to
+    ys = L.map fromUnitList $ tail $ subsequences $ M.toList $ unconvertedUnits to from
+
+    -- all possible conversions that could happen
+    convs = [dfs [] from' to' (S.singleton from') | from' <- xs, to' <- ys]
 
 dfs xs from to ex =
   if from == to
     then Just xs
-    else msum [dfs (x:xs) u to (S.insert u ex) | (u, x) <- unitsConvs from, S.notMember u ex]
+    else msum [dfs (x : xs) u to (S.insert u ex) | (u, x) <- unitsConvs from, S.notMember u ex]
 
 unitsConvs from =
   if exp == 1
