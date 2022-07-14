@@ -84,11 +84,12 @@ metricConvs = [(fromUnit u, [siConv u p x]) | u <- metricUnits, (_, p, x) <- siP
 
 siStorageConvs = [(fromUnit u, [siConv u p x]) | u <- storageUnits, (_, p, x) <- storagePrefixes]
 
-convert x@(Scalar f from) to
-  | nullUnits from = Right $ Scalar f to
-  | otherwise = case convertUnits from to of
-    Nothing -> Left $ ConversionError from to
-    Just conv -> Right $ x * conv
+convert x@(Scalar f from) to =
+  if nullUnits from
+    then Right $ Scalar f to
+    else case convertUnits from to of
+      Nothing -> Left $ ConversionError from to
+      Just conv -> Right $ x * conv
 
 convertUnits from to
   | nullUnits to = Just 1
