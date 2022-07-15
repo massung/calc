@@ -44,7 +44,8 @@ dimsConvMap = M.map nub $ foldlWithKey' mapDims M.empty convMap
        in M.insertWith (++) d (L.filter (/= d) [dims u' | (u', _) <- convs]) m
 
 imperialConvs =
-  [ ("h", ["4 in"]),
+  [ ("in", ["1000 mil"]),
+    ("h", ["4 in"]),
     ("ft", ["12 in", "0.3048 m"]),
     ("yd", ["3 ft"]),
     ("ch", ["22 yd"]),
