@@ -2,6 +2,7 @@
 
 module Calc.Dim where
 
+import Calc.Exps
 import Data.Foldable as F
 import Data.List as L
 import Data.Map.Strict as M
@@ -37,23 +38,14 @@ instance Show Dim where
   show Storage = "[storage]"
   show Volume = "[volume]"
 
-newtype Dims = Dims (Map Dim Integer)
+newtype Dims = Dims (Exps Dim)
   deriving (Eq, Ord)
 
 instance Show Dims where
-  show (Dims dims)
-    | F.null num = showDims den
-    | F.null den = showDims num
-    | otherwise = showDims num ++ "/" ++ showDims (M.map abs den)
-    where
-      (num, den) = M.partition (> 0) dims
-
-      -- display a single unit with exponent
-      showDim (d, 1) = show d
-      showDim (d, n) = show d ++ "^" ++ show n
-
-      -- concatenate units together
-      showDims = unwords . L.map showDim . M.toList
+  show (Dims dims) = showExps dims
 
 instance Semigroup Dims where
-  (<>) (Dims a) (Dims b) = Dims $ M.filter (/= 0) $ unionWith (+) a b
+  (<>) (Dims a) (Dims b) = Dims $ appendExps a b
+
+instance Monoid Dims where
+  mempty = Dims mempty

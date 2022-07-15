@@ -82,6 +82,8 @@ run args = do
 main :: IO ()
 main = do
   args <- cmdArgs opts
-
-  -- show an error or answer
-  either print (outputScalar args) $ run args
+  case run args of
+    Left err -> print err
+    Right ans -> do
+      outputScalar args ans
+      putChar '\n'

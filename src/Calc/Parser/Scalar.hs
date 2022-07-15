@@ -21,7 +21,7 @@ instance IsString Scalar where
 
 scalarParser = do
   n <- naturalOrFloat lexer
-  u <- option noUnits $ try unitsParser <|> unitsTerm
+  u <- option mempty $ try unitsParser <|> unitsTerm
   return $ case n of
     Left i -> Scalar (fromIntegral i) u
     Right f -> Scalar (toRational f) u

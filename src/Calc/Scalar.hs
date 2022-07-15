@@ -24,7 +24,7 @@ instance PrintfArg Scalar where
     | otherwise = errorBadFormat $ fmtChar fmt
 
 instance Num Scalar where
-  fromInteger n = Scalar (fromInteger n) noUnits
+  fromInteger n = Scalar (fromInteger n) mempty
 
   -- add scalars
   (+) (Scalar x ux) (Scalar y uy)
@@ -42,7 +42,7 @@ instance Num Scalar where
   signum = mapScalar signum
 
 instance Fractional Scalar where
-  fromRational r = Scalar (fromRational r) noUnits
+  fromRational r = Scalar (fromRational r) mempty
 
   -- scalar inverse
   recip (Scalar x u) = Scalar (recip x) $ mapUnits negate u

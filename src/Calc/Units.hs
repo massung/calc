@@ -3,6 +3,7 @@
 module Calc.Units where
 
 import Calc.Dim
+import Calc.Exps
 import Calc.SI
 import Data.Foldable as F
 import Data.List as L
@@ -20,11 +21,11 @@ instance IsString Unit where
 instance Show Unit where
   show = symbol
 
-newtype Units = Units (Map Unit Integer)
+newtype Units = Units (Exps Unit)
   deriving (Eq, Ord)
 
 instance Semigroup Units where
-  (<>) (Units a) (Units b) = Units $ M.filter (/= 0) $ unionWith (+) a b
+  (<>) (Units a) (Units b) = Units $ appendExps a b
 
 instance Monoid Units where
   mempty = Units mempty
@@ -39,19 +40,7 @@ instance FromUnit Units where
   fromUnit u = Units $ M.singleton u 1
 
 instance Show Units where
-  show (Units u)
-    | F.null num = showUnits den
-    | F.null den = showUnits num
-    | otherwise = showUnits num ++ "/" ++ showUnits (M.map abs den)
-    where
-      (num, den) = M.partition (> 0) u
-
-      -- display a single unit with exponent
-      showUnit (u, 1) = show u
-      showUnit (u, n) = show u ++ "^" ++ show n
-
-      -- concatenate units together
-      showUnits = unwords . L.map showUnit . M.toList
+  show (Units u) = showExps u
 
 imperialUnits =
   [ Unit {name = "inch", symbol = "in", dim = Length},
@@ -136,8 +125,6 @@ units = L.map (fromUnit . snd) $ M.toList unitMap
 
 fromUnitList = Units . fromList
 
-noUnits = Units M.empty
-
 nullUnits (Units u) = M.null u
 
 mapUnits f (Units u) = Units (M.map f u)
@@ -145,12 +132,6 @@ mapUnits f (Units u) = Units (M.map f u)
 recipUnits = mapUnits negate
 
 divideUnits a b = mappend a (recipUnits b)
-
-simplify m = (M.map (`div` factor) m, factor)
-  where
-    factor =
-      let x = M.foldl' gcd (maximum m) m
-       in if all (< 0) m then negate x else x
 
 simplifyUnits (Units u) = first Units $ simplify u
 
