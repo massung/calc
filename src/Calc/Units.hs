@@ -154,4 +154,4 @@ simplify m = (M.map (`div` factor) m, factor)
 
 simplifyUnits (Units u) = first Units $ simplify u
 
-unitsDims (Units u) = Dims $ M.mapKeys dim u
+dims (Units u) = Dims $ M.mapKeys dim u

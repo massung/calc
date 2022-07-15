@@ -57,5 +57,3 @@ instance Show Dims where
 
 instance Semigroup Dims where
   (<>) (Dims a) (Dims b) = Dims $ M.filter (/= 0) $ unionWith (+) a b
-
-dims = Dims . fromListWith (+)
