@@ -24,7 +24,7 @@ data Opts = Opts
     dontShowUnits :: Bool,
     interactive :: Bool,
     precision :: Maybe Int,
-    ans :: Maybe String
+    ans :: [String]
   }
   deriving (Data, Typeable, Show, Eq)
 
@@ -34,13 +34,15 @@ opts =
       dontShowUnits = def &= explicit &= name "n" &= name "no-units",
       interactive = def &= explicit &= name "i" &= name "interactive",
       precision = def &= explicit &= name "p" &= name "precision" &= typ "INT",
-      ans = def &= argPos 0 &= typ "EXPR"
+      ans = def &= args &= typ "EXPR"
     }
     &= summary "calc v1.0, (c) Jeffrey Massung"
     &= noAtExpand
 
 getAns :: Opts -> Either Error Scalar
-getAns args = maybe (Right 0) (mapLeft ExprError . parse scalarParser "") $ ans args
+getAns args = case ans args of
+  [] -> Right 0
+  xs -> mapLeft ExprError . parse scalarParser "" $ unwords xs
 
 outputScalar args x@(Scalar _ u)
   | nullUnits u = printf prec x
@@ -60,7 +62,10 @@ runInteractive args ans = do
   putStr "== "
   case runExpr args {exprString = Just expr} ans of
     Left err -> print err >> runInteractive args ans
-    Right ans' -> outputScalar args ans' >> runInteractive args ans'
+    Right ans' -> do
+      outputScalar args ans'
+      putChar '\n'
+      runInteractive args ans'
 
 runExpr :: Opts -> Scalar -> Either Error Scalar
 runExpr args ans =
