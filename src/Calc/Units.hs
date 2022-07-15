@@ -58,6 +58,14 @@ imperialUnits =
     Unit {name = "rod", symbol = "rod", dim = Length},
     Unit {name = "acre", symbol = "acre", dim = Area},
     Unit {name = "hectare", symbol = "ha", dim = Area},
+    Unit {name = "teaspoon", symbol="tsp", dim=Volume},
+    Unit {name = "tablespoon", symbol="tbsp", dim=Volume},
+    Unit {name = "fluid ounce", symbol="floz", dim=Volume},
+    Unit {name = "gill", symbol="gill", dim=Volume},
+    Unit {name = "cup", symbol="cup", dim=Volume},
+    Unit {name = "pint", symbol="pt", dim=Volume},
+    Unit {name = "quart", symbol="qt", dim=Volume},
+    Unit {name = "gallon", symbol="gal", dim=Volume},
     Unit {name = "ounce", symbol = "oz", dim = Mass},
     Unit {name = "pound", symbol = "lb", dim = Mass},
     Unit {name = "stone", symbol = "st", dim = Mass},
@@ -85,7 +93,12 @@ metricUnits =
     Unit {name = "hertz", symbol = "hz", dim = Frequency},
     Unit {name = "watt", symbol = "W", dim = Power},
     Unit {name = "joule", symbol = "J", dim = Energy},
-    Unit {name = "newton", symbol = "N", dim = Force}
+    Unit {name = "newton", symbol = "N", dim = Force},
+    Unit {name = "volt", symbol="V", dim=Voltage},
+    Unit {name = "coulomb", symbol="C", dim=Current},
+    Unit {name = "ampere", symbol="A", dim=Charge},
+    Unit {name = "ohm", symbol="O", dim=Resistance},
+    Unit {name = "farad", symbol="F", dim=Capacitance}
   ]
 
 angleUnits =

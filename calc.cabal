@@ -48,6 +48,7 @@ library
     , data-default
     , errors
     , extra
+    , fgl
     , mtl
     , parsec
     , random
@@ -74,6 +75,7 @@ executable calc
     , data-default
     , errors
     , extra
+    , fgl
     , mtl
     , parsec
     , random
@@ -101,6 +103,7 @@ test-suite calc-test
     , data-default
     , errors
     , extra
+    , fgl
     , hspec
     , mtl
     , parsec
