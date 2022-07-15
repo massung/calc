@@ -2,6 +2,7 @@
 
 module Calc.Conv where
 
+import Calc.Dim
 import Calc.Error
 import Calc.Parser.Scalar
 import Calc.SI
@@ -34,6 +35,13 @@ conv from xs = (from, [(u, to / fromUnits from) | to@(Scalar _ u) <- xs])
 
 recipConv :: (Units, [(Units, Scalar)]) -> [(Units, [(Units, Scalar)])]
 recipConv (from, xs) = [(to, [(from, recip x)]) | (to, x) <- xs]
+
+dimsConvMap :: Map Dims [Dims]
+dimsConvMap = foldlWithKey' mapDims M.empty convMap
+  where
+    mapDims m u convs =
+      let d = dims u
+       in M.insert d (nub $ L.filter (/= d) [dims u' | (u', _) <- convs]) m
 
 imperialConvs =
   [ ("h", ["4 in"]),
