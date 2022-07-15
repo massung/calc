@@ -153,3 +153,5 @@ simplify m = (M.map (`div` factor) m, factor)
        in if all (< 0) m then negate x else x
 
 simplifyUnits (Units u) = first Units $ simplify u
+
+unitsDims (Units u) = Dims $ M.mapKeys dim u
