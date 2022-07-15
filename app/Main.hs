@@ -5,11 +5,9 @@ module Main where
 
 import Calc.Error
 import Calc.Eval
-import Calc.Parser.Expr
 import Calc.Parser.Scalar
 import Calc.Scalar
 import Calc.Units hiding (name)
-import Control.Monad
 import Data.Either.Extra
 import Data.Maybe
 import System.Console.CmdArgs
