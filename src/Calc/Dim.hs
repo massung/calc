@@ -3,9 +3,6 @@
 module Calc.Dim where
 
 import Calc.Exps
-import Data.Foldable as F
-import Data.List as L
-import Data.Map.Strict as M
 
 data Dim
   = Angle
