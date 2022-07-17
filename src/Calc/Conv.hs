@@ -8,11 +8,13 @@ import Calc.Parser.Scalar
 import Calc.SI
 import Calc.Scalar
 import Calc.Units
+import Data.Either.Extra
 import Data.Foldable as F
-import Data.List as L
-import Data.Map.Strict as M hiding (member)
+import Data.List as L hiding (mapMaybe)
+import Data.Map.Strict as M hiding (mapMaybe, member)
 import Data.Maybe
 import Data.Set as S
+import Data.Tuple.Extra
 
 convMap :: Map Units [(Units, Scalar)]
 convMap = M.fromListWith (++) (conversions ++ recips)
@@ -36,12 +38,11 @@ conv from xs = (from, [(u, to / fromUnits from) | to@(Scalar _ u) <- xs])
 recipConv :: (Units, [(Units, Scalar)]) -> [(Units, [(Units, Scalar)])]
 recipConv (from, xs) = [(to, [(from, recip x)]) | (to, x) <- xs]
 
-dimsConvMap :: Map Dims [Dims]
-dimsConvMap = M.map nub $ foldlWithKey' mapDims M.empty convMap
+dimsConvMap :: Map Units [(Dims, Scalar)]
+dimsConvMap = M.mapWithKey convDims convMap
   where
-    mapDims m u convs =
-      let d = dims u
-       in M.insertWith (++) d (L.filter (/= d) [dims u' | (u', _) <- convs]) m
+    convDims from convs =
+      let d = dims from in L.filter ((/= d) . fst) [first dims x | x <- convs]
 
 imperialConvs =
   [ ("in", ["1000 mil"]),
@@ -110,9 +111,17 @@ siStorageConvs = [(fromUnit u, [siConv u p x]) | u <- storageUnits, (_, p, x) <-
 convert x@(Scalar f from) to =
   if nullUnits from
     then Right $ Scalar f to
-    else case convertUnits from to of
-      Nothing -> Left $ ConversionError from to
-      Just conv -> Right $ x * conv
+    else let x' = conv . (x*) =<< convertDims from to
+          in maybeToEither (ConversionError from to) x'
+  where
+    conv x@(Scalar _ from) = (x*) <$> convertUnits from to
+
+convertDims from to =
+  if nullUnits to || dims from == dims to
+    then Just 1
+    else listToMaybe [x | (d, x) <- convs, d == dims to]
+  where
+    convs = M.findWithDefault [] from dimsConvMap
 
 convertUnits from to =
   if nullUnits to || from == to
