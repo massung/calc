@@ -32,8 +32,8 @@ evalUnary f (Term x) = evalExpr $ Term (f x)
 evalUnary f x = evalExpr x >>= evalUnary f
 
 evalBinary f (Term x@(Scalar _ from)) (Term y@(Scalar _ to)) =
-  if nullUnits to
-    then Term . (x `f`) <$> convert y from
+  if nullUnits to || nullUnits from
+    then Right $ Term (f x y)
     else Term . (`f` y) <$> harmonize x to
 evalBinary f x y = do
   x' <- evalExpr x
