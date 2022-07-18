@@ -1,5 +1,3 @@
-{-# LANGUAGE MultiWayIf #-}
-
 module Calc.Eval where
 
 import Calc.Conv
