@@ -150,3 +150,7 @@ divideUnits a b = mappend a (recipUnits b)
 simplifyUnits (Units u) = first Units $ simplify u
 
 dims (Units u) = Dims $ M.mapKeys dim u
+
+dims' (Units u) = M.fromList [unitDims u' | u' <- M.toList u]
+  where
+    unitDims u@(u', e) = (dim u', Units $ M.singleton u' e)

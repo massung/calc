@@ -17,12 +17,14 @@ data Expr
   | Convert Expr Units
   | Unary String (Scalar -> Scalar) Expr
   | Binary String (Scalar -> Scalar -> Scalar) Expr Expr
+  | BinaryConv String (Scalar -> Scalar -> Scalar) Expr Expr
 
 instance Show Expr where
   show (Term x) = show x
   show (Convert x u) = show x ++ " : " ++ show u
   show (Unary op _ x) = "(" ++ op ++ show x ++ ")"
   show (Binary op _ x y) = "(" ++ show x ++ op ++ show y ++ ")"
+  show (BinaryConv op _ x y) = "(" ++ show x ++ op ++ show y ++ ")"
 
 exprParser :: Parsec String Scalar Expr
 exprParser = buildExpressionParser exprTable exprTerm
@@ -50,9 +52,11 @@ exprTable =
   [ [prefix "-" negate, prefix "+" id],
     --[binary "^" (^) AssocLeft],
     [binary "*" (*) AssocLeft, binary "/" (/) AssocLeft],
-    [binary "+" (+) AssocLeft, binary "-" (-) AssocLeft]
+    [binaryConv "+" (+) AssocLeft, binaryConv "-" (-) AssocLeft]
   ]
 
 prefix name f = Prefix (do reservedOp lexer name; return $ Unary name f)
 
 binary name f = Infix (do reservedOp lexer name; return $ Binary name f)
+
+binaryConv name f = Infix (do reservedOp lexer name; return $ BinaryConv name f)

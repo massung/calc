@@ -1,3 +1,5 @@
+{-# LANGUAGE MultiWayIf #-}
+
 module Calc.Eval where
 
 import Calc.Conv
@@ -19,6 +21,7 @@ evalExpr (Term x) = Right $ Term x
 evalExpr (Convert x to) = evalConvert x to
 evalExpr (Unary _ f x) = evalUnary f x
 evalExpr (Binary _ f x y) = evalBinary f x y
+evalExpr (BinaryConv _ f x y) = evalBinaryConv f x y
 
 evalConvert (Term x) to = convert x to >>= evalExpr . Term
 evalConvert x to = do
@@ -31,8 +34,17 @@ evalUnary f x = evalExpr x >>= evalUnary f
 evalBinary f (Term x@(Scalar _ from)) (Term y@(Scalar _ to)) =
   if nullUnits to
     then Term . (x `f`) <$> convert y from
-    else Term . (`f` y) <$> convert x to
+    else Term . (`f` y) <$> harmonize x to
 evalBinary f x y = do
   x' <- evalExpr x
   y' <- evalExpr y
   evalBinary f x' y'
+
+evalBinaryConv f (Term x@(Scalar _ from)) (Term y@(Scalar _ to)) =
+  if nullUnits to
+    then Term . (x `f`) <$> convert y from
+    else Term . (`f` y) <$> convert x to
+evalBinaryConv f x y = do
+  x' <- evalExpr x
+  y' <- evalExpr y
+  evalBinaryConv f x' y'

@@ -108,13 +108,25 @@ metricConvs = [(fromUnit u, [siConv u p x]) | u <- metricUnits, (_, p, x) <- siP
 
 siStorageConvs = [(fromUnit u, [siConv u p x]) | u <- storageUnits, (_, p, x) <- storagePrefixes]
 
+harmonize x@(Scalar f from) to =
+  if nullUnits from
+    then Right $ Scalar f to
+    else
+      let similar = M.intersectionWith (,) (dims' from) (dims' to)
+       in M.foldl' conv (Right x) similar
+  where
+    conv (Right x) (from', to') = case convertUnits from' to' of
+      Nothing -> Left $ ConversionError from' to'
+      Just y -> Right $ x * y
+    conv err _ = err
+
 convert x@(Scalar f from) to =
   if nullUnits from
     then Right $ Scalar f to
-    else let x' = conv . (x*) =<< convertDims from to
+    else let x' = conv . (x *) =<< convertDims from to
           in maybeToEither (ConversionError from to) x'
   where
-    conv x@(Scalar _ from) = (x*) <$> convertUnits from to
+    conv x@(Scalar _ from) = (x *) <$> convertUnits from to
 
 convertDims from to =
   if nullUnits to || dims from == dims to
