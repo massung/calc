@@ -24,7 +24,7 @@ instance IsString Units where
 unitsParser :: Parsec String st Units
 unitsParser = buildExpressionParser unitsExprTable unitsTerm
 
-unitsTerm = parens lexer terms <|> terms
+unitsTerm = parens lexer unitsParser <|> terms
   where
     terms = mconcat <$> many1 unitTerm
 

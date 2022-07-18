@@ -36,10 +36,12 @@ exprTerm = do
     Nothing -> e
     Just u -> Convert e u
 
-exprCast = (reservedOp lexer ":" <|> reserved lexer "to") >> unitsParser
+exprCast = do
+  reservedOp lexer ":" <|> reserved lexer "to"
+  unitsParser
 
 expr =
-  parens lexer exprTerm
+  parens lexer exprParser
     <|> Term <$> scalarParser
     <|> Term . fromUnits <$> unitsTerm
     <|> Term <$> exprAnswer
