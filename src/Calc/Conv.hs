@@ -123,8 +123,9 @@ harmonize x@(Scalar f from) to =
 convert x@(Scalar f from) to =
   if nullUnits from
     then Right $ Scalar f to
-    else let x' = conv . (x *) =<< convertDims from to
-          in maybeToEither (ConversionError from to) x'
+    else
+      let x' = conv . (x *) =<< convertDims from to
+       in maybeToEither (ConversionError from to) x'
   where
     conv x@(Scalar _ from) = (x *) <$> convertUnits from to
 
@@ -138,29 +139,21 @@ convertDims from to =
 convertUnits from to =
   if nullUnits to || from == to
     then Just 1
-    else case product <$> msum convs of
-      Nothing -> Nothing
-      Just conv -> (conv *) <$> convertUnits (from <> scalarUnits conv) to
+    else product <$> mconcat convs
   where
-    xs = L.map fromUnitList $ tail $ subsequences $ M.toList $ unconvertedUnits from to
-    ys = L.map fromUnitList $ tail $ subsequences $ M.toList $ unconvertedUnits to from
+    from' = unconvertedUnits from to
+    to' = unconvertedUnits to from
 
-    -- all possible conversions that could happen
-    convs = [dfs [] from' to' (S.singleton from') | from' <- xs, to' <- ys]
+    -- units conversions between matching dimensions
+    convs = [dfs [] x y (S.singleton x) | x <- from', y <- to', dims x == dims y]
 
 dfs xs from to ex =
   if from == to
     then Just xs
     else msum [dfs (x : xs) u to (S.insert u ex) | (u, x) <- unitsConvs from, S.notMember u ex]
 
-unitsConvs from =
-  if exp == 1
-    then convs from
-    else convs from ++ [(mapUnits (* exp) u, x ^^ exp) | (u, x) <- convs from']
+unitsConvs from = [(mapUnits (* exp) u, x ^^ exp) | (u, x) <- fromMaybe [] $ convMap !? from']
   where
-    convs = fromMaybe [] . (convMap !?)
-
-    -- simplified units
     (from', exp) = simplifyUnits from
 
-unconvertedUnits (Units a) (Units b) = (M.\\) a b
+unconvertedUnits (Units a) (Units b) = [Units u | u <- M.splitRoot $ (M.\\) a b, not (M.null u)]
