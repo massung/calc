@@ -42,7 +42,8 @@ dimsConvMap :: Map Units [(Dims, Scalar)]
 dimsConvMap = M.mapWithKey convDims convMap
   where
     convDims from convs =
-      let d = dims from in L.filter ((/= d) . fst) [first dims x | x <- convs]
+      let d = dims from
+       in L.filter ((/= d) . fst) [first dims x | x <- convs]
 
 imperialConvs =
   [ ("in", ["1000 mil"]),
