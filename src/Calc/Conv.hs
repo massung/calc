@@ -38,12 +38,14 @@ conv from xs = (from, [(u, to / fromUnits from) | to@(Scalar _ u) <- xs])
 recipConv :: (Units, [(Units, Scalar)]) -> [(Units, [(Units, Scalar)])]
 recipConv (from, xs) = [(to, [(from, recip x)]) | (to, x) <- xs]
 
-dimsConvMap :: Map Units [(Dims, Scalar)]
-dimsConvMap = M.mapWithKey convDims convMap
+dimsConvMap :: Map (Units, Dims) Scalar
+dimsConvMap = M.foldlWithKey' convDims M.empty convMap
   where
-    convDims from convs =
-      let d = dims from
-       in L.filter ((/= d) . fst) [first dims x | x <- convs]
+    convDims m from convs = L.foldl' (insConv from) m convs
+    insConv from m (u, x) =
+      if dims u == dims from
+        then m
+        else M.insert (from, dims u) x m
 
 imperialConvs =
   [ ("in", ["1000 mil"]),
@@ -86,7 +88,7 @@ imperialConvs =
     ("J", ["2.78 W/hr"]),
     ("BTU", ["1055.056 J"]),
     ("N", ["1 kg m/s^2", "0.224809 lbf"]),
-    ("knot", ["1.150779 mi/hr"]),
+    ("kn", ["1.150779 mi/hr"]),
     ("rad", ["57.29578 deg"]),
     ("rev", ["180 deg"]),
     ("arcs", ["2.78e-4 deg"]),
@@ -131,11 +133,10 @@ convert x@(Scalar f from) to =
     conv x@(Scalar _ from) = (x *) <$> convertUnits from to
 
 convertDims from to =
-  if nullUnits to || dims from == dims to
-    then Just 1
-    else listToMaybe [x | (d, x) <- convs, d == dims to]
-  where
-    convs = M.findWithDefault [] from dimsConvMap
+  let to' = dims to
+   in if nullUnits to || dims from == to'
+        then Just 1
+        else M.lookup (from, to') dimsConvMap
 
 convertUnits from to =
   if nullUnits to || from == to
