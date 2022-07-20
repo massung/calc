@@ -15,7 +15,6 @@ import Data.List as L hiding (mapMaybe)
 import Data.Map.Strict as M hiding (mapMaybe, member)
 import Data.Maybe
 import Data.Set as S
-import Data.Tuple.Extra
 
 convMap :: Map Units [(Units, Scalar)]
 convMap = M.fromListWith (++) (conversions ++ recips)
