@@ -7,26 +7,27 @@ import Calc.Parser.Scalar
 import Calc.Parser.Units
 import Calc.Scalar
 import Calc.Units
-import Data.Map as M
 import Text.Parsec
 import Text.Parsec.Expr
 import Text.Parsec.Token
 
 data Expr
-  = Term Scalar
+  = Answer
+  | Term Scalar
   | Convert Expr Units
   | Unary String (Scalar -> Scalar) Expr
   | Binary String (Scalar -> Scalar -> Scalar) Expr Expr
   | BinaryConv String (Scalar -> Scalar -> Scalar) Expr Expr
 
 instance Show Expr where
+  show Answer = "_"
   show (Term x) = show x
   show (Convert x u) = show x ++ " : " ++ show u
   show (Unary op _ x) = "(" ++ op ++ show x ++ ")"
   show (Binary op _ x y) = "(" ++ show x ++ op ++ show y ++ ")"
   show (BinaryConv op _ x y) = "(" ++ show x ++ op ++ show y ++ ")"
 
-exprParser :: Parsec String Scalar Expr
+exprParser :: Parsec String () Expr
 exprParser = buildExpressionParser exprTable exprTerm
 
 exprTerm = do
@@ -44,11 +45,11 @@ expr =
   parens lexer exprParser
     <|> Term <$> scalarParser
     <|> Term . fromUnits <$> unitsTerm
-    <|> Term <$> exprAnswer
+    <|> exprAnswer
 
 exprAnswer = do
   reserved lexer "_"
-  getState
+  return Answer
 
 exprTable =
   [ [prefix "-" negate, prefix "+" id],
