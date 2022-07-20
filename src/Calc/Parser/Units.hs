@@ -30,7 +30,7 @@ unitsTerm = parens lexer unitsParser <|> terms
 
 unitTerm = do
   u <- fromString <$> identifier lexer
-  n <- try (lexeme lexer unitExponent) <|> return 1
+  n <- option 1 $ lexeme lexer unitExponent
   return $ Units (M.singleton u n)
 
 unitExponent = do
