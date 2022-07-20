@@ -8,6 +8,7 @@ import Calc.Parser.Scalar
 import Calc.SI
 import Calc.Scalar
 import Calc.Units
+import Control.Applicative
 import Data.Either.Extra
 import Data.Foldable as F
 import Data.List as L hiding (mapMaybe)
@@ -38,14 +39,18 @@ conv from xs = (from, [(u, to / fromUnits from) | to@(Scalar _ u) <- xs])
 recipConv :: (Units, [(Units, Scalar)]) -> [(Units, [(Units, Scalar)])]
 recipConv (from, xs) = [(to, [(from, recip x)]) | (to, x) <- xs]
 
-dimsConvMap :: Map (Units, Dims) Scalar
+dimsConvMap :: Map (Dims, Dims) (Map Units Scalar)
 dimsConvMap = M.foldlWithKey' convDims M.empty convMap
   where
     convDims m from convs = L.foldl' (insConv from) m convs
-    insConv from m (u, x) =
+
+    -- insert a single conversion
+    insConv from m conv@(u, x) =
       if dims u == dims from
         then m
-        else M.insert (from, dims u) x m
+        else
+          let k = (dims from, dims u)
+           in M.alter (\m -> (M.insert from x <$> m) <|> Just (M.singleton from x)) k m
 
 imperialConvs =
   [ ("in", ["1000 mil"]),
@@ -62,7 +67,7 @@ imperialConvs =
     ("link", ["7.92 in"]),
     ("rod", ["25 link"]),
     ("acre", ["43560.04 ft^2"]),
-    ("ha", ["10000 m^2"]),
+    ("ha", ["10000 m^2", "2.471052 acre"]),
     ("tbsp", ["3 tsp"]),
     ("floz", ["1.6 tbsp"]),
     ("gill", ["5 floz"]),
@@ -123,6 +128,28 @@ harmonize x@(Scalar f from) to =
       Just y -> Right $ x * y
     conv err _ = err
 
+{-
+Conversion algorithm:
+
+  1. Check to see if the dimensionality of the units are the same (e.g. ft/s -> m/hr)
+    a. No? Goto 2
+    b. Yes? Attempt to convert 1:1 each unit pair (e.g. ft->m and s->hr)
+  2. Search for a conversion between dimensionalities (e.g. length^2 -> area)
+    a. No? Fail conversion
+    b. Yes? Apply conversion and goto 1.b.
+
+Searching for a conversion between dimensionalities:
+
+  1. Is there a set of possible conversions? (e.g. length^2 -> area)
+    a. No? Fail conversion
+    b. Yes? Is there an exact conversion? (e.g. ft^2)
+      i. No? Goto 2
+      ii. Yes? Return conversion
+  2. Is there a unit with a conversion we can convert to? (e.g. in^2 -> ft^2)
+    a. No? Fail conversion
+    b. Yes? Return conversion * dimensionality conversion
+-}
+
 convert x@(Scalar f from) to =
   if nullUnits from
     then Right $ Scalar f to
@@ -133,10 +160,12 @@ convert x@(Scalar f from) to =
     conv x@(Scalar _ from) = (x *) <$> convertUnits from to
 
 convertDims from to =
-  let to' = dims to
-   in if nullUnits to || dims from == to'
-        then Just 1
-        else M.lookup (from, to') dimsConvMap
+  if nullUnits to || dims from == dims to
+    then Just 1
+    else do
+      convs <- M.lookup (dims from, dims to) dimsConvMap
+      M.lookup from convs
+        <|> msum [(x *) <$> convertUnits from u | (u, x) <- M.toList convs]
 
 convertUnits from to =
   if nullUnits to || from == to
