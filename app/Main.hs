@@ -12,11 +12,9 @@ import Calc.Scalar
 import Calc.Units hiding (name)
 import Control.Exception
 import Data.Either.Extra
-import Data.List as L
 import Data.Maybe
 import System.Console.CmdArgs
 import System.IO
-import System.IO.Unsafe
 import Text.Parsec hiding ((<|>), try)
 import Text.Printf
 
