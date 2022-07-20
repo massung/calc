@@ -49,7 +49,10 @@ expr =
 
 exprAnswer = do
   reserved lexer "_"
-  return Answer
+  u <- optionMaybe unitsTerm
+  return $ case u of
+    Nothing -> Answer
+    Just units -> Convert Answer units
 
 exprTable =
   [ [prefix "-" negate, prefix "+" id],

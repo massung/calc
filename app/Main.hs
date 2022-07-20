@@ -15,7 +15,7 @@ import Data.Either.Extra
 import Data.Maybe
 import System.Console.CmdArgs
 import System.IO
-import Text.Parsec hiding ((<|>), try)
+import Text.Parsec hiding (try, (<|>))
 import Text.Printf
 
 -- command line options
@@ -42,7 +42,7 @@ outputScalar args x@(Scalar _ u)
   | dontShowUnits args = printf prec x
   | otherwise = printf (prec ++ " %U") x x
   where
-    prec = "%0." ++ show (fromMaybe 3 $ precision args) ++ "g"
+    prec = "%0." ++ show (fromMaybe 2 $ precision args) ++ "g"
 
 prompt :: IO String
 prompt = do
@@ -68,7 +68,7 @@ parseInput s = case mapLeft ExprError $ parse scalarParser "" s of
 runExpr :: Expr -> Scalar -> IO Scalar
 runExpr expr ans = case evalExpr ans expr of
   Right (Term x) -> return x
-  Right _ -> return 0  -- unreachable
+  Right _ -> return 0 -- unreachable
   Left err -> throw err
 
 runInteractive :: Opts -> Scalar -> IO ()
@@ -103,6 +103,8 @@ main = do
       expr <- parseExpr $ exprString args
       if not $ hasPlaceholder expr
         then runExpr expr 0 >>= output args
-        else run args expr
-                `catch` \(ex :: IOException) -> return ()
+        else
+          run args expr
+            `catch` \(ex :: IOException) ->
+              return ()
                 `catch` \(ex :: Error) -> print ex

@@ -77,3 +77,4 @@ testConversions =
     testConv "1 ft : in" "12 in"
     testConv "12 in : ft" "1 ft"
     testConv "1 ft : cm" "30.48 cm"
+    testConv "1 ft^2 : cm^2" "929.03 cm^2"
