@@ -14,20 +14,20 @@ import Text.Parsec
 
 noUnits = Units M.empty
 
+epsilon = 1e-2
+
 main :: IO ()
 main = hspec $ do
   testUnits
   testScalars
   testConversions
 
-testConv s ans =
-  it s $ do
-    eval `shouldBe` Right True
+testExpr s ans = it s $ eval `shouldBe` Right True
   where
     eval = do
       expr <- mapLeft ExprError $ parse exprParser "" s
       case evalExpr ans expr of
-        Right (Term x) -> return True
+        Right (Term x) -> return $ abs (x - ans) < epsilon
         _ -> return False
 
 testUnits =
@@ -70,11 +70,58 @@ testScalars =
     it "compound units" $ do
       ("2 ft/s" :: Scalar) `shouldBe` Scalar 2 (fromUnitList [("ft", 1), ("s", -1)])
 
-testConversions =
-  describe "conversions" $ do
-    testConv "1 + 2 ft" "3 ft"
-    testConv "2 + 1 ft" "3 ft"
-    testConv "1 ft : in" "12 in"
-    testConv "12 in : ft" "1 ft"
-    testConv "1 ft : cm" "30.48 cm"
-    testConv "1 ft^2 : cm^2" "929.03 cm^2"
+testConversions = do
+  describe "basic conversions" $ do
+    testExpr "1 ft : in" "12 in"
+    testExpr "12 in : ft" "1 ft"
+    testExpr "1 ft : cm" "30.48 cm"
+    testExpr "1 ft^2 : cm^2" "929.03 cm^2"
+
+  describe "si conversions" $ do
+    testExpr "1 aL : L" "1e-18 L"
+    testExpr "1 fL : L" "1e-15 L"
+    testExpr "1 pL : L" "1e-12 L"
+    testExpr "1 nL : L" "1e-9 L"
+    testExpr "1 uL : L" "1e-6 L"
+    testExpr "1 mL : L" "1e-3 L"
+    testExpr "1 cL : L" "1e-2 L"
+    testExpr "1 dL : L" "1e-1 L"
+    testExpr "1 daL : L" "1e1 L"
+    testExpr "1 hL : L" "1e2 L"
+    testExpr "1 kL : L" "1e3 L"
+    testExpr "1 ML : L" "1e6 L"
+    testExpr "1 GL : L" "1e9 L"
+    testExpr "1 TL : L" "1e12 L"
+    testExpr "1 PL : L" "1e15 L"
+    testExpr "1 EL : L" "1e18 L"
+
+  describe "multi-step conversions" $ do
+    testExpr "1 cable : h" "1800 h"
+    testExpr "1 gal : floz" "128 floz"
+
+  describe "simplified conversions" $ do
+    testExpr "1 ft^2 : in^2" "144 in^2"
+    testExpr "1 m^3 : cm^3" "1000000 cm^3"
+
+  describe "compound conversions" $ do
+    testExpr "1 mi/hr : ft/s" "1.467 ft/s"
+
+  describe "dimension conversions" $ do
+    testExpr "1 ha : m^2" "10000 m^2"
+    testExpr "2 N : kg m/s^2" "2 kg m/s^2"
+
+  describe "complex dimension conversions" $ do
+    testExpr "1 L : in^3" "61.02 in^3"
+    testExpr "2 N : ft lb/min^2" "52077.696 ft lb/min^2"
+
+  describe "simple expressions" $ do
+    testExpr "1 + 2" 3
+    testExpr "1 - 2" (-1)
+    testExpr "1 * 2" 2
+    testExpr "1 / 2" 0.5
+    testExpr "1 + 2 ft" "3 ft"
+    testExpr "2 ft + 1" "3 ft"
+    testExpr "1 ft + 1in" "13 in"
+    testExpr "12 in + 1ft" "2 ft"
+    testExpr "1 ft * 2in" "24 in^2"
+    testExpr "12 in * 1ft" "1 ft^2"

@@ -4,7 +4,7 @@ import Calc.Units
 import Text.Printf
 
 data Scalar = Scalar Rational Units
-  deriving (Eq)
+  deriving (Eq, Ord)
 
 instance FromUnits Scalar where
   fromUnits = Scalar 1
@@ -50,5 +50,3 @@ instance Fractional Scalar where
 scalarUnits (Scalar _ units) = units
 
 mapScalar f (Scalar x u) = Scalar (f x) u
-
---expScalar x@(Scalar _ _) (Scalar y ) = Scalar (x ^^ e) (mapUnits (* e) u)
