@@ -3,6 +3,7 @@
 module Calc.Dim where
 
 import Calc.Exps
+import Data.Map.Strict as M
 
 data Dim
   = Angle
@@ -56,3 +57,5 @@ instance Semigroup Dims where
 
 instance Monoid Dims where
   mempty = Dims mempty
+
+baseDims (Dims dims) = M.keys dims

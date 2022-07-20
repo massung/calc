@@ -8,6 +8,7 @@ data Error
   = NoExpr
   | ExprError ParseError
   | ConversionError Units Units
+  deriving (Eq)
 
 instance Exception Error where
 
