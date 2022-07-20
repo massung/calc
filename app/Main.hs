@@ -105,6 +105,6 @@ main = do
         then runExpr expr 0 >>= output args
         else
           run args expr
-            `catch` \(ex :: IOException) ->
-              return ()
-                `catch` \(ex :: Error) -> print ex
+            `catches` [ Handler $ \(ex :: IOException) -> return (),
+                        Handler $ \(ex :: Error) -> print ex
+                      ]
