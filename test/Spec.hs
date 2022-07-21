@@ -22,7 +22,7 @@ main = hspec $ do
   testScalars
   testConversions
 
-testExpr s ans = it s $ eval `shouldBe` Right True
+testExpr s ans = it (unwords [s, "==", show ans]) $ eval `shouldBe` Right True
   where
     eval = do
       expr <- mapLeft ExprError $ parse exprParser "" s
@@ -121,7 +121,12 @@ testConversions = do
     testExpr "1 / 2" 0.5
     testExpr "1 + 2 ft" "3 ft"
     testExpr "2 ft + 1" "3 ft"
-    testExpr "1 ft + 1in" "13 in"
-    testExpr "12 in + 1ft" "2 ft"
-    testExpr "1 ft * 2in" "24 in^2"
-    testExpr "12 in * 1ft" "1 ft^2"
+    testExpr "1 ft + 1 in" "13 in"
+    testExpr "12 in + 1 ft" "2 ft"
+
+  describe "harmonized expressions" $ do
+    testExpr "1 ft * 2 in" "24 in^2"
+    testExpr "12 in * 1 ft" "1 ft^2"
+    testExpr "1 ft / 2 in" 6
+    testExpr "1 ft * 2 in^-1" 6
+    testExpr "1 ft * 2 in^2" "24 in^3"
