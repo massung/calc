@@ -1,6 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-import Calc.Dim
 import Calc.Error
 import Calc.Eval
 import Calc.Parser.Expr
