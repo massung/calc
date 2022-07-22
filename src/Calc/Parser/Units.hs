@@ -31,7 +31,7 @@ unitsTerm = parens lexer unitsParser <|> terms
 unitTerm = do
   u <- fromString <$> identifier lexer
   n <- option 1 $ lexeme lexer unitExponent
-  return $ Units (M.singleton u n)
+  return $ Units (M.singleton u $ fromInteger n)
 
 unitExponent = do
   reservedOp lexer "^"

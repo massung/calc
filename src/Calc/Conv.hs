@@ -114,17 +114,16 @@ metricConvs = [(fromUnit u, [siConv u p x]) | u <- metricUnits, (_, p, x) <- siP
 
 siStorageConvs = [(fromUnit u, [siConv u p x]) | u <- storageUnits, (_, p, x) <- storagePrefixes]
 
-harmonize x@(Scalar f from) to =
-  if nullUnits from
-    then Right $ Scalar f to
-    else
-      let similar = M.intersectionWith (,) (dims' from) (dims' to)
-       in M.foldl' conv (Right x) similar
+harmonize x@(Scalar _ from) to =
+  maybe (Left $ ConversionError from to) (Right . (x*)) (harmonizeDims from to)
+
+harmonizeDims :: Units -> Units -> Maybe Scalar
+harmonizeDims from to =
+  let from' = dimsUnits from
+      to' = dimsUnits to
+   in M.foldl' mappend (Just 1) $ M.intersectionWith conv from' to'
   where
-    conv (Right x) (from', to') = case convertUnits from' to' of
-      Nothing -> Left $ ConversionError from' to'
-      Just y -> Right $ x * y
-    conv err _ = err
+    conv (from, x) (to, _) = (^^x) <$> convertUnits (fromUnit from) (fromUnit to)
 
 {-
 Conversion algorithm:

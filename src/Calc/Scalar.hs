@@ -23,6 +23,9 @@ instance PrintfArg Scalar where
     | fmtChar (vFmt 'U' fmt) == 'U' = formatString (show u) fmt {fmtChar = 's'}
     | otherwise = errorBadFormat $ fmtChar fmt
 
+instance Semigroup Scalar where
+  (<>) a b = a * b
+
 instance Num Scalar where
   fromInteger n = Scalar (fromInteger n) mempty
 

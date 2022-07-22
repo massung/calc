@@ -27,7 +27,6 @@ library
       Calc.Dim
       Calc.Error
       Calc.Eval
-      Calc.Exps
       Calc.Parser.Expr
       Calc.Parser.Lexer
       Calc.Parser.Scalar

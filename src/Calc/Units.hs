@@ -3,7 +3,6 @@
 module Calc.Units where
 
 import Calc.Dim
-import Calc.Exps
 import Calc.SI
 import Data.Foldable as F
 import Data.List as L
@@ -21,11 +20,11 @@ instance IsString Unit where
 instance Show Unit where
   show = symbol
 
-newtype Units = Units (Exps Unit)
+newtype Units = Units (Map Unit Int)
   deriving (Eq, Ord)
 
 instance Semigroup Units where
-  (<>) (Units a) (Units b) = Units $ appendExps a b
+  (<>) (Units a) (Units b) = Units $ M.filter (/= 0) $ M.unionWith (+) a b
 
 instance Monoid Units where
   mempty = Units mempty
@@ -40,7 +39,19 @@ instance FromUnit Units where
   fromUnit u = Units $ M.singleton u 1
 
 instance Show Units where
-  show (Units u) = showExps u
+  show (Units u)
+    | F.null num = showExps' den
+    | F.null den = showExps' num
+    | otherwise = showExps' num ++ "/" ++ showExps' (M.map abs den)
+    where
+      (num, den) = M.partition (> 0) u
+
+      -- display a single unit with exponent
+      showExp (x, 1) = show x
+      showExp (x, n) = show x ++ "^" ++ show n
+
+      -- concatenate units together
+      showExps' = unwords . L.map showExp . M.toList
 
 imperialUnits =
   [ Unit {name = "mil", symbol = "mil", dim = Length},
@@ -146,10 +157,22 @@ recipUnits = mapUnits negate
 
 divideUnits a b = mappend a (recipUnits b)
 
-simplifyUnits (Units u) = first Units $ simplify u
-
-dims (Units u) = Dims $ M.mapKeys dim u
-
-dims' (Units u) = M.fromList [unitDims u' | u' <- M.toList u]
+dims (Units u) = Dims $ M.foldlWithKey' mapDims M.empty u
   where
-    unitDims u@(u', e) = (dim u', Units $ M.singleton u' e)
+    mapDims m u x = M.insert (dim u) x m
+
+dimsUnits (Units u) = M.foldlWithKey' mapDims M.empty u
+  where
+    mapDims m u x = M.alter (consUnits (u, x)) (dim u) m
+
+    -- cons all the units common dimension units
+    consUnits x Nothing = Just x
+    consUnits _ x = x
+
+simplify (Units m) = (M.map (`div` factor) m, factor)
+  where
+    factor =
+      let x = M.foldl' gcd (maximum m) m
+       in if all (< 0) m then negate x else x
+
+simplifyUnits u = first Units $ simplify u

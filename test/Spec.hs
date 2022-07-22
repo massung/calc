@@ -30,14 +30,8 @@ testExpr s ans = it (unwords [s, "==", show ans]) $ eval `shouldBe` Right True
         Right (Term x) -> return $ abs (x - ans) < epsilon
         _ -> return False
 
-testUnits =
+testUnits = do
   describe "units" $ do
-    it "dims ft" $ do
-      dims "ft" `shouldBe` Dims (M.singleton Length 1)
-    it "dims ft/s" $ do
-      dims "ft/s" `shouldBe` Dims (M.fromList [(Length, 1), (Duration, -1)])
-    it "dims' ft/s" $ do
-      dims' "ft/s" `shouldBe` M.fromList [(Length, "ft"), (Duration, "s^-1")]
     it "ft == ft" $ do
       ("ft" :: Units) == ("ft" :: Units) `shouldBe` True
     it "noUnits <> ft" $ do
@@ -61,7 +55,7 @@ testUnits =
     it "divideUnits ft s" $ do
       divideUnits "ft" "s" `shouldBe` ("ft/s" :: Units)
 
-testScalars =
+testScalars = do
   describe "scalars" $ do
     it "no units" $ do
       (1 :: Scalar) `shouldBe` Scalar 1 noUnits
@@ -128,5 +122,5 @@ testConversions = do
     testExpr "1 ft * 2 in" "24 in^2"
     testExpr "12 in * 1 ft" "1 ft^2"
     testExpr "1 ft / 2 in" 6
-    testExpr "1 ft * 2 in^-1" 6
+    testExpr "1 ft * 2 in^-1" 24
     testExpr "1 ft * 2 in^2" "24 in^3"
