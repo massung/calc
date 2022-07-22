@@ -6,6 +6,8 @@ import Calc.Parser.Expr
 import Calc.Parser.Scalar
 import Calc.Scalar as S
 import Calc.Units as U
+import Control.Monad.Except
+import Control.Monad.State.Strict
 import Data.Either.Extra
 import Data.Map as M
 import Test.Hspec
@@ -25,9 +27,9 @@ testExpr s ans = it (unwords [s, "==", show ans]) $ eval `shouldBe` Right True
   where
     eval = do
       expr <- mapLeft ExprError $ parse exprParser "" s
-      case evalExpr ans expr of
-        Right (Term x) -> return $ abs (x - ans) < epsilon
-        _ -> return False
+      case runState (runExceptT $ evalExpr expr) [] of
+        (Right x, _) -> return $ x == ans
+        (Left e, _) -> return False
 
 testUnits = do
   describe "units" $ do
