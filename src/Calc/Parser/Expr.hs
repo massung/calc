@@ -19,13 +19,12 @@ data Expr
   | Binary String (Scalar -> Scalar -> Scalar) Expr Expr
   | BinaryConv String (Scalar -> Scalar -> Scalar) Expr Expr
 
-instance Show Expr where
-  show Answer = "_"
-  show (Term x) = show x
-  show (Convert x u) = show x ++ " : " ++ show u
-  show (Unary op _ x) = "(" ++ op ++ show x ++ ")"
-  show (Binary op _ x y) = "(" ++ show x ++ op ++ show y ++ ")"
-  show (BinaryConv op _ x y) = "(" ++ show x ++ op ++ show y ++ ")"
+hasPlaceholder Answer = True
+hasPlaceholder (Term _) = False
+hasPlaceholder (Convert x _) = hasPlaceholder x
+hasPlaceholder (Unary _ _ x) = hasPlaceholder x
+hasPlaceholder (Binary _ _ x y) = hasPlaceholder x || hasPlaceholder y
+hasPlaceholder (BinaryConv _ _ x y) = hasPlaceholder x || hasPlaceholder y
 
 exprParser :: Parsec String () Expr
 exprParser = buildExpressionParser exprTable exprTerm

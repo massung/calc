@@ -11,6 +11,8 @@ import Calc.Parser.Scalar
 import Calc.Scalar
 import Calc.Units hiding (name)
 import Control.Exception
+import Control.Monad.Except
+import Control.Monad.State.Strict
 import Data.Either.Extra
 import Data.Maybe
 import System.Console.CmdArgs
@@ -20,18 +22,16 @@ import Text.Printf
 
 -- command line options
 data Opts = Opts
-  { exprString :: String,
+  { exprStrings :: [String],
     precision :: Maybe Int,
-    dontShowUnits :: Bool,
-    interactive :: Bool
+    dontShowUnits :: Bool
   }
   deriving (Data, Typeable, Show, Eq)
 
 opts =
   Opts
-    { exprString = def &= argPos 0 &= typ "EXPRESSION",
+    { exprStrings = def &= args &= typ "EXPRESSION",
       dontShowUnits = def &= explicit &= name "n" &= name "no-units",
-      interactive = def &= explicit &= name "i" &= name "interactive",
       precision = def &= explicit &= name "p" &= name "precision" &= typ "INT"
     }
     &= summary "calc v1.0, (c) Jeffrey Massung"
@@ -65,13 +65,12 @@ parseInput s = case mapLeft ExprError $ parse scalarParser "" s of
   Right x -> return x
   Left err -> throw err
 
-runExpr :: Expr -> Scalar -> IO Scalar
-runExpr expr ans = case evalExpr ans expr of
-  Right (Term x) -> return x
-  Right _ -> return 0 -- unreachable
-  Left err -> throw err
+runExpr :: Expr -> [Scalar] -> IO Scalar
+runExpr expr ans = case runState (runExceptT $ evalExpr expr) ans of
+  (Right x, _) -> return x
+  (Left e, _) -> throw e
 
-runInteractive :: Opts -> Scalar -> IO ()
+runInteractive :: Opts -> [Scalar] -> IO ()
 runInteractive args ans = do
   expr <- prompt >>= parseExpr
   ans' <- runExpr expr ans
@@ -79,32 +78,35 @@ runInteractive args ans = do
   output args ans'
   runInteractive args ans'
 
-runOnce :: Opts -> Expr -> String -> IO ()
+runOnce :: Opts -> Expr -> [Scalar] -> IO ()
 runOnce args expr s = do
   ans <- parseInput s
   ans' <- runExpr expr ans
   output args ans'
 
-run :: Opts -> Expr -> IO ()
-run args expr = do
+run :: Opts -> Expr -> [Scalar] -> IO ()
+run args expr [] = do
   s <- getLine
   if null s
     then run args expr
     else do
       runOnce args expr s
       run args expr
+run args expr ans = do
 
 main :: IO ()
 main = do
   args <- cmdArgs opts
-  if interactive args
-    then runInteractive args 0
-    else do
-      expr <- parseExpr $ exprString args
+  case exprStrings args of
+    [] -> runInteractive args []
+    (exprString : answers) -> do
+      expr <- parseExpr exprString
       if not $ hasPlaceholder expr
-        then runExpr expr 0 >>= output args
-        else
-          run args expr
+        then runExpr expr [] >>= output args
+        else do
+          case sequence [parse scalarParser "" s | s <- answers] of
+            Left err -> throw err
+            Right ans -> run args expr ans
             `catches` [ Handler $ \(ex :: IOException) -> return (),
                         Handler $ \(ex :: Error) -> print ex
                       ]

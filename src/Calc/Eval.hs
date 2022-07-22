@@ -1,46 +1,60 @@
 module Calc.Eval where
 
 import Calc.Conv
+import Calc.Error
 import Calc.Parser.Expr
 import Calc.Scalar
 import Calc.Units
+import Control.Monad.Except
+import Control.Monad.State.Strict
 
-hasPlaceholder Answer = True
-hasPlaceholder (Term _) = False
-hasPlaceholder (Convert x _) = hasPlaceholder x
-hasPlaceholder (Unary _ _ x) = hasPlaceholder x
-hasPlaceholder (Binary _ _ x y) = hasPlaceholder x || hasPlaceholder y
-hasPlaceholder (BinaryConv _ _ x y) = hasPlaceholder x || hasPlaceholder y
+type Eval = ExceptT Error (State [Scalar])
 
-evalExpr ans Answer = Right $ Term ans
-evalExpr ans (Term x) = Right $ Term x
-evalExpr ans (Convert x to) = evalConvert ans x to
-evalExpr ans (Unary _ f x) = evalUnary ans f x
-evalExpr ans (Binary _ f x y) = evalBinary ans f x y
-evalExpr ans (BinaryConv _ f x y) = evalBinaryConv ans f x y
+evalExpr :: Expr -> Eval Scalar
+evalExpr Answer = evalAnswer
+evalExpr (Term x) = return x
+evalExpr (Convert x to) = evalConvert x to
+evalExpr (Unary _ f x) = evalUnary f x
+evalExpr (Binary _ f x y) = evalBinary f x y
+evalExpr (BinaryConv _ f x y) = evalBinaryConv f x y
 
-evalConvert ans (Term x) to = convert x to >>= evalExpr ans . Term
-evalConvert ans x to = do
-  x' <- evalExpr ans x
-  evalConvert ans x' to
+evalAnswer :: Eval Scalar
+evalAnswer = do
+  st <- lift get
+  case st of
+    [] -> throwError NoAnswer
+    (x : xs) -> do
+      put xs
+      return x
 
-evalUnary ans f (Term x) = evalExpr ans $ Term (f x)
-evalUnary ans f x = evalExpr ans x >>= evalUnary ans f
+evalConvert :: Expr -> Units -> Eval Scalar
+evalConvert (Term x) to = either throwError return $ convert x to
+evalConvert x to = do
+  x' <- evalExpr x
+  either throwError return $ convert x' to
 
-evalBinary ans f (Term x@(Scalar _ from)) (Term y@(Scalar _ to)) =
+evalUnary :: (Scalar -> Scalar) -> Expr -> Eval Scalar
+evalUnary f (Term x) = return $ f x
+evalUnary f x = do
+  x' <- evalExpr x
+  return $ f x'
+
+evalBinary :: (Scalar -> Scalar -> Scalar) -> Expr -> Expr -> Eval Scalar
+evalBinary f (Term x@(Scalar _ from)) (Term y@(Scalar _ to)) = do
   if nullUnits to || nullUnits from
-    then Right $ Term (f x y)
-    else Term . (`f` y) <$> harmonize x to
-evalBinary ans f x y = do
-  x' <- evalExpr ans x
-  y' <- evalExpr ans y
-  evalBinary ans f x' y'
+    then return $ f x y
+    else either throwError (return . (`f` y)) $ harmonize x to
+evalBinary f x y = do
+  x' <- evalExpr x
+  y' <- evalExpr y
+  return $ f x' y'
 
-evalBinaryConv ans f (Term x@(Scalar _ from)) (Term y@(Scalar _ to)) =
+evalBinaryConv :: (Scalar -> Scalar -> Scalar) -> Expr -> Expr -> Eval Scalar
+evalBinaryConv f (Term x@(Scalar _ from)) (Term y@(Scalar _ to)) = do
   if nullUnits to
-    then Term . (x `f`) <$> convert y from
-    else Term . (`f` y) <$> convert x to
-evalBinaryConv ans f x y = do
-  x' <- evalExpr ans x
-  y' <- evalExpr ans y
-  evalBinaryConv ans f x' y'
+    then either throwError (return . (x `f`)) $ convert y from
+    else either throwError (return . (`f` y)) $ convert x to
+evalBinaryConv f x y = do
+  x' <- evalExpr x
+  y' <- evalExpr y
+  return $ f x' y'
