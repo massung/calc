@@ -40,21 +40,17 @@ evalUnary f x = do
   return $ f x'
 
 evalBinary :: (Scalar -> Scalar -> Scalar) -> Expr -> Expr -> Eval Scalar
-evalBinary f (Term x@(Scalar _ from)) (Term y@(Scalar _ to)) = do
-  if nullUnits to || nullUnits from
-    then return $ f x y
-    else either throwError (return . (`f` y)) $ harmonize x to
 evalBinary f x y = do
-  x' <- evalExpr x
-  y' <- evalExpr y
-  return $ f x' y'
+  x'@(Scalar _ from) <- evalExpr x
+  y'@(Scalar _ to) <- evalExpr y
+  if nullUnits from || nullUnits to
+    then return $ f x' y'
+    else either throwError (return . (`f` y')) $ convert x' to
 
 evalBinaryConv :: (Scalar -> Scalar -> Scalar) -> Expr -> Expr -> Eval Scalar
-evalBinaryConv f (Term x@(Scalar _ from)) (Term y@(Scalar _ to)) = do
-  if nullUnits to
-    then either throwError (return . (x `f`)) $ convert y from
-    else either throwError (return . (`f` y)) $ convert x to
 evalBinaryConv f x y = do
-  x' <- evalExpr x
-  y' <- evalExpr y
-  return $ f x' y'
+  x'@(Scalar _ from) <- evalExpr x
+  y'@(Scalar _ to) <- evalExpr y
+  if nullUnits to
+    then either throwError (return . (x' `f`)) $ convert y' from
+    else either throwError (return . (`f` y')) $ convert x' to
