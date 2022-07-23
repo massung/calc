@@ -15,6 +15,7 @@ import Control.Exception
 import Control.Monad.Except
 import Control.Monad.State.Strict
 import Data.Either.Extra
+import Data.List.Split
 import Data.Maybe
 import System.Console.CmdArgs
 import System.IO
@@ -25,6 +26,7 @@ import Text.Printf
 data Opts = Opts
   { precision :: Maybe Int,
     dontShowUnits :: Bool,
+    delim :: Maybe String,
     exprStrings :: [String]
   }
   deriving (Data, Typeable, Show, Eq)
@@ -33,6 +35,7 @@ getOpts =
   cmdArgs $ Opts
     { dontShowUnits = def &= explicit &= name "n" &= name "no-units",
       precision = def &= explicit &= name "p" &= name "precision" &= typ "INT",
+      delim = def &= explicit &= name "d" &= name "delimiter" &= typ "SEP",
       exprStrings = def &= args &= typ "EXPRESSION"
     }
     &= summary "calc v1.0, (c) Jeffrey Massung"
@@ -42,7 +45,7 @@ printAns :: Opts -> Scalar -> IO Scalar
 printAns opts x@(Scalar _ u) =
   if nullUnits u || dontShowUnits opts
     then printf (prec ++ "\n") x >> return x
-    else printf (prec ++ "%U\n") x x >> return x
+    else printf (prec ++ " %U\n") x x >> return x
   where
     prec = "%0." ++ show (fromMaybe 2 $ precision opts) ++ "g"
 
@@ -55,6 +58,11 @@ parseInputs :: [String] -> IO [Scalar]
 parseInputs inputs = either (throw . ExprError) return $ sequence xs
   where
     xs = [parse scalarParser "" s | s <- inputs]
+
+parseCsvInputs :: Opts -> IO [Scalar]
+parseCsvInputs opts = do
+  input <- getLine
+  parseInputs $ splitOn (fromMaybe "," $ delim opts) input
 
 prompt :: IO Expr
 prompt = do
@@ -79,8 +87,7 @@ runInteractive opts xs = do
 
 runLoop :: Opts -> Expr -> IO ()
 runLoop opts expr = do
-  s <- getLine
-  inputs <- parseInputs [s]
+  inputs <- parseCsvInputs opts
   runExpr opts expr inputs
   runLoop opts expr
 
