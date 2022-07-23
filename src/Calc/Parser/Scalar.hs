@@ -5,19 +5,23 @@ module Calc.Parser.Scalar where
 import Calc.Parser.Lexer
 import Calc.Parser.Units
 import Calc.Scalar
-import Calc.Units
 import Data.Either
 import Data.String
 import Text.Parsec
 import Text.Parsec.Token
 
 instance IsString Scalar where
-  fromString s = fromRight (error "no parse") $ parse parser "" s
-    where
-      parser = do
-        x <- scalarParser
-        eof
-        return x
+  fromString = fromRight (error "no parse") . parseScalar
+
+parseScalar = parse parser ""
+  where
+    parser = do
+      s <- unitsSign
+      n <- scalarParser
+      eof
+      if s < 0
+        then return $ negate n
+        else return n
 
 scalarParser = do
   n <- naturalOrFloat lexer

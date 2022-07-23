@@ -14,12 +14,14 @@ import Text.Parsec.Expr
 import Text.Parsec.Token
 
 instance IsString Units where
-  fromString s = fromRight (error "no parse") $ parse parser "" s
-    where
-      parser = do
-        x <- unitsParser
-        eof
-        return x
+  fromString = fromRight (error "no parse") . parseUnits
+
+parseUnits = parse parser ""
+  where
+    parser = do
+      u <- unitsParser
+      eof
+      return u
 
 unitsParser :: Parsec String st Units
 unitsParser = buildExpressionParser unitsExprTable unitsTerm
@@ -35,12 +37,12 @@ unitsTerm = parens lexer unitsParser <|> terms
 unitTerm = do
   u <- fromString <$> identifier lexer
   n <- option 1 $ lexeme lexer unitExponent
-  return $ Units (M.singleton u $ fromInteger n)
+  return $ Units (M.singleton u n)
 
 unitExponent = do
   reservedOp lexer "^"
   s <- unitsSign
-  e <- decimal lexer
+  e <- fromInteger <$> decimal lexer
   return (e * s)
 
 unitsSign = option 1 (neg <|> pos)

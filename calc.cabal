@@ -52,7 +52,6 @@ library
     , parsec
     , random
     , scientific
-    , split
     , symbol
     , utf8-string
     , vector
@@ -80,7 +79,6 @@ executable calc
     , parsec
     , random
     , scientific
-    , split
     , symbol
     , utf8-string
     , vector
@@ -110,7 +108,6 @@ test-suite calc-test
     , parsec
     , random
     , scientific
-    , split
     , symbol
     , utf8-string
     , vector

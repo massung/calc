@@ -32,7 +32,6 @@ dependencies:
 - parsec
 - random
 - scientific
-- split
 - symbol
 - utf8-string
 - vector

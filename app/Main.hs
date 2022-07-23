@@ -15,7 +15,7 @@ import Control.Exception
 import Control.Monad.Except
 import Control.Monad.State.Strict
 import Data.Either.Extra
-import Data.List.Split
+import Data.List.Extra
 import Data.Maybe
 import System.Console.CmdArgs
 import System.IO
@@ -57,7 +57,7 @@ parseExpr s = case mapLeft ExprError $ parse exprParser "" s of
 parseInputs :: [String] -> IO [Scalar]
 parseInputs inputs = either (throw . ExprError) return $ sequence xs
   where
-    xs = [parse scalarParser "" s | s <- inputs]
+    xs = [parseScalar $ trimStart s | s <- inputs]
 
 parseCsvInputs :: Opts -> IO [Scalar]
 parseCsvInputs opts = do
