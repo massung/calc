@@ -1,64 +1,92 @@
 # CALC - a CLI calculator with support for units
 
-Example usages:
+A scalar expression and units calculator for the terminal.
+
+```
+$ calc -?
+calc v1.0, (c) Jeffrey Massung
+
+calc [OPTIONS] [EXPRESSION [ARGS...]]
+
+Common flags:
+  -p --precision=N
+  -n --no-units
+  -d --delimiter=SEP
+  -? --help             Display help message
+  -V --version          Print version information
+     --numeric-version  Print just the version number
+
+Scalar expression and units calculator
+```
+
+## Example Usages
+
+TODO: show asciinema to record examples
+
+### Simple expressions
 
 ```bash
-$ # you can use it as a simple calculator
-$ calc '(1+2)*3/4'
+calc '(1+2)/3*4'
 2.25
+```
 
-$ # it can alter output different precision
-$ calc -p5 '7/13'
-0.53846
+### Unit conversions
 
-$ # it can handle units
-$ calc '5 mi/hr * 5 hr'
-25.00 mi
+```bash
+calc '10 ft : m'
+3.05 m
 
-$ # it can perform unit conversions
-$ calc '5 mi/hr : m/s'
-2.24 m/s
+calc '3 N to lb ft/min^2'
+78116.54 ft lb/min^2
+```
 
-$ # it does implicit unit conversions
-$ calc '2 gal + 3 c'
-35.00 c
+### Automatic unit conversions
 
-$ # it can use placeholders supplied by arguments
-$ calc '_ J : BTU' 10
-9.48e-3 BTU
+```bash
+calc '5 TB * 0.03/GB'
+153.60
 
-$ # multiple placeholders can be supplied in order
-$ calc '_ * 100 / (_ + _)' 43 78 3
-53.09
+calc '2 ft + 3in'
+15 in
+```
 
-$ # which allows piping large sets of data to it
-$ shuf -i 1-1000 -n 5 | calc '_ ha to acre'
-1828.58 acre
-1670.43 acre
-274.29 acre
-165.56 acre
-1371.43 acre
+### Parameterized expressions
 
-$ # or you can supply them via stdin yourself
-$ calc '_ L to in^3'
+```bash
+calc '_ c : in^3' 1.5
+20.81 in^3
+```
+
+### Parameterized from stdin
+
+```bash
+calc '_ ft + 4 in'
 1
-61.02 in^3
+16.00 in
 2
-122.05 in^3
-3
-183.07 in^3
+28.00 in
 <ctrl-d>
 
-$ # supplied arguments can contain units
-$ calc '_ m'
-1
-1.00 m
-2 ft
-0.61 m
-<ctrl-d>
+calc '_ psi : Pa' < values.txt
+572265.00 Pa
+393001.27 Pa
+441264.58 Pa
+530896.45 Pa
+248211.33 Pa
+137895.18 Pa
+```
 
-$ # it even has support for an interactive mode
-$ calc -i
+### Multiple parameters
+
+```bash
+calc '_ * 100 / (_ + _)' 43 78 3
+53.09
+```
+
+### Interactive mode
+
+```bash
+calc
 >> (10 W to J/s) * 3 hr
 == 108000.00 J
 >> _ / 4

@@ -25,7 +25,7 @@ import Text.Printf
 -- command line options
 data Opts = Opts
   { precision :: Maybe Int,
-    dontShowUnits :: Bool,
+    noUnits :: Bool,
     delim :: Maybe String,
     exprStrings :: [String]
   }
@@ -33,17 +33,19 @@ data Opts = Opts
 
 getOpts =
   cmdArgs $ Opts
-    { dontShowUnits = def &= explicit &= name "n" &= name "no-units",
-      precision = def &= explicit &= name "p" &= name "precision" &= typ "INT",
+    { noUnits = def &= explicit &= name "n" &= name "no-units",
+      precision = def &= explicit &= name "p" &= name "precision" &= typ "N",
       delim = def &= explicit &= name "d" &= name "delimiter" &= typ "SEP",
-      exprStrings = def &= args &= typ "EXPRESSION"
+      exprStrings = def &= args &= typ "EXPRESSION [ARGS...]"
     }
+    &= program "calc"
     &= summary "calc v1.0, (c) Jeffrey Massung"
+    &= details ["Scalar expression and units calculator"]
     &= noAtExpand
 
 printAns :: Opts -> Scalar -> IO Scalar
 printAns opts x@(Scalar _ u) =
-  if nullUnits u || dontShowUnits opts
+  if nullUnits u || noUnits opts
     then printf (prec ++ "\n") x >> return x
     else printf (prec ++ " %U\n") x x >> return x
   where
