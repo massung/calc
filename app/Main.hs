@@ -101,6 +101,6 @@ main = do
   -- handle EOF or expression error
   run opts (exprStrings opts)
     `catches`
-      [ Handler $ \(ex :: IOException) -> putChar '\n',
+      [ Handler $ \(ex :: IOException) -> return (),
         Handler $ \(ex :: Error) -> print ex
       ]
