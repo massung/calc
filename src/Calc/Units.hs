@@ -4,6 +4,7 @@ module Calc.Units where
 
 import Calc.Dim
 import Calc.SI
+import Control.Applicative
 import Data.Foldable as F
 import Data.List as L
 import Data.Map.Strict as M
@@ -176,3 +177,7 @@ simplify (Units m) = (M.map (`div` factor) m, factor)
        in if all (< 0) m then negate x else x
 
 simplifyUnits u = first Units $ simplify u
+
+validateUnits (Units u) = all (==1) $ M.foldlWithKey' countDims M.empty u
+  where
+    countDims m u _ = M.alter (\x -> (+1) <$> x <|> Just 1) (dim u) m

@@ -26,7 +26,11 @@ unitsParser = buildExpressionParser unitsExprTable unitsTerm
 
 unitsTerm = parens lexer unitsParser <|> terms
   where
-    terms = mconcat <$> many1 unitTerm
+    terms = do
+      units <- mconcat <$> many1 unitTerm
+      if validateUnits units
+        then return units
+        else fail "illegal units"
 
 unitTerm = do
   u <- fromString <$> identifier lexer
