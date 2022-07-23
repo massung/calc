@@ -5,7 +5,7 @@ cabal-version: 1.12
 -- see: https://github.com/sol/hpack
 
 name:           calc
-version:        0.1.0.0
+version:        0.8.0.0
 description:    Please see the README on GitHub at <https://github.com/massung/calc#readme>
 homepage:       https://github.com/massung/calc#readme
 bug-reports:    https://github.com/massung/calc/issues
