@@ -27,6 +27,10 @@ $ # it can use placeholders supplied by arguments
 $ calc '_ J : BTU' 10
 9.48e-3 BTU
 
+$ # multiple placeholders can be supplied in order
+$ calc '_ * 100 / (_ + _)' 43 78 3
+53.09
+
 $ # which allows piping large sets of data to it
 $ shuf -i 1-1000 -n 5 | calc '_ ha to acre'
 1828.58 acre
