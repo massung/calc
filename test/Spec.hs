@@ -35,6 +35,8 @@ testUnits = do
   describe "units" $ do
     it "ft == ft" $ do
       ("ft" :: Units) == ("ft" :: Units) `shouldBe` True
+
+  describe "append units" $ do
     it "noUnits <> ft" $ do
       (noUnits <> "ft") `shouldBe` "ft"
     it "ft <> noUnits" $ do
@@ -43,6 +45,8 @@ testUnits = do
       ("ft" <> "ft") `shouldBe` ("ft^2" :: Units)
     it "ft <> s" $ do
       ("ft" <> "s") `shouldBe` ("ft s" :: Units)
+
+  describe "map units" $ do
     it "recipUnits ft" $ do
       recipUnits "ft" `shouldBe` ("ft^-1" :: Units)
     it "recipUnits ft^2" $ do
