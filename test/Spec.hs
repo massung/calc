@@ -27,9 +27,9 @@ testExpr s ans = it (unwords [s, "==", show ans]) $ eval `shouldBe` Right True
   where
     eval = do
       expr <- mapLeft ExprError $ parse exprParser "" s
-      case runState (runExceptT $ evalExpr expr) [] of
-        (Right x, _) -> return $ x == ans
-        (Left e, _) -> return False
+      case evalState (runExceptT $ evalExpr expr) [] of
+        Right x -> return $ abs (x - ans) < epsilon
+        Left e -> return False
 
 testUnits = do
   describe "units" $ do

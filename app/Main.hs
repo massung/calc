@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE MultiWayIf #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
@@ -22,91 +23,84 @@ import Text.Printf
 
 -- command line options
 data Opts = Opts
-  { exprStrings :: [String],
-    precision :: Maybe Int,
-    dontShowUnits :: Bool
+  { precision :: Maybe Int,
+    dontShowUnits :: Bool,
+    exprStrings :: [String]
   }
   deriving (Data, Typeable, Show, Eq)
 
-opts =
-  Opts
-    { exprStrings = def &= args &= typ "EXPRESSION",
-      dontShowUnits = def &= explicit &= name "n" &= name "no-units",
-      precision = def &= explicit &= name "p" &= name "precision" &= typ "INT"
+getOpts =
+  cmdArgs $ Opts
+    { dontShowUnits = def &= explicit &= name "n" &= name "no-units",
+      precision = def &= explicit &= name "p" &= name "precision" &= typ "INT",
+      exprStrings = def &= args &= typ "EXPRESSION"
     }
     &= summary "calc v1.0, (c) Jeffrey Massung"
     &= noAtExpand
 
-outputScalar args x@(Scalar _ u)
-  | nullUnits u = printf prec x
-  | dontShowUnits args = printf prec x
-  | otherwise = printf (prec ++ " %U") x x
+printAns :: Opts -> Scalar -> IO Scalar
+printAns opts x@(Scalar _ u) =
+  if nullUnits u || dontShowUnits opts
+    then printf (prec ++ "\n") x >> return x
+    else printf (prec ++ "%U\n") x x >> return x
   where
-    prec = "%0." ++ show (fromMaybe 2 $ precision args) ++ "g"
-
-prompt :: IO String
-prompt = do
-  putStr ">> "
-  hFlush stdout
-  getLine
-
-output :: Opts -> Scalar -> IO ()
-output args ans = do
-  outputScalar args ans
-  putChar '\n'
+    prec = "%0." ++ show (fromMaybe 2 $ precision opts) ++ "g"
 
 parseExpr :: String -> IO Expr
 parseExpr s = case mapLeft ExprError $ parse exprParser "" s of
   Right expr -> return expr
   Left err -> throw err
 
-parseInput :: String -> IO Scalar
-parseInput s = case mapLeft ExprError $ parse scalarParser "" s of
-  Right x -> return x
-  Left err -> throw err
+parseInputs :: [String] -> IO [Scalar]
+parseInputs inputs = either (throw . ExprError) return $ sequence xs
+  where
+    xs = [parse scalarParser "" s | s <- inputs]
 
-runExpr :: Expr -> [Scalar] -> IO Scalar
-runExpr expr ans = case runState (runExceptT $ evalExpr expr) ans of
-  (Right x, _) -> return x
-  (Left e, _) -> throw e
-
-runInteractive :: Opts -> [Scalar] -> IO ()
-runInteractive args ans = do
-  expr <- prompt >>= parseExpr
-  ans' <- runExpr expr ans
-  putStr "== "
-  output args ans'
-  runInteractive args ans'
-
-runOnce :: Opts -> Expr -> [Scalar] -> IO ()
-runOnce args expr s = do
-  ans <- parseInput s
-  ans' <- runExpr expr ans
-  output args ans'
-
-run :: Opts -> Expr -> [Scalar] -> IO ()
-run args expr [] = do
+prompt :: IO Expr
+prompt = do
+  putStr ">> "
+  hFlush stdout
   s <- getLine
   if null s
-    then run args expr
-    else do
-      runOnce args expr s
-      run args expr
-run args expr ans = do
+    then prompt
+    else parseExpr s
+
+runExpr :: Opts -> Expr -> [Scalar] -> IO Scalar
+runExpr opts expr xs = either throw (printAns opts) result
+  where
+    result = evalState (runExceptT $ evalExpr expr) xs
+
+runInteractive :: Opts -> [Scalar] -> IO ()
+runInteractive opts xs = do
+  expr <- prompt
+  putStr "== "
+  ans' <- runExpr opts expr xs
+  runInteractive opts (ans' : xs)
+
+runLoop :: Opts -> Expr -> IO ()
+runLoop opts expr = do
+  s <- getLine
+  inputs <- parseInputs [s]
+  runExpr opts expr inputs
+  runLoop opts expr
+
+run :: Opts -> [String] -> IO ()
+run opts [] = runInteractive opts []
+run opts (exprString : inputs) = do
+  (expr, xs) <- (,) <$> parseExpr exprString <*> parseInputs inputs
+
+  -- no placeholder, no inputs, or run once
+  if | not (hasPlaceholder expr) -> void $ runExpr opts expr []
+     | null xs -> runLoop opts expr
+     | otherwise -> void $ runExpr opts expr xs
 
 main :: IO ()
 main = do
-  args <- cmdArgs opts
-  case exprStrings args of
-    [] -> runInteractive args []
-    (exprString : answers) -> do
-      expr <- parseExpr exprString
-      if not $ hasPlaceholder expr
-        then runExpr expr [] >>= output args
-        else do
-          case sequence [parse scalarParser "" s | s <- answers] of
-            Left err -> throw err
-            Right ans -> run args expr ans
-            `catches` [ Handler $ \(ex :: IOException) -> return (),
-                        Handler $ \(ex :: Error) -> print ex
-                      ]
+  opts <- getOpts
+
+  -- handle EOF or expression error
+  run opts (exprStrings opts)
+    `catches`
+      [ Handler $ \(ex :: IOException) -> putChar '\n',
+        Handler $ \(ex :: Error) -> print ex
+      ]
