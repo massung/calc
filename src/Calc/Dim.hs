@@ -24,4 +24,4 @@ data Dim
   deriving (Eq, Ord, Show)
 
 newtype Dims = Dims (Map Dim Int)
-  deriving (Eq, Ord)
+  deriving (Eq, Ord, Show)

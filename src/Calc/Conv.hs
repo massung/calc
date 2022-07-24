@@ -29,7 +29,8 @@ conversions = [conv from xs | (from, xs) <- convs]
         [ imperialConvs,
           metricConvs,
           storageConvs,
-          siStorageConvs
+          siStorageConvs,
+          derivedConvs
         ]
 
 conv :: Units -> [Scalar] -> (Units, [(Units, Scalar)])
@@ -101,6 +102,10 @@ imperialConvs =
     ("O", ["1 V/A"]),
     ("W", ["1 J/s", "1 V A"]),
     ("F", ["1 C/V"])
+  ]
+
+derivedConvs =
+  [ ("W s", ["1 J"])
   ]
 
 storageConvs = [("B", ["8 b"])]
