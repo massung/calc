@@ -142,11 +142,11 @@ angularConvs =
   ]
 
 electricalConvs =
-  [ ("V", ["1 J/C"]),
-    ("A", ["1 C/s"]),
-    ("O", ["1 V/A"]),
-    ("W", ["1 J/s", "1 V A"]),
-    ("F", ["1 C/V"])
+  [ ("C", ["1 A s"]),
+    ("V", ["1 J/C", "1 kg m^2/A^-1 s^-3"]),
+    ("O", ["1 V/A", "1 kg m^2/A^-2 s^-3"]),
+    ("W", ["1 J/s", "1 V A", "1 kg m^2/s^-3"]),
+    ("F", ["1 C/V", "1 s^4 A^2/kg m^2"])
   ]
 
 storageConvs =
