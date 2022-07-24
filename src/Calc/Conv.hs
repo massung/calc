@@ -26,7 +26,18 @@ conversions = [conv from xs | (from, xs) <- convs]
   where
     convs =
       concat
-        [ imperialConvs,
+        [ lengthConvs,
+          areaConvs,
+          volumeConvs,
+          massConvs,
+          timeConvs,
+          speedConvs,
+          pressureConvs,
+          forceConvs,
+          energyConvs,
+          powerConvs,
+          angularConvs,
+          electricalConvs,
           metricConvs,
           storageConvs,
           siStorageConvs,
@@ -52,7 +63,7 @@ dimsConvMap = M.foldlWithKey' convDims M.empty convMap
           let k = (dims from, dims u)
            in M.alter (\m -> (M.insert from x <$> m) <|> Just (M.singleton from x)) k m
 
-imperialConvs =
+lengthConvs =
   [ ("in", ["1000 mil"]),
     ("h", ["4 in"]),
     ("ft", ["12 in", "0.3048 m"]),
@@ -65,51 +76,91 @@ imperialConvs =
     ("cable", ["100 ftm"]),
     ("nmi", ["10 cable"]),
     ("link", ["7.92 in"]),
-    ("rod", ["25 link"]),
-    ("acre", ["43560.04 ft^2"]),
-    ("ha", ["10000 m^2", "2.471052 acre"]),
-    ("tbsp", ["3 tsp"]),
+    ("rod", ["25 link"])
+  ]
+
+areaConvs =
+  [ ("acre", ["43560.04 ft^2"]),
+    ("ha", ["10000 m^2", "2.471052 acre"])
+  ]
+
+volumeConvs =
+  [ ("tbsp", ["3 tsp"]),
     ("floz", ["2 tbsp"]),
     ("c", ["8 floz"]),
     ("pt", ["2 c"]),
     ("qt", ["2 pt"]),
     ("gal", ["4 qt"]),
-    ("L", ["1000 cm^3", "35.19508 floz"]),
-    ("lb", ["16 oz", "453.5924 g"]),
+    ("L", ["1000 cm^3", "35.19508 floz"])
+  ]
+
+massConvs =
+  [ ("lb", ["16 oz", "453.5924 g"]),
     ("st", ["14 lb"]),
     ("qtr", ["28 lb"]),
     ("cwt", ["112 lb"]),
     ("t", ["2240 lb"]),
-    ("slug", ["32.17404856 lb"]),
-    ("min", ["60 s"]),
+    ("slug", ["32.17404856 lb"])
+  ]
+
+timeConvs =
+  [ ("min", ["60 s"]),
     ("hr", ["60 min"]),
     ("day", ["24 hr"]),
-    ("Pa", ["1 N/m^2"]),
+    ("hz", ["1 s^-1"])
+  ]
+
+speedConvs =
+  [ ("kn", ["1.150779 mi/hr"]),
+    ("mph", ["1 mi/hr"])
+  ]
+
+pressureConvs =
+  [ ("Pa", ["1 N/m^2"]),
     ("bar", ["100000 Pa", "14.50377 psi"]),
-    ("psi", ["1 lb/in^2"]),
-    ("hz", ["1 s^-1"]),
-    ("HP", ["745.7 W"]),
-    ("J", ["1 kg m^2/s^2", "1 N m", "1 Pa m^3"]),
-    ("BTU", ["1055.056 J"]),
-    ("N", ["1 kg m/s^2", "0.224809 lbf"]),
-    ("kn", ["1.150779 mi/hr"]),
-    ("mph", ["1 mi/hr"]),
-    ("rad", ["57.29578 deg"]),
+    ("psi", ["1 lb/in^2"])
+  ]
+
+forceConvs =
+  [ ("N", ["1 kg m/s^2", "0.224809 lbf"])
+  ]
+
+energyConvs =
+  [ ("J", ["1 kg m^2/s^2", "1 N m", "1 Pa m^3"]),
+    ("BTU", ["1055.056 J"])
+  ]
+
+powerConvs =
+  [ ("hp", ["745.7 W"])
+  ]
+
+angularConvs =
+  [ ("rad", ["57.29578 deg"]),
     ("rev", ["180 deg"]),
     ("arcs", ["2.78e-4 deg"]),
-    ("arcm", ["0.016666668 deg"]),
-    ("V", ["1 J/C"]),
+    ("arcm", ["0.016666668 deg"])
+  ]
+
+electricalConvs =
+  [ ("V", ["1 J/C"]),
     ("A", ["1 C/s"]),
     ("O", ["1 V/A"]),
     ("W", ["1 J/s", "1 V A"]),
     ("F", ["1 C/V"])
   ]
 
-derivedConvs =
-  [ ("W s", ["1 J"])
+storageConvs =
+  [ ("B", ["8 b"])
   ]
 
-storageConvs = [("B", ["8 b"])]
+derivedConvs =
+  [ ("V C", ["1 J"]),
+    ("A s", ["1 C"]),
+    ("O A", ["1 V"]),
+    ("W s", ["1 J"]),
+    ("W/A", ["1 V"]),
+    ("F V", ["1 C"])
+  ]
 
 siConv u p x =
   let u' = unitMap ! (p ++ symbol u)

@@ -11,7 +11,6 @@ data Dim
   | Duration
   | Energy
   | Force
-  | Frequency
   | Length
   | Mass
   | Power
