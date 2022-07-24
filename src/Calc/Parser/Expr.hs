@@ -14,14 +14,14 @@ import Text.Parsec.Token
 data Expr
   = Answer
   | Term Scalar
-  | Convert Expr Units
+  | Convert Units Expr
   | Unary String (Scalar -> Scalar) Expr
   | Binary String (Scalar -> Scalar -> Scalar) Expr Expr
   | BinaryConv String (Scalar -> Scalar -> Scalar) Expr Expr
 
 hasPlaceholder Answer = True
 hasPlaceholder (Term _) = False
-hasPlaceholder (Convert x _) = hasPlaceholder x
+hasPlaceholder (Convert _ x) = hasPlaceholder x
 hasPlaceholder (Unary _ _ x) = hasPlaceholder x
 hasPlaceholder (Binary _ _ x y) = hasPlaceholder x || hasPlaceholder y
 hasPlaceholder (BinaryConv _ _ x y) = hasPlaceholder x || hasPlaceholder y
@@ -29,18 +29,7 @@ hasPlaceholder (BinaryConv _ _ x y) = hasPlaceholder x || hasPlaceholder y
 exprParser :: Parsec String () Expr
 exprParser = buildExpressionParser exprTable exprTerm
 
-exprTerm = do
-  e <- expr
-  u <- optionMaybe exprCast
-  return $ case u of
-    Nothing -> e
-    Just u -> Convert e u
-
-exprCast = do
-  reservedOp lexer ":" <|> reserved lexer "to"
-  unitsParser
-
-expr =
+exprTerm =
   parens lexer exprParser
     <|> Term <$> scalarParser
     <|> Term . fromUnits <$> unitsTerm
@@ -51,14 +40,21 @@ exprAnswer = do
   u <- optionMaybe unitsTerm
   return $ case u of
     Nothing -> Answer
-    Just units -> Convert Answer units
+    Just units -> Convert units Answer
+
+exprCast = do
+  reservedOp lexer ":" <|> reserved lexer "to"
+  unitsParser
 
 exprTable =
   [ [prefix "-" negate, prefix "+" id],
     --[binary "^" (^) AssocLeft],
     [binary "*" (*) AssocLeft, binary "/" (/) AssocLeft],
-    [binaryConv "+" (+) AssocLeft, binaryConv "-" (-) AssocLeft]
+    [binaryConv "+" (+) AssocLeft, binaryConv "-" (-) AssocLeft],
+    [postfix]
   ]
+
+postfix = Postfix (do Convert <$> exprCast)
 
 prefix name f = Prefix (do reservedOp lexer name; return $ Unary name f)
 
