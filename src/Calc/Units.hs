@@ -93,7 +93,8 @@ imperialUnits =
     Unit {name = "bar", symbol = "bar", dim = Pressure},
     Unit {name = "british thermal unit", symbol = "BTU", dim = Energy},
     Unit {name = "pound force", symbol = "lbf", dim = Force},
-    Unit {name = "knot", symbol = "kn", dim = Speed}
+    Unit {name = "knot", symbol = "kn", dim = Speed},
+    Unit {name = "miles per hour", symbol = "mph", dim = Speed}
   ]
 
 metricUnits =
