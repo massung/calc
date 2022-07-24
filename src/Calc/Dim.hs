@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Calc.Dim where
 
 import Data.Map.Strict as M

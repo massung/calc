@@ -14,9 +14,9 @@ evalExpr :: Expr -> Eval Scalar
 evalExpr Answer = evalAnswer
 evalExpr (Term x) = return x
 evalExpr (Convert to x) = evalConvert x to
-evalExpr (Unary _ f x) = evalUnary f x
-evalExpr (Binary _ f x y) = evalBinary f x y
-evalExpr (BinaryConv _ f x y) = evalBinaryConv f x y
+evalExpr (Unary f x) = evalUnary f x
+evalExpr (Binary f x y) = evalBinary f x y
+evalExpr (BinaryConv f x y) = evalBinaryConv f x y
 
 evalAnswer :: Eval Scalar
 evalAnswer = do
@@ -45,7 +45,7 @@ evalBinary f x y = do
   y'@(Scalar _ to) <- evalExpr y
   if nullUnits from || nullUnits to
     then return $ f x' y'
-    else case (`f` y') <$> convert x' to of
+    else case (`f` y') <$> harmonize x' to of
       Right ans -> return ans
       Left _ -> return $ f x' y'
 

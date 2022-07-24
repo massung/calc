@@ -15,16 +15,16 @@ data Expr
   = Answer
   | Term Scalar
   | Convert Units Expr
-  | Unary String (Scalar -> Scalar) Expr
-  | Binary String (Scalar -> Scalar -> Scalar) Expr Expr
-  | BinaryConv String (Scalar -> Scalar -> Scalar) Expr Expr
+  | Unary (Scalar -> Scalar) Expr
+  | Binary (Scalar -> Scalar -> Scalar) Expr Expr
+  | BinaryConv (Scalar -> Scalar -> Scalar) Expr Expr
 
 hasPlaceholder Answer = True
 hasPlaceholder (Term _) = False
 hasPlaceholder (Convert _ x) = hasPlaceholder x
-hasPlaceholder (Unary _ _ x) = hasPlaceholder x
-hasPlaceholder (Binary _ _ x y) = hasPlaceholder x || hasPlaceholder y
-hasPlaceholder (BinaryConv _ _ x y) = hasPlaceholder x || hasPlaceholder y
+hasPlaceholder (Unary _ x) = hasPlaceholder x
+hasPlaceholder (Binary _ x y) = hasPlaceholder x || hasPlaceholder y
+hasPlaceholder (BinaryConv _ x y) = hasPlaceholder x || hasPlaceholder y
 
 exprParser :: Parsec String () Expr
 exprParser = buildExpressionParser exprTable exprTerm
@@ -51,13 +51,11 @@ exprTable =
     --[binary "^" (^) AssocLeft],
     [binary "*" (*) AssocLeft, binary "/" (/) AssocLeft],
     [binaryConv "+" (+) AssocLeft, binaryConv "-" (-) AssocLeft],
-    [postfix]
+    [Postfix (do Convert <$> exprCast)]
   ]
 
-postfix = Postfix (do Convert <$> exprCast)
+prefix op f = Prefix (do reservedOp lexer op; return $ Unary f)
 
-prefix name f = Prefix (do reservedOp lexer name; return $ Unary name f)
+binary op f = Infix (do reservedOp lexer op; return $ Binary f)
 
-binary name f = Infix (do reservedOp lexer name; return $ Binary name f)
-
-binaryConv name f = Infix (do reservedOp lexer name; return $ BinaryConv name f)
+binaryConv op f = Infix (do reservedOp lexer op; return $ BinaryConv f)
