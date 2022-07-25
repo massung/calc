@@ -1,3 +1,5 @@
+{-# LANGUAGE MultiWayIf #-}
+
 module Calc.Scalar where
 
 import Calc.Conv
@@ -53,10 +55,10 @@ mapScalar f (Scalar x d u) = Scalar (f x) d u
 
 fromUnits u = Scalar 1 (dims u) u
 
-convert (Scalar x d u) to =
-  if dims to == d
-    then Right $ Scalar (applyConv (conversionScale u to) x) d to
-    else Left $ ConversionError u to
+convert (Scalar x d from) to
+  | nullDims d = Right $ Scalar x (dims to) to
+  | d == dims to = Right $ Scalar (applyConv (conversionScale from to) x) d to
+  | otherwise = Left $ ConversionError from to
 
 scale conv n = applyConv (powConv n conv)
 

@@ -51,7 +51,10 @@ instance Show Units where
       -- concatenate units together
       showExps' = unwords . L.map showExp . M.toList
 
+{-
 -- angle units
+-}
+
 _radian = Unit {dim = Angle, symbol = "rad", conv = Base}
 
 _degree = Unit {dim = Angle, symbol = "deg", conv = Linear 57.2958}
@@ -60,23 +63,32 @@ _arcsec = Unit {dim = Angle, symbol = "arcs", conv = Linear 206265}
 
 _arcmin = Unit {dim = Angle, symbol = "arcm", conv = Linear 3427.75}
 
-_rev = Unit {dim = Angle, symbol = "rev", conv = Linear 0.002778}
+_rev = Unit {dim = Angle, symbol = "rev", conv = Linear 0.1591549430919}
 
+{-
 -- area units
+-}
+
 _hectare = Unit {dim = Area, symbol = "ha", conv = Linear 1e-4}
 
 _acre = Unit {dim = Area, symbol = "acre", conv = Linear 2.471e-4}
 
+{-
 -- duration units
+-}
+
 _second = Unit {dim = Duration, symbol = "s", conv = Base}
 
-_minute = Unit {dim = Duration, symbol = "min", conv = Linear $ 1 % 60}
+_minute = Unit {dim = Duration, symbol = "min", conv = Linear (1 % 60)}
 
-_hour = Unit {dim = Duration, symbol = "hr", conv = Linear $ 1 % 3600}
+_hour = Unit {dim = Duration, symbol = "hr", conv = Linear (1 % 3600)}
 
-_day = Unit {dim = Duration, symbol = "day", conv = Linear $ 1 % 86400}
+_day = Unit {dim = Duration, symbol = "day", conv = Linear (1 % 86400)}
 
+{-
 -- electrical units
+-}
+
 _farad = Unit {dim = Capacitance, symbol = "F", conv = Base}
 
 _coulomb = Unit {dim = Charge, symbol = "C", conv = Base}
@@ -87,12 +99,20 @@ _ohm = Unit {dim = Resistance, symbol = "O", conv = Base}
 
 _volt = Unit {dim = Voltage, symbol = "V", conv = Base}
 
+{-
 -- energy units
+-}
+
 _joule = Unit {dim = Energy, symbol = "J", conv = Base}
 
-_btu = Unit {dim = Energy, symbol = "BTU", conv = Base}
+_btu = Unit {dim = Energy, symbol = "BTU", conv = Linear 9.478e-4}
 
+_therm = Unit {dim = Energy, symbol = "thm", conv = Linear 9.478e-9}
+
+{-
 -- force units
+-}
+
 _newton = Unit {dim = Force, symbol = "N", conv = Base}
 
 _poundForce = Unit {dim = Force, symbol = "lbf", conv = Linear 0.2248}
@@ -128,7 +148,10 @@ _link = Unit {dim = Length, symbol = "link", conv = Linear 4.970969886302}
 
 _rod = Unit {dim = Length, symbol = "rod", conv = Linear 0.1988384}
 
+{-
 -- mass units
+-}
+
 _gram = Unit {dim = Mass, symbol = "g", conv = Linear 1000.0}
 
 _ounce = Unit {dim = Mass, symbol = "oz", conv = Linear 35.274}
@@ -145,43 +168,58 @@ _hundredweight = Unit {dim = Mass, symbol = "cwt", conv = Linear 0.02205}
 
 _ton = Unit {dim = Mass, symbol = "t", conv = Linear 0.0011}
 
+{-
 -- power units
+-}
+
 _watt = Unit {dim = Power, symbol = "W", conv = Base}
 
 _horsepower = Unit {dim = Power, symbol = "hp", conv = Linear 0.001341}
 
+{-
 -- pressure units
+-}
+
 _pascal = Unit {dim = Pressure, symbol = "Pa", conv = Base}
 
 _psi = Unit {dim = Pressure, symbol = "psi", conv = Linear 1.45e-4}
 
 _bar = Unit {dim = Pressure, symbol = "bar", conv = Linear 1e-5}
 
+{-
 -- speed units
-_kph = Unit {dim = Speed, symbol = "kph", conv = Linear 3600}
+-}
 
-_knot = Unit {dim = Speed, symbol = "kn", conv = Linear 1943.8445}
+_kph = Unit {dim = Speed, symbol = "kph", conv = Linear 3.600}
 
-_mph = Unit {dim = Speed, symbol = "mph", conv = Linear 2236.9363}
+_knot = Unit {dim = Speed, symbol = "kn", conv = Linear 1.9438445}
 
+_mph = Unit {dim = Speed, symbol = "mph", conv = Linear 2.2369363}
+
+{-
 -- storage units
+-}
+
 _bit = Unit {dim = Storage, symbol = "b", conv = Linear 8}
 
 _byte = Unit {dim = Storage, symbol = "B", conv = Base}
 
-_kilobyte = Unit {dim = Storage, symbol = "kB", conv = Linear $ 1 % 1024}
+_kilobyte = Unit {dim = Storage, symbol = "kB", conv = Linear (1 % 1024)}
 
-_megabyte = Unit {dim = Storage, symbol = "MB", conv = Linear $ 1 % 1048576}
+_megabyte = Unit {dim = Storage, symbol = "MB", conv = Linear (1 % 1048576)}
 
-_gigabyte = Unit {dim = Storage, symbol = "GB", conv = Linear $ 1 % 1073741824}
+_gigabyte = Unit {dim = Storage, symbol = "GB", conv = Linear (1 % 1073741824)}
 
-_terabyte = Unit {dim = Storage, symbol = "TB", conv = Linear $ 1 % 1099511627776}
+_terabyte = Unit {dim = Storage, symbol = "TB", conv = Linear (1 % 1099511627776)}
 
-_petabyte = Unit {dim = Storage, symbol = "PB", conv = Linear $ 1 % 1125899906842624}
+_petabyte = Unit {dim = Storage, symbol = "PB", conv = Linear (1 % 1125899906842624)}
 
-_exabyte = Unit {dim = Storage, symbol = "EB", conv = Linear $ 1 % 1152921504606846976}
+_exabyte = Unit {dim = Storage, symbol = "EB", conv = Linear (1 % 1152921504606846976)}
 
+{-
 -- volume units
+-}
+
 _liter = Unit {dim = Volume, symbol = "L", conv = Linear 1000}
 
 _teaspoon = Unit {dim = Volume, symbol = "tsp", conv = Linear 202884}
@@ -270,6 +308,7 @@ unitMap = F.foldl' (\m u -> M.insert (symbol u) u m) mempty units
             _tablespoon,
             _teaspoon,
             _terabyte,
+            _therm,
             _ton,
             _volt,
             _watt,
