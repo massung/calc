@@ -7,6 +7,7 @@ import Calc.Dims
 import Control.Applicative
 import Data.Foldable as F
 import Data.List as L
+import Data.List.Extra
 import Data.Map.Strict as M
 import Data.Maybe
 import Data.Ratio
@@ -351,3 +352,7 @@ simplifyUnits u = first Units $ simplify u
 validateUnits (Units u) = all (== 1) $ M.foldlWithKey' countDims M.empty u
   where
     countDims m u _ = M.alter (\x -> (+ 1) <$> x <|> Just 1) (dim u) m
+
+harmonizeUnits from@(Units a) to@(Units b) = Units $ M.mapKeys mapUnit a
+  where
+    mapUnit u = headDef u [k | (k, _) <- M.toList b, dim u == dim k]
