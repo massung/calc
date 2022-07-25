@@ -96,7 +96,7 @@ testConversions = do
     testExpr "1 EL : L" "1e18 L"
 
   describe "multi-step conversions" $ do
-    testExpr "1 cable : h" "1800 h"
+    testExpr "1 cable : h" "2160 h"
     testExpr "1 gal : floz" "128 floz"
 
   describe "simplified conversions" $ do
@@ -112,7 +112,7 @@ testConversions = do
 
   describe "complex dimension conversions" $ do
     testExpr "1 L : in^3" "61.02 in^3"
-    testExpr "2 N : ft lb/min^2" "52077.696 ft lb/min^2"
+    testExpr "2 N : ft lb/min^2" "52077.71 ft lb/min^2"
 
   describe "simple expressions" $ do
     testExpr "1 + 2" 3

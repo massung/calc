@@ -52,19 +52,23 @@ instance Show Units where
       -- concatenate units together
       showExps' = unwords . L.map showExp . M.toList
 
+_pi = 245850922 % 78256779
+
 {-
 -- angle units
 -}
 
 _radian = Unit {dim = Angle, symbol = "rad", conv = Base}
 
-_degree = Unit {dim = Angle, symbol = "deg", conv = Linear 57.2958}
+_degree = Unit {dim = Angle, symbol = "deg", conv = Linear (_pi / 180)}
 
-_arcsec = Unit {dim = Angle, symbol = "arcs", conv = Linear 206265}
+_arcsec = Unit {dim = Angle, symbol = "arcs", conv = Linear 206264.8062471}
 
-_arcmin = Unit {dim = Angle, symbol = "arcm", conv = Linear 3427.75}
+_arcmin = Unit {dim = Angle, symbol = "arcm", conv = Linear 3437.7467707849}
 
-_rev = Unit {dim = Angle, symbol = "rev", conv = Linear 0.1591549430919}
+_rev = Unit {dim = Angle, symbol = "rev", conv = Linear ((1 % 2) / _pi)}
+
+_turn = Unit {dim = Angle, symbol = "turn", conv = Linear ((1 % 2) / _pi)}
 
 {-
 -- area units
@@ -118,36 +122,39 @@ _newton = Unit {dim = Force, symbol = "N", conv = Base}
 
 _poundForce = Unit {dim = Force, symbol = "lbf", conv = Linear 0.2248}
 
+{-
 -- length units
+-}
+
 _meter = Unit {dim = Length, symbol = "m", conv = Base}
 
 _mil = Unit {dim = Length, symbol = "mil", conv = Linear 39370}
 
-_inch = Unit {dim = Length, symbol = "in", conv = Linear 39.37008}
+_inch = Unit {dim = Length, symbol = "in", conv = Linear (5000 % 127)}
 
-_hand = Unit {dim = Length, symbol = "h", conv = Linear 9.3475}
+_hand = Unit {dim = Length, symbol = "h", conv = Linear (3750 % 381)}
 
-_foot = Unit {dim = Length, symbol = "ft", conv = Linear 3.28084}
+_foot = Unit {dim = Length, symbol = "ft", conv = Linear (1250 % 381)}
 
-_yard = Unit {dim = Length, symbol = "yd", conv = Linear 1.0936133}
+_yard = Unit {dim = Length, symbol = "yd", conv = Linear (1250 % 1143)}
 
-_fathom = Unit {dim = Length, symbol = "ftm", conv = Linear 0.5468}
+_fathom = Unit {dim = Length, symbol = "ftm", conv = Linear (625 % 1143)}
 
-_chain = Unit {dim = Length, symbol = "ch", conv = Linear 0.04971}
+_chain = Unit {dim = Length, symbol = "ch", conv = Linear (625 % 12573)}
 
-_furlong = Unit {dim = Length, symbol = "fur", conv = Linear 0.004971}
+_furlong = Unit {dim = Length, symbol = "fur", conv = Linear (125 % 25146)}
 
-_mile = Unit {dim = Length, symbol = "mi", conv = Linear 6.214e-4}
+_mile = Unit {dim = Length, symbol = "mi", conv = Linear (125 % 201168)}
 
-_league = Unit {dim = Length, symbol = "lea", conv = Linear 2.071e-4}
+_league = Unit {dim = Length, symbol = "lea", conv = Linear (125 % 603504)}
 
-_cable = Unit {dim = Length, symbol = "cable", conv = Linear 0.004557}
+_cable = Unit {dim = Length, symbol = "cable", conv = Linear (125 % 27432)}
 
-_nauticalMile = Unit {dim = Length, symbol = "nmi", conv = Linear 5.399568413e-4}
+_nauticalMile = Unit {dim = Length, symbol = "nmi", conv = Linear (1 % 1852)}
 
-_link = Unit {dim = Length, symbol = "link", conv = Linear 4.970969886302}
+_link = Unit {dim = Length, symbol = "link", conv = Linear (62500 % 12573)}
 
-_rod = Unit {dim = Length, symbol = "rod", conv = Linear 0.1988384}
+_rod = Unit {dim = Length, symbol = "rod", conv = Linear (2500 % 12573)}
 
 {-
 -- mass units
@@ -155,17 +162,17 @@ _rod = Unit {dim = Length, symbol = "rod", conv = Linear 0.1988384}
 
 _gram = Unit {dim = Mass, symbol = "g", conv = Linear 1000.0}
 
-_ounce = Unit {dim = Mass, symbol = "oz", conv = Linear 35.274}
+_ounce = Unit {dim = Mass, symbol = "oz", conv = Linear 35.27396902552304}
 
-_pound = Unit {dim = Mass, symbol = "lb", conv = Linear 2.205}
+_pound = Unit {dim = Mass, symbol = "lb", conv = Linear 2.204623}
 
-_stone = Unit {dim = Mass, symbol = "st", conv = Linear 0.1575}
+_stone = Unit {dim = Mass, symbol = "st", conv = Linear 0.157473076}
 
-_slug = Unit {dim = Mass, symbol = "slug", conv = Linear 0.06852}
+_slug = Unit {dim = Mass, symbol = "slug", conv = Linear 0.0685217793074}
 
 _quarter = Unit {dim = Mass, symbol = "qtr", conv = Linear 0.08818}
 
-_hundredweight = Unit {dim = Mass, symbol = "cwt", conv = Linear 0.02205}
+_hundredweight = Unit {dim = Mass, symbol = "cwt", conv = Linear 0.0220462306409519}
 
 _ton = Unit {dim = Mass, symbol = "t", conv = Linear 0.0011}
 
@@ -311,6 +318,7 @@ unitMap = F.foldl' (\m u -> M.insert (symbol u) u m) mempty units
             _terabyte,
             _therm,
             _ton,
+            _turn,
             _volt,
             _watt,
             _yard
