@@ -1,11 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Calc.Conv where
-
-import Calc.Dim
+{-
+import Calc.Dims
 import Calc.Error
 import Calc.Parser.Scalar
-import Calc.SI
 import Calc.Scalar
 import Calc.Units
 import Control.Applicative
@@ -242,3 +241,4 @@ unitsConvs from = [(mapUnits (* exp) u, x ^^ exp) | (u, x) <- fromMaybe [] $ con
     (from', exp) = simplifyUnits from
 
 unconvertedUnits (Units a) (Units b) = [Units u | u <- M.splitRoot $ (M.\\) a b, not (M.null u)]
+-}

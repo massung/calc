@@ -1,24 +1,20 @@
 module Calc.Scalar where
 
+import Calc.Dims
+import Calc.Error
 import Calc.Units
 import Text.Printf
 
-data Scalar = Scalar Rational Units
+data Scalar = Scalar Rational Dims Units
   deriving (Eq, Ord)
 
-instance FromUnits Scalar where
-  fromUnits = Scalar 1
-
-instance FromUnit Scalar where
-  fromUnit u = fromUnits $ fromUnit u
-
 instance Show Scalar where
-  show (Scalar x u)
+  show (Scalar x d u)
     | nullUnits u = show (fromRational x)
     | otherwise = show (fromRational x) ++ " " ++ show u
 
 instance PrintfArg Scalar where
-  formatArg (Scalar x u) fmt
+  formatArg (Scalar x d u) fmt
     | fmtChar (vFmt 'g' fmt) == 'g' = formatRealFloat (fromRational x) fmt
     | fmtChar (vFmt 'U' fmt) == 'U' = formatString (show u) fmt {fmtChar = 's'}
     | otherwise = errorBadFormat $ fmtChar fmt
@@ -27,17 +23,17 @@ instance Semigroup Scalar where
   (<>) a b = a * b
 
 instance Num Scalar where
-  fromInteger n = Scalar (fromInteger n) mempty
+  fromInteger n = Scalar (fromInteger n) mempty mempty
 
   -- add scalars
-  (+) (Scalar x ux) (Scalar y uy)
-    | nullUnits uy = Scalar (x + y) ux
-    | nullUnits ux = Scalar (x + y) uy
-    | ux == uy = Scalar (x + y) ux
+  (+) (Scalar x dx ux) (Scalar y dy uy)
+    | nullDims dy = Scalar (x + y) dx ux
+    | nullDims dx = Scalar (x + y) dy uy
+    | dx == dy = Scalar (x + y) dx ux
     | otherwise = error "Cannot add disparate units"
 
   -- multiply scalars
-  (*) (Scalar x ux) (Scalar y uy) = Scalar (x * y) (ux <> uy)
+  (*) (Scalar x dx ux) (Scalar y dy uy) = Scalar (x * y) (dx <> dy) (ux <> uy)
 
   -- mapped functions
   negate = mapScalar negate
@@ -45,11 +41,16 @@ instance Num Scalar where
   signum = mapScalar signum
 
 instance Fractional Scalar where
-  fromRational r = Scalar (fromRational r) mempty
+  fromRational r = Scalar (fromRational r) mempty mempty
 
   -- scalar inverse
-  recip (Scalar x u) = Scalar (recip x) $ mapUnits negate u
+  recip (Scalar x d u) = Scalar (recip x) (recipDims d) (recipUnits u)
 
-scalarUnits (Scalar _ units) = units
+mapScalar f (Scalar x d u) = Scalar (f x) d u
 
-mapScalar f (Scalar x u) = Scalar (f x) u
+fromUnits u = Scalar 1 (dims u) u
+
+convert (Scalar x d u) to =
+  if dims to == d
+    then Right $ Scalar x d to
+    else Left $ ConversionError u to

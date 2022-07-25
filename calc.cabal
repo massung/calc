@@ -24,7 +24,7 @@ source-repository head
 library
   exposed-modules:
       Calc.Conv
-      Calc.Dim
+      Calc.Dims
       Calc.Error
       Calc.Eval
       Calc.Parser.Expr
@@ -32,7 +32,6 @@ library
       Calc.Parser.Scalar
       Calc.Parser.Units
       Calc.Scalar
-      Calc.SI
       Calc.Units
   other-modules:
       Paths_calc

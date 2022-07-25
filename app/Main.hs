@@ -44,7 +44,7 @@ getOpts =
     &= noAtExpand
 
 printAns :: Opts -> Scalar -> IO Scalar
-printAns opts x@(Scalar _ u) =
+printAns opts x@(Scalar _ d u) =
   if nullUnits u || noUnits opts
     then printf (prec ++ "\n") x >> return x
     else printf (prec ++ " %U\n") x x >> return x

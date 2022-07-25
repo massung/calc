@@ -40,19 +40,7 @@ evalUnary f x = do
   return $ f x'
 
 evalBinary :: (Scalar -> Scalar -> Scalar) -> Expr -> Expr -> Eval Scalar
-evalBinary f x y = do
-  x'@(Scalar _ from) <- evalExpr x
-  y'@(Scalar _ to) <- evalExpr y
-  if nullUnits from || nullUnits to
-    then return $ f x' y'
-    else case (`f` y') <$> harmonize x' to of
-      Right ans -> return ans
-      Left _ -> return $ f x' y'
+evalBinary f x y = f <$> evalExpr x <*> evalExpr y
 
 evalBinaryConv :: (Scalar -> Scalar -> Scalar) -> Expr -> Expr -> Eval Scalar
-evalBinaryConv f x y = do
-  x'@(Scalar _ from) <- evalExpr x
-  y'@(Scalar _ to) <- evalExpr y
-  if nullUnits to
-    then either throwError (return . (x' `f`)) $ convert y' from
-    else either throwError (return . (`f` y')) $ convert x' to
+evalBinaryConv f x y = f <$> evalExpr x <*> evalExpr y

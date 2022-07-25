@@ -52,6 +52,6 @@ unitsSign = option 1 (neg <|> pos)
 
 unitsExprTable =
   [ [ Infix (do reservedOp lexer "*"; return (<>)) AssocLeft,
-      Infix (do reservedOp lexer "/"; return divideUnits) AssocLeft
+      Infix (do reservedOp lexer "/"; return (</>)) AssocLeft
     ]
   ]
