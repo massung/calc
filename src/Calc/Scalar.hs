@@ -1,8 +1,11 @@
 module Calc.Scalar where
 
+import Calc.Conv
 import Calc.Dims
 import Calc.Error
 import Calc.Units
+import Data.Foldable as F
+import Data.Map.Strict as M
 import Text.Printf
 
 data Scalar = Scalar Rational Dims Units
@@ -52,5 +55,12 @@ fromUnits u = Scalar 1 (dims u) u
 
 convert (Scalar x d u) to =
   if dims to == d
-    then Right $ Scalar x d to
+    then Right $ Scalar (applyConv (conversionScale u to) x) d to
     else Left $ ConversionError u to
+
+scale conv n = applyConv (powConv n conv)
+
+conversionScale (Units from) (Units to) = recipConv from' <> to'
+  where
+    from' = F.foldl' (<>) Base [powConv n conv | (Unit {conv = conv}, n) <- M.toList from]
+    to' = F.foldl' (<>) Base [powConv n conv | (Unit {conv = conv}, n) <- M.toList to]

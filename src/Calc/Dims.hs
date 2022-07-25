@@ -2,6 +2,8 @@
 
 module Calc.Dims where
 
+import Data.Char
+import Data.List as L
 import Data.Map.Strict as M
 
 data Dim
@@ -26,10 +28,16 @@ data Dim
   deriving (Eq, Ord, Show)
 
 newtype Dims = Dims (Map Dim Int)
-  deriving (Eq, Ord, Show)
+  deriving (Eq, Ord)
+
+instance Show Dims where
+  show (Dims dims) = mconcat $ L.intersperse "*" [showDim dim | dim <- M.toList dims]
+    where
+      showDim (dim, 1) = "[" ++ L.map toLower (show dim) ++ "]"
+      showDim (dim, n) = "[" ++ L.map toLower (show dim) ++ "^" ++ show n ++ "]"
 
 instance Semigroup Dims where
-  (<>) (Dims a) (Dims b) = Dims $ M.filter (/=0) $ M.unionWith (+) a b
+  (<>) (Dims a) (Dims b) = Dims $ M.filter (/= 0) $ M.unionWith (+) a b
 
 instance Monoid Dims where
   mempty = Dims M.empty
@@ -59,3 +67,5 @@ nullDims (Dims dims) = M.null dims
 mapDims f (Dims dims) = Dims $ M.map f dims
 
 recipDims = mapDims negate
+
+powDims n = mapDims (* n)

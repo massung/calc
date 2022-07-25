@@ -32,16 +32,17 @@ data Opts = Opts
   deriving (Data, Typeable, Show, Eq)
 
 getOpts =
-  cmdArgs $ Opts
-    { noUnits = def &= explicit &= name "n" &= name "no-units",
-      precision = def &= explicit &= name "p" &= name "precision" &= typ "N",
-      delim = def &= explicit &= name "d" &= name "delimiter" &= typ "SEP",
-      exprStrings = def &= args &= typ "EXPRESSION [ARGS...]"
-    }
-    &= program "calc"
-    &= summary "calc v1.0, (c) Jeffrey Massung"
-    &= details ["Scalar expression and units calculator"]
-    &= noAtExpand
+  cmdArgs $
+    Opts
+      { noUnits = def &= explicit &= name "n" &= name "no-units",
+        precision = def &= explicit &= name "p" &= name "precision" &= typ "N",
+        delim = def &= explicit &= name "d" &= name "delimiter" &= typ "SEP",
+        exprStrings = def &= args &= typ "EXPRESSION [ARGS...]"
+      }
+      &= program "calc"
+      &= summary "calc v1.0, (c) Jeffrey Massung"
+      &= details ["Scalar expression and units calculator"]
+      &= noAtExpand
 
 printAns :: Opts -> Scalar -> IO Scalar
 printAns opts x@(Scalar _ d u) =
@@ -98,10 +99,11 @@ run opts [] = runInteractive opts []
 run opts (exprString : inputs) = do
   (expr, xs) <- (,) <$> parseExpr exprString <*> parseInputs inputs
 
-  -- no placeholder, no inputs, or run once
-  if | not (hasPlaceholder expr) -> void $ runExpr opts expr []
-     | null xs -> runLoop opts expr
-     | otherwise -> void $ runExpr opts expr xs
+  -- no placeholder (run once), no inputs (use stdin), or run once w/ CLI args
+  if
+      | not (hasPlaceholder expr) -> void $ runExpr opts expr []
+      | null xs -> runLoop opts expr
+      | otherwise -> void $ runExpr opts expr xs
 
 main :: IO ()
 main = do
@@ -109,7 +111,6 @@ main = do
 
   -- handle EOF or expression error
   run opts (exprStrings opts)
-    `catches`
-      [ Handler $ \(ex :: IOException) -> return (),
-        Handler $ \(ex :: Error) -> print ex
-      ]
+    `catches` [ Handler $ \(ex :: IOException) -> return (),
+                Handler $ \(ex :: Error) -> print ex
+              ]
