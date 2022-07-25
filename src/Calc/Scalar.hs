@@ -7,6 +7,7 @@ import Calc.Dims
 import Calc.Error
 import Calc.Units
 import Data.Foldable as F
+import Data.List as L
 import Data.Map.Strict as M
 import Text.Printf
 
@@ -55,12 +56,27 @@ mapScalar f (Scalar x d u) = Scalar (f x) d u
 
 fromUnits u = Scalar 1 (dims u) u
 
+similarUnits from@(Units a) to@(Units b) =
+  let a' = M.fromList [(dim u, u) | (u, _) <- M.toList a]
+      b' = M.fromList [(dim u, u) | (u, _) <- M.toList b]
+   in overlappingDims a' b'
+  where
+    overlappingDims a b = L.map snd . M.toList $ M.intersectionWith (,) a b
+
+harmonize x@(Scalar n d from) to
+  | nullUnits to = x
+  | nullDims d = Scalar n (dims to) to
+  | otherwise = case similarUnits from to of
+      [] -> x
+      units -> let from' = M.filter (`elem` units) from
+                   to' = M.filter ()
+      in Scalar (applyConv (conversionScale from' to') x) d (from <> recipUnits from' <> to')
+
 convert (Scalar x d from) to
+  | nullUnits to = Right $ Scalar x d from
   | nullDims d = Right $ Scalar x (dims to) to
   | d == dims to = Right $ Scalar (applyConv (conversionScale from to) x) d to
   | otherwise = Left $ ConversionError from to
-
-scale conv n = applyConv (powConv n conv)
 
 conversionScale (Units from) (Units to) = recipConv from' <> to'
   where

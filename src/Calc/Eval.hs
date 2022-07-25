@@ -40,7 +40,13 @@ evalUnary f x = do
   return $ f x'
 
 evalBinary :: (Scalar -> Scalar -> Scalar) -> Expr -> Expr -> Eval Scalar
-evalBinary f x y = f <$> evalExpr x <*> evalExpr y
+evalBinary f x y = do
+  x' <- evalExpr x
+  y'@(Scalar _ _ to) <- evalExpr y
+  (`f` y') <$> either throwError return (harmonize x' to)
 
 evalBinaryConv :: (Scalar -> Scalar -> Scalar) -> Expr -> Expr -> Eval Scalar
-evalBinaryConv f x y = f <$> evalExpr x <*> evalExpr y
+evalBinaryConv f x y = do
+  x' <- evalExpr x
+  y'@(Scalar _ _ to) <- evalExpr y
+  (`f` y') <$> either throwError return (convert x' to)
