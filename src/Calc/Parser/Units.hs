@@ -5,7 +5,6 @@ module Calc.Parser.Units where
 
 import Calc.Parser.Lexer
 import Calc.Units
-import Data.ByteString.UTF8 as BS hiding (fromString)
 import Data.Either
 import Data.Map.Strict as M
 import Data.String
