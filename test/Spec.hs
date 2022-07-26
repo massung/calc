@@ -65,11 +65,6 @@ testScalars = do
     it "no units" $ do
       (1 :: Scalar) `shouldBe` Scalar 1 mempty mempty
 
--- it "simple units" $ do
---   ("2 ft" :: Scalar) `shouldBe` Scalar 2 (fromUnit "ft")
--- it "compound units" $ do
---   ("2 ft/s" :: Scalar) `shouldBe` Scalar 2 (fromUnitList [("ft", 1), ("s", -1)])
-
 testConversions = do
   describe "basic conversions" $ do
     testExpr "1 ft : in" "12 in"
@@ -130,3 +125,20 @@ testConversions = do
     testExpr "1 ft / 2 in" 6
     testExpr "1 ft * 2 in^-1" 24
     testExpr "1 ft * 2 in^2" "24 in^3"
+
+  describe "precision loss" $ do
+    testExpr "((2 ft : in) : ft) : in" "24 in"
+
+  describe "angle conversions" $ do
+    testExpr "1 rad : deg" "57.3 deg"
+    testExpr "1 rad : turn" "0.1592 turn"
+    testExpr "1 rad : rev" "0.1592 rev"
+
+  describe "area conversions" $ do
+    testExpr "1 ha : m^2" "10000 m^2"
+    testExpr "1 ha : acre" "2.471 acre"
+
+  describe "duration conversions" $ do
+    testExpr "1 s : min" "0.01667 min"
+    testExpr "1 s : hr" "2.778e-4 hr"
+    testExpr "1 s : day" "1.157e-5 day"

@@ -60,7 +60,7 @@ _pi = 245850922 % 78256779
 
 _radian = Unit {dim = Angle, symbol = "rad", conv = Base}
 
-_degree = Unit {dim = Angle, symbol = "deg", conv = Linear (_pi / 180)}
+_degree = Unit {dim = Angle, symbol = "deg", conv = Linear (180 / _pi)}
 
 _rev = Unit {dim = Angle, symbol = "rev", conv = Linear ((1 % 2) / _pi)}
 
