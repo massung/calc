@@ -62,10 +62,6 @@ _radian = Unit {dim = Angle, symbol = "rad", conv = Base}
 
 _degree = Unit {dim = Angle, symbol = "deg", conv = Linear (_pi / 180)}
 
-_arcsec = Unit {dim = Angle, symbol = "arcs", conv = Linear 206264.8062471}
-
-_arcmin = Unit {dim = Angle, symbol = "arcm", conv = Linear 3437.7467707849}
-
 _rev = Unit {dim = Angle, symbol = "rev", conv = Linear ((1 % 2) / _pi)}
 
 _turn = Unit {dim = Angle, symbol = "turn", conv = Linear ((1 % 2) / _pi)}
@@ -76,7 +72,7 @@ _turn = Unit {dim = Angle, symbol = "turn", conv = Linear ((1 % 2) / _pi)}
 
 _hectare = Unit {dim = Area, symbol = "ha", conv = Linear 1e-4}
 
-_acre = Unit {dim = Area, symbol = "acre", conv = Linear 2.471e-4}
+_acre = Unit {dim = Area, symbol = "acre", conv = Linear (78125 % 316160658)}
 
 {-
 -- duration units
@@ -110,9 +106,9 @@ _volt = Unit {dim = Voltage, symbol = "V", conv = Base}
 
 _joule = Unit {dim = Energy, symbol = "J", conv = Base}
 
-_btu = Unit {dim = Energy, symbol = "BTU", conv = Linear 9.478e-4}
+_btu = Unit {dim = Energy, symbol = "BTU", conv = Linear (50000000 % 52752792631)}
 
-_therm = Unit {dim = Energy, symbol = "thm", conv = Linear 9.478e-9}
+_therm = Unit {dim = Energy, symbol = "thm", conv = Linear (1 % 105480400)}
 
 {-
 -- force units
@@ -120,7 +116,9 @@ _therm = Unit {dim = Energy, symbol = "thm", conv = Linear 9.478e-9}
 
 _newton = Unit {dim = Force, symbol = "N", conv = Base}
 
-_poundForce = Unit {dim = Force, symbol = "lbf", conv = Linear 0.2248}
+_poundForce = Unit {dim = Force, symbol = "lbf", conv = Linear (2000000000000 % 8896443230521)}
+
+_pond = Unit {dim = Force, symbol = "pond", conv = Linear (20000000 % 1961333)}
 
 {-
 -- length units
@@ -160,21 +158,17 @@ _rod = Unit {dim = Length, symbol = "rod", conv = Linear (2500 % 12573)}
 -- mass units
 -}
 
-_gram = Unit {dim = Mass, symbol = "g", conv = Linear 1000.0}
+_gram = Unit {dim = Mass, symbol = "g", conv = Linear 1000}
 
-_ounce = Unit {dim = Mass, symbol = "oz", conv = Linear 35.27396902552304}
+_ounce = Unit {dim = Mass, symbol = "oz", conv = Linear (1600000000 % 45359237)}
 
-_pound = Unit {dim = Mass, symbol = "lb", conv = Linear 2.204623}
+_pound = Unit {dim = Mass, symbol = "lb", conv = Linear (100000000 % 45359237)}
 
-_stone = Unit {dim = Mass, symbol = "st", conv = Linear 0.157473076}
+_stone = Unit {dim = Mass, symbol = "st", conv = Linear (50000000 % 317514659)}
 
-_slug = Unit {dim = Mass, symbol = "slug", conv = Linear 0.0685217793074}
+_hundredweight = Unit {dim = Mass, symbol = "cwt", conv = Linear (1000000 % 45359237)}
 
-_quarter = Unit {dim = Mass, symbol = "qtr", conv = Linear 0.08818}
-
-_hundredweight = Unit {dim = Mass, symbol = "cwt", conv = Linear 0.0220462306409519}
-
-_ton = Unit {dim = Mass, symbol = "t", conv = Linear 0.0011}
+_ton = Unit {dim = Mass, symbol = "t", conv = Linear (50000 % 45359237)}
 
 {-
 -- power units
@@ -190,7 +184,7 @@ _horsepower = Unit {dim = Power, symbol = "hp", conv = Linear 0.001341}
 
 _pascal = Unit {dim = Pressure, symbol = "Pa", conv = Base}
 
-_psi = Unit {dim = Pressure, symbol = "psi", conv = Linear 1.45e-4}
+_psi = Unit {dim = Pressure, symbol = "psi", conv = Linear 145e-6}
 
 _bar = Unit {dim = Pressure, symbol = "bar", conv = Linear 1e-5}
 
@@ -198,11 +192,11 @@ _bar = Unit {dim = Pressure, symbol = "bar", conv = Linear 1e-5}
 -- speed units
 -}
 
-_kph = Unit {dim = Speed, symbol = "kph", conv = Linear 3.600}
+_kph = Unit {dim = Speed, symbol = "kph", conv = Linear (18 % 5)}
 
-_knot = Unit {dim = Speed, symbol = "kn", conv = Linear 1.9438445}
+_knot = Unit {dim = Speed, symbol = "kn", conv = Linear (3125 % 1397)}
 
-_mph = Unit {dim = Speed, symbol = "mph", conv = Linear 2.2369363}
+_mph = Unit {dim = Speed, symbol = "mph", conv = Linear (900 % 463)}
 
 {-
 -- storage units
@@ -230,19 +224,19 @@ _exabyte = Unit {dim = Storage, symbol = "EB", conv = Linear (1 % 11529215046068
 
 _liter = Unit {dim = Volume, symbol = "L", conv = Linear 1000}
 
-_teaspoon = Unit {dim = Volume, symbol = "tsp", conv = Linear 202884}
+_teaspoon = Unit {dim = Volume, symbol = "tsp", conv = Linear (96000000000000 % 473176473)}
 
-_tablespoon = Unit {dim = Volume, symbol = "tbsp", conv = Linear 67628}
+_tablespoon = Unit {dim = Volume, symbol = "tbsp", conv = Linear (32000000000000 % 473176473)}
 
-_fluidOunce = Unit {dim = Volume, symbol = "floz", conv = Linear 33814}
+_fluidOunce = Unit {dim = Volume, symbol = "floz", conv = Linear (16000000000000 % 473176473)}
 
-_cup = Unit {dim = Volume, symbol = "c", conv = Linear 4226.7528}
+_cup = Unit {dim = Volume, symbol = "c", conv = Linear (2000000000000 % 473176473)}
 
-_pint = Unit {dim = Volume, symbol = "pt", conv = Linear 2113.3764}
+_pint = Unit {dim = Volume, symbol = "pt", conv = Linear (1000000000000 % 473176473)}
 
-_quart = Unit {dim = Volume, symbol = "qt", conv = Linear 1057}
+_quart = Unit {dim = Volume, symbol = "qt", conv = Linear (500000000000 % 473176473)}
 
-_gallon = Unit {dim = Volume, symbol = "gal", conv = Linear 264.1721}
+_gallon = Unit {dim = Volume, symbol = "gal", conv = Linear (125000000000 % 473176473)}
 
 siUnits u = [siUnit conversion | conversion <- siConversions]
   where
@@ -255,8 +249,6 @@ unitMap = F.foldl' (\m u -> M.insert (symbol u) u m) mempty units
       concat
         [ [ _acre,
             _ampere,
-            _arcmin,
-            _arcsec,
             _bar,
             _bit,
             _btu,
@@ -302,16 +294,15 @@ unitMap = F.foldl' (\m u -> M.insert (symbol u) u m) mempty units
             _pascal,
             _petabyte,
             _pint,
+            _pond,
             _pound,
             _poundForce,
             _psi,
             _quart,
-            _quarter,
             _radian,
             _rev,
             _rod,
             _second,
-            _slug,
             _stone,
             _tablespoon,
             _teaspoon,
