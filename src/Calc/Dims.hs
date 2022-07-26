@@ -12,6 +12,7 @@ data Dim
   | Capacitance
   | Charge
   | Current
+  | Duration
   | Energy
   | Force
   | Frequency
@@ -22,7 +23,6 @@ data Dim
   | Resistance
   | Speed
   | Storage
-  | Duration
   | Voltage
   | Volume
   deriving (Eq, Ord, Show)

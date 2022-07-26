@@ -121,6 +121,12 @@ _poundForce = Unit {dim = Force, symbol = "lbf", conv = Linear (2000000000000 % 
 _pond = Unit {dim = Force, symbol = "pond", conv = Linear (20000000 % 1961333)}
 
 {-
+-- frequency units
+-}
+
+_hertz = Unit {dim = Frequency, symbol = "hz", conv = Base}
+
+{-
 -- length units
 -}
 
@@ -273,6 +279,7 @@ unitMap = F.foldl' (\m u -> M.insert (symbol u) u m) mempty units
             _horsepower,
             _hour,
             _hundredweight,
+            _hertz,
             _inch,
             _joule,
             _kilobyte,
@@ -319,6 +326,7 @@ unitMap = F.foldl' (\m u -> M.insert (symbol u) u m) mempty units
           siUnits _coulomb,
           siUnits _farad,
           siUnits _gram,
+          siUnits _hertz,
           siUnits _joule,
           siUnits _liter,
           siUnits _meter,
