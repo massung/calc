@@ -82,21 +82,25 @@ prompt = do
     then prompt
     else parseExpr s
 
-readEval :: Opts -> [Scalar] -> IO Scalar
-readEval opts xs = do
-  expr <- prompt
-  putStr "== "
-  runExpr opts expr xs
-
 runExpr :: Opts -> Expr -> [Scalar] -> IO Scalar
 runExpr opts expr xs = either throw (printAns opts) result
   where
     result = evalState (runExceptT $ evalExpr expr) xs
 
+runEval :: Opts -> [Scalar] -> IO Scalar
+runEval opts xs = do
+  expr <- prompt
+  putStr "== "
+  runExpr opts expr xs
+
 runInteractive :: Opts -> [Scalar] -> IO ()
 runInteractive opts xs = do
-  ans <- readEval opts xs
-  runInteractive opts (ans : xs)
+  repl
+    `catches` [ Handler $ \(ex :: IOException) -> return (),
+                Handler $ \(ex :: Error) -> print ex >> runInteractive opts xs
+              ]
+  where
+    repl = runEval opts xs >>= runInteractive opts . (: xs)
 
 runLoop :: Opts -> Expr -> IO ()
 runLoop opts expr = do

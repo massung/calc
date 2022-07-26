@@ -1,9 +1,12 @@
+{-# LANGUAGE OverloadedLists #-}
 {-# LANGUAGE OverloadedStrings #-}
 
+import Calc.Dims
 import Calc.Error
 import Calc.Eval
 import Calc.Parser.Expr
 import Calc.Parser.Scalar
+import Calc.Parser.Units
 import Calc.Scalar as S
 import Calc.Units as U
 import Control.Monad.Except
@@ -13,6 +16,7 @@ import Data.Map as M
 import Test.Hspec
 import Text.Parsec
 
+noUnits :: Units
 noUnits = Units M.empty
 
 epsilon = 1e-2
@@ -20,21 +24,40 @@ epsilon = 1e-2
 main :: IO ()
 main = hspec $ do
   testUnits
+  testDims
   testScalars
   testConversions
+  testArgs
 
-testExpr s ans = it (unwords [s, "==", show ans]) $ eval `shouldBe` Right True
+testExprArgs args s ans = it (unwords [s, "==", show ans]) $ eval `shouldBe` Right True
   where
     eval = do
       expr <- mapLeft ExprError $ parse exprParser "" s
-      case evalState (runExceptT $ evalExpr expr) [] of
+      case evalState (runExceptT $ evalExpr expr) args of
         Right x -> return $ abs (x - ans) < epsilon
         Left e -> return False
 
+testExpr = testExprArgs []
+
+testDims = do
+  describe "baseDims" $ do
+    it "ft == Length" $ do
+      dims "ft" == Dims [(Length, 1)]
+    it "ft/s == Speed" $ do
+      dims "ft/s" == baseDims Speed
+
 testUnits = do
-  describe "units" $ do
+  describe "IsString units" $ do
     it "ft == ft" $ do
-      ("ft" :: Units) == ("ft" :: Units) `shouldBe` True
+      ("ft" :: Units) `shouldBe` ("ft" :: Units)
+
+  describe "parsing units" $ do
+    it "ft == ft" $ do
+      parseUnits "ft" `shouldBe` Right "ft"
+    it "ft/s == ft/s" $ do
+      parseUnits "ft/s" `shouldBe` Right "ft/s"
+    it "asdf == invalid units" $ do
+      parseUnits "asdf" `shouldSatisfy` isLeft
 
   describe "append units" $ do
     it "noUnits <> ft" $ do
@@ -125,6 +148,7 @@ testConversions = do
     testExpr "1 ft / 2 in" 6
     testExpr "1 ft * 2 in^-1" 24
     testExpr "1 ft * 2 in^2" "24 in^3"
+    testExpr "1 m/s * 1 min" "60 m"
 
   describe "precision loss" $ do
     testExpr "((2 ft : in) : ft) : in" "24 in"
@@ -142,3 +166,14 @@ testConversions = do
     testExpr "1 s : min" "0.01667 min"
     testExpr "1 s : hr" "2.778e-4 hr"
     testExpr "1 s : day" "1.157e-5 day"
+
+testArgs = do
+  describe "single arguments" $ do
+    testExprArgs [1] "_ ft" "1 ft"
+    testExprArgs [1] "_ ft : in" "12 in"
+    testExprArgs [2] "_ yd : ft" "6 ft"
+    testExprArgs [1] "5 ft + _ in" "61 in"
+
+  describe "multiple arguments" $ do
+    testExprArgs [1, 2] "_ ft + _ in" "14 in"
+    testExprArgs [2, 3, 1] "_ * _ - _" "5"

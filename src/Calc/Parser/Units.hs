@@ -13,11 +13,12 @@ import Text.Parsec.Expr
 import Text.Parsec.Token
 
 instance IsString Units where
-  fromString = fromRight (error "no parse") . parseUnits
+  fromString = fromRight (error "illegal units") . parseUnits
 
 parseUnits = parse parser ""
   where
     parser = do
+      whiteSpace lexer
       u <- unitsParser
       eof
       return u
@@ -34,9 +35,12 @@ unitsTerm = parens lexer unitsParser <|> terms
         else fail "illegal units"
 
 unitTerm = do
-  u <- fromString <$> identifier lexer
-  n <- option 1 $ lexeme lexer unitExponent
-  return $ Units (M.singleton u n)
+  s <- identifier lexer
+  case unitMap !? s of
+    Nothing -> fail $ "unknown unit: " ++ s
+    Just u -> do
+      n <- option 1 $ lexeme lexer unitExponent
+      return $ Units (M.singleton u n)
 
 unitExponent = do
   reservedOp lexer "^"
