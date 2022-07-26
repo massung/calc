@@ -8,6 +8,7 @@ module Main where
 import Calc.Error
 import Calc.Eval
 import Calc.Parser.Expr
+import Calc.Parser.Lexer
 import Calc.Parser.Scalar
 import Calc.Scalar
 import Calc.Units hiding (name)
@@ -20,6 +21,7 @@ import Data.Maybe
 import System.Console.CmdArgs
 import System.IO
 import Text.Parsec hiding (try, (<|>))
+import Text.Parsec.Token
 import Text.Printf
 
 -- command line options
@@ -53,9 +55,13 @@ printAns opts x@(Scalar _ d u) =
     prec = "%0." ++ show (fromMaybe 2 $ precision opts) ++ "g"
 
 parseExpr :: String -> IO Expr
-parseExpr s = case mapLeft ExprError $ parse exprParser "" s of
-  Right expr -> return expr
-  Left err -> throw err
+parseExpr s = either throw return $ mapLeft ExprError $ parse parser "" s
+  where
+    parser = do
+      whiteSpace lexer
+      expr <- exprParser
+      eof
+      return expr
 
 parseInputs :: [String] -> IO [Scalar]
 parseInputs inputs = either (throw . ExprError) return $ sequence xs
@@ -76,6 +82,12 @@ prompt = do
     then prompt
     else parseExpr s
 
+readEval :: Opts -> [Scalar] -> IO Scalar
+readEval opts xs = do
+  expr <- prompt
+  putStr "== "
+  runExpr opts expr xs
+
 runExpr :: Opts -> Expr -> [Scalar] -> IO Scalar
 runExpr opts expr xs = either throw (printAns opts) result
   where
@@ -83,10 +95,8 @@ runExpr opts expr xs = either throw (printAns opts) result
 
 runInteractive :: Opts -> [Scalar] -> IO ()
 runInteractive opts xs = do
-  expr <- prompt
-  putStr "== "
-  ans' <- runExpr opts expr xs
-  runInteractive opts (ans' : xs)
+  ans <- readEval opts xs
+  runInteractive opts (ans : xs)
 
 runLoop :: Opts -> Expr -> IO ()
 runLoop opts expr = do
