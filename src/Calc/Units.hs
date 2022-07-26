@@ -212,18 +212,6 @@ _bit = Unit {dim = Storage, symbol = "b", conv = Linear 8}
 
 _byte = Unit {dim = Storage, symbol = "B", conv = Base}
 
-_kilobyte = Unit {dim = Storage, symbol = "kB", conv = Linear (1 % 1024)}
-
-_megabyte = Unit {dim = Storage, symbol = "MB", conv = Linear (1 % 1048576)}
-
-_gigabyte = Unit {dim = Storage, symbol = "GB", conv = Linear (1 % 1073741824)}
-
-_terabyte = Unit {dim = Storage, symbol = "TB", conv = Linear (1 % 1099511627776)}
-
-_petabyte = Unit {dim = Storage, symbol = "PB", conv = Linear (1 % 1125899906842624)}
-
-_exabyte = Unit {dim = Storage, symbol = "EB", conv = Linear (1 % 1152921504606846976)}
-
 {-
 -- volume units
 -}
@@ -246,7 +234,11 @@ _gallon = Unit {dim = Volume, symbol = "gal", conv = Linear (125000000000 % 4731
 
 siUnits u = [siUnit conversion | conversion <- siConversions]
   where
-    siUnit (_, p, c) = u {symbol = p ++ symbol u, conv = conv u <> c}
+    siUnit (p, c) = u {symbol = p ++ symbol u, conv = conv u <> c}
+
+storageUnits u = [storageUnit conversion | conversion <- storageConversions]
+  where
+    storageUnit (p, c) = u {symbol = p ++ symbol u, conv = conv u <> c}
 
 unitMap :: Map String Unit
 unitMap = F.foldl' (\m u -> M.insert (symbol u) u m) mempty units
@@ -265,14 +257,12 @@ unitMap = F.foldl' (\m u -> M.insert (symbol u) u m) mempty units
             _cup,
             _day,
             _degree,
-            _exabyte,
             _farad,
             _fathom,
             _fluidOunce,
             _foot,
             _furlong,
             _gallon,
-            _gigabyte,
             _gram,
             _hand,
             _hectare,
@@ -282,13 +272,11 @@ unitMap = F.foldl' (\m u -> M.insert (symbol u) u m) mempty units
             _hertz,
             _inch,
             _joule,
-            _kilobyte,
             _knot,
             _kph,
             _league,
             _link,
             _liter,
-            _megabyte,
             _meter,
             _mil,
             _mile,
@@ -299,7 +287,6 @@ unitMap = F.foldl' (\m u -> M.insert (symbol u) u m) mempty units
             _ohm,
             _ounce,
             _pascal,
-            _petabyte,
             _pint,
             _pond,
             _pound,
@@ -313,7 +300,6 @@ unitMap = F.foldl' (\m u -> M.insert (symbol u) u m) mempty units
             _stone,
             _tablespoon,
             _teaspoon,
-            _terabyte,
             _therm,
             _ton,
             _turn,
@@ -335,7 +321,10 @@ unitMap = F.foldl' (\m u -> M.insert (symbol u) u m) mempty units
           siUnits _pascal,
           siUnits _second,
           siUnits _volt,
-          siUnits _watt
+          siUnits _watt,
+          -- storage units
+          storageUnits _bit,
+          storageUnits _byte
         ]
 
 nullUnits (Units u) = M.null u
