@@ -28,6 +28,7 @@ main = hspec $ do
   testScalars
   testConversions
   testArgs
+  testDefs
 
 testExprArgs args s ans = it (unwords [s, "==", show ans]) $ eval `shouldBe` Right True
   where
@@ -177,3 +178,8 @@ testArgs = do
   describe "multiple arguments" $ do
     testExprArgs [1, 2] "_ ft + _ in" "14 in"
     testExprArgs [2, 3, 1] "_ * _ - _" "5"
+
+testDefs = do
+  describe "function calls" $ do
+    testExpr "[sin 90 deg]" 1
+    testExpr "[cos [pi]]" (-1)
