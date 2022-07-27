@@ -52,7 +52,7 @@ instance Show Units where
       -- concatenate units together
       showExps' = unwords . L.map showExp . M.toList
 
-_pi = 245850922 % 78256779
+_pi = toRational pi
 
 {-
 -- angle units
@@ -110,7 +110,7 @@ _btu = Unit {dim = Energy, symbol = "BTU", conv = Linear (50000000 % 52752792631
 
 _therm = Unit {dim = Energy, symbol = "thm", conv = Linear (1 % 105480400)}
 
-_electronVolt = Unit {dim = Energy, symbol="eV", conv = Linear (5000000000000000000000000000 % 801088317)}
+_electronVolt = Unit {dim = Energy, symbol = "eV", conv = Linear (5000000000000000000000000000 % 801088317)}
 
 {-
 -- force units

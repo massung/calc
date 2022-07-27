@@ -57,10 +57,10 @@ mapScalar f (Scalar x d u) = Scalar (f x) d u
 
 fromUnits u = Scalar 1 (dims u) u
 
-harmonize (Scalar x d from) to
-  | nullUnits to = Right $ Scalar x d from
+harmonize s@(Scalar x d from) to
+  | nullUnits from || nullUnits to = Right s
   | nullDims d = Right $ Scalar x (dims to) to
-  | otherwise = convert (Scalar x d from) $ harmonizeUnits from to
+  | otherwise = convert s $ harmonizeUnits from to
 
 convert (Scalar x d from) to
   | nullUnits to = Right $ Scalar x d from
