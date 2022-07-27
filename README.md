@@ -1,86 +1,54 @@
 # CALC - a CLI calculator with support for units
 
-A scalar expression and units calculator for the terminal.
+A simple, scriptable, scalar expression and units calculator for the terminal.
 
-```
-$ calc -?
-calc v1.0, (c) Jeffrey Massung
+## Setup
 
-calc [OPTIONS] [EXPRESSION [ARGS...]]
+### Installing Haskell and Stack
 
-Common flags:
-  -s --script=FILE
-  -p --precision=DIGITS
-  -d --delimiter=SEP
-  -n --no-units
-  -? --help             Display help message
-  -V --version          Print version information
-     --numeric-version  Print just the version number
+1. Install [ghcup](https://www.haskell.org/ghcup/)
+2. Run `ghcup` to install [stack](https://docs.haskellstack.org/en/stable/README/)
 
-Scalar expression and units calculator
-```
+### Building from Source
 
-## Usages screencast
+1. Clone the repository
+2. From within the repository directory run `stack build` and/or `stack install`
 
+## Screencast
 
+![demo](demo/demo.gif)
 
-### Simple expressions
+## Examples
 
 ```bash
+# simple expressions
+calc '1+2'
 
-# calc is a simple calculator
-calc '(1+2)/3*4'
+# more complex expressions with unit conversions
+calc '300 W * 2 hr : BTU'
+calc '100 mL + 1 c to in^3'
 
+# make use of placeholder arguments
+calc '_ / _ in' '3 yd^2' 4
 
-# that understands units
-calc '5 GB : Mb'
-
-
-# and complex unit conversions
-calc '10 W hr to BTU'
-calc '100 mL to in^3'
-
-
-# and can perform automatic unit conversions
-calc '2 mi + 3 km'
-calc '40 m^2/s + 2 acre/min'
-
-
-# use placeholders for inputs
-calc '_ tbsp : floz' 10
-calc '100 hz * _ m : mph' 13
-
-
-# even multiple placeholders
-calc '_ + _ * _' 1 2 3
-
-
-# or pipe them
+# evaluate piped, delimited values
 head -n 5 values.txt | calc '_ deg/s : rev/min'
 
-
-# call built-in functions that also understand units
-calc '[sin 45 deg]'
-
-
-# or even define your own functions in script files
-cat > myfuncs.calc <<EOF
-# this is a comment
-function transferRate [MB;s] = _/_
-EOF
-
-calc --script myfuncs.calc '[transferRate 10 GB; 20 min]'
-
-
-# you can also define your own functions and
-
-
-# or just run an interactive session
-calc
-1 + 1
-_ V * 3 A : W
-
-
-# and much, much more...
+# call functions that understand units
+calc -p8 '[sin 45 deg] * [cos [pi] / 4]'
 ```
 
+## Scripts
+
+You can define your own functions in scripts:
+
+```bash
+# myfuncs.calc
+function transferRate [MB; s] = _/_
+```
+
+And now you can load the script and use it in your calculations:
+
+```
+calc --script myfuncs.calc '[transferRate 10 GB; 20 min]'
+```

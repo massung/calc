@@ -47,4 +47,4 @@ scriptFunction = do
   expr <- exprParser
   return (def, scriptDef units expr)
 
-scriptUnits = brackets lexer (sepBy unitsParser $ char ';')
+scriptUnits = brackets lexer (sepBy unitsParser $ lexeme lexer (char ';'))

@@ -123,7 +123,7 @@ runInteractive opts defs xs = do
                 Handler $ \(ex :: Error) -> print ex >> runInteractive opts defs xs
               ]
   where
-    repl = runEval opts defs xs >>= runInteractive opts defs . (: xs)
+    repl = runEval opts defs xs >>= runInteractive opts defs . L.take 5 . (: xs)
 
 runLoop :: Opts -> Expr -> IO ()
 runLoop opts expr = do
