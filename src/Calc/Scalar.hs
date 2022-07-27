@@ -51,6 +51,8 @@ instance Fractional Scalar where
   -- scalar inverse
   recip (Scalar x d u) = Scalar (recip x) (recipDims d) (recipUnits u)
 
+scalar x units = Scalar (toRational x) (dims units) units
+
 mapScalar f (Scalar x d u) = Scalar (f x) d u
 
 fromUnits u = Scalar 1 (dims u) u

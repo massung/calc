@@ -1,6 +1,6 @@
 module Calc.Eval where
 
-import Calc.Conv
+import Calc.Def
 import Calc.Error
 import Calc.Parser.Expr
 import Calc.Scalar
@@ -14,6 +14,7 @@ evalExpr :: Expr -> Eval Scalar
 evalExpr Answer = evalAnswer
 evalExpr (Term x) = return x
 evalExpr (Convert to x) = evalConvert x to
+evalExpr (Apply def xs) = evalCall def xs
 evalExpr (Unary f x) = evalUnary f x
 evalExpr (Binary f x y) = evalBinary f x y
 evalExpr (BinaryConv f x y) = evalBinaryConv f x y
@@ -32,6 +33,11 @@ evalConvert (Term x) to = either throwError return $ convert x to
 evalConvert x to = do
   x' <- evalExpr x
   either throwError return $ convert x' to
+
+evalCall :: Def -> [Expr] -> Eval Scalar
+evalCall def xs = do
+  xs' <- sequence [evalExpr x | x <- xs]
+  either throwError return $ apply def xs'
 
 evalUnary :: (Scalar -> Scalar) -> Expr -> Eval Scalar
 evalUnary f (Term x) = return $ f x

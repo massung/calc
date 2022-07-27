@@ -2,11 +2,13 @@
 
 module Calc.Parser.Expr where
 
+import Calc.Def
 import Calc.Parser.Lexer
 import Calc.Parser.Scalar
 import Calc.Parser.Units
 import Calc.Scalar
 import Calc.Units
+import Data.String
 import Text.Parsec
 import Text.Parsec.Expr
 import Text.Parsec.Token
@@ -15,6 +17,7 @@ data Expr
   = Answer
   | Term Scalar
   | Convert Units Expr
+  | Apply Def [Expr]
   | Unary (Scalar -> Scalar) Expr
   | Binary (Scalar -> Scalar -> Scalar) Expr Expr
   | BinaryConv (Scalar -> Scalar -> Scalar) Expr Expr
@@ -25,12 +28,14 @@ hasPlaceholder (Convert _ x) = hasPlaceholder x
 hasPlaceholder (Unary _ x) = hasPlaceholder x
 hasPlaceholder (Binary _ x y) = hasPlaceholder x || hasPlaceholder y
 hasPlaceholder (BinaryConv _ x y) = hasPlaceholder x || hasPlaceholder y
+hasPlaceholder (Apply _ xs) = any hasPlaceholder xs
 
 exprParser :: Parsec String () Expr
 exprParser = buildExpressionParser exprTable exprTerm
 
 exprTerm =
   parens lexer exprParser
+    <|> brackets lexer exprApply
     <|> Term <$> scalarParser
     <|> Term . fromUnits <$> unitsTerm
     <|> exprAnswer
@@ -45,6 +50,11 @@ exprAnswer = do
 exprCast = do
   reservedOp lexer ":" <|> reserved lexer "to"
   unitsParser
+
+exprApply = do
+  def <- identifier lexer
+  xs <- sepBy exprParser (char ';')
+  return $ Apply (fromString def) xs
 
 exprTable =
   [ [prefix "-" negate, prefix "+" id],

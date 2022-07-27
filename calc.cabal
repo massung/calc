@@ -24,6 +24,7 @@ source-repository head
 library
   exposed-modules:
       Calc.Conv
+      Calc.Def
       Calc.Dims
       Calc.Error
       Calc.Eval
