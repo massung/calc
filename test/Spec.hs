@@ -1,6 +1,7 @@
 {-# LANGUAGE OverloadedLists #-}
 {-# LANGUAGE OverloadedStrings #-}
 
+import Calc.Defs
 import Calc.Dims
 import Calc.Error
 import Calc.Eval
@@ -33,7 +34,7 @@ main = hspec $ do
 testExprArgs args s ans = it (unwords [s, "==", show ans]) $ eval `shouldBe` Right True
   where
     eval = do
-      expr <- mapLeft ExprError $ parse exprParser "" s
+      expr <- mapLeft ExprError $ runParser exprParser defMap "" s
       case evalState (runExceptT $ evalExpr expr) args of
         Right x -> return $ abs (x - ans) < epsilon
         Left e -> return False
@@ -144,6 +145,8 @@ testConversions = do
     testExpr "12 in + 1 ft" "2 ft"
 
   describe "harmonized expressions" $ do
+    testExpr "2 ft * 3" "6 ft"
+    testExpr "2 * 3 ft" "6 ft"
     testExpr "1 ft * 2 in" "24 in^2"
     testExpr "12 in * 1 ft" "1 ft^2"
     testExpr "1 ft / 2 in" 6

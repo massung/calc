@@ -8,6 +8,7 @@ import Calc.Parser.Scalar
 import Calc.Parser.Units
 import Calc.Scalar
 import Calc.Units
+import Data.Map.Strict as M
 import Data.String
 import Text.Parsec
 import Text.Parsec.Expr
@@ -30,7 +31,7 @@ hasPlaceholder (Binary _ x y) = hasPlaceholder x || hasPlaceholder y
 hasPlaceholder (BinaryConv _ x y) = hasPlaceholder x || hasPlaceholder y
 hasPlaceholder (Apply _ xs) = any hasPlaceholder xs
 
-exprParser :: Parsec String () Expr
+exprParser :: Parsec String (Map String Def) Expr
 exprParser = buildExpressionParser exprTable exprTerm
 
 exprTerm =
@@ -52,9 +53,12 @@ exprCast = do
   unitsParser
 
 exprApply = do
-  def <- identifier lexer
-  xs <- sepBy exprParser (char ';')
-  return $ Apply (fromString def) xs
+  defs <- getState
+  s <- identifier lexer
+  xs <- sepBy exprParser (lexeme lexer $ char ';')
+  case M.lookup s defs of
+    Just def -> return $ Apply def xs
+    Nothing -> fail $ s ++ " ?"
 
 exprTable =
   [ [prefix "-" negate, prefix "+" id],

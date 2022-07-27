@@ -31,9 +31,9 @@ library
       Calc.Parser.Expr
       Calc.Parser.Lexer
       Calc.Parser.Scalar
-      Calc.Parser.Script
       Calc.Parser.Units
       Calc.Scalar
+      Calc.Script
       Calc.Units
   other-modules:
       Paths_calc

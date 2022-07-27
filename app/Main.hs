@@ -5,18 +5,21 @@
 
 module Main where
 
+import Calc.Defs
 import Calc.Error
 import Calc.Eval
 import Calc.Parser.Expr
 import Calc.Parser.Lexer
 import Calc.Parser.Scalar
 import Calc.Scalar
+import Calc.Script
 import Calc.Units hiding (name)
 import Control.Exception
 import Control.Monad.Except
 import Control.Monad.State.Strict
 import Data.Either.Extra
-import Data.List.Extra
+import Data.List.Extra as L
+import Data.Map.Strict as M
 import Data.Maybe
 import System.Console.CmdArgs
 import System.IO
@@ -26,7 +29,8 @@ import Text.Printf
 
 -- command line options
 data Opts = Opts
-  { precision :: Maybe Int,
+  { scriptFiles :: [String],
+    precision :: Maybe Int,
     noUnits :: Bool,
     delim :: Maybe String,
     exprStrings :: [String]
@@ -36,8 +40,9 @@ data Opts = Opts
 getOpts =
   cmdArgs $
     Opts
-      { noUnits = def &= explicit &= name "n" &= name "no-units",
+      { scriptFiles = def &= explicit &= name "s" &= name "script" &= typ "FILE",
         precision = def &= explicit &= name "p" &= name "precision" &= typ "N",
+        noUnits = def &= explicit &= name "n" &= name "no-units",
         delim = def &= explicit &= name "d" &= name "delimiter" &= typ "SEP",
         exprStrings = def &= args &= typ "EXPRESSION [ARGS...]"
       }
@@ -63,8 +68,8 @@ printAns opts x@(Scalar _ d u) =
   where
     prec = "%0." ++ show (fromMaybe 2 $ precision opts) ++ "g"
 
-parseExpr :: String -> IO Expr
-parseExpr s = either throw return $ mapLeft ExprError $ parse parser "" s
+parseExpr :: Map String Def -> String -> IO Expr
+parseExpr defs s = either throw return $ mapLeft ExprError $ runParser parser defs "" s
   where
     parser = do
       whiteSpace lexer
@@ -82,34 +87,34 @@ parseCsvInputs opts = do
   input <- getLine
   parseInputs $ splitOn (fromMaybe "," $ delim opts) input
 
-prompt :: IO Expr
-prompt = do
+prompt :: Map String Def -> IO Expr
+prompt defs = do
   putStr ">> "
   hFlush stdout
   s <- getLine
-  if null s
-    then prompt
-    else parseExpr s
+  if L.null s
+    then prompt defs
+    else parseExpr defs s
 
 runExpr :: Opts -> Expr -> [Scalar] -> IO Scalar
 runExpr opts expr xs = either throw (printAns opts) result
   where
     result = evalState (runExceptT $ evalExpr expr) xs
 
-runEval :: Opts -> [Scalar] -> IO Scalar
-runEval opts xs = do
-  expr <- prompt
+runEval :: Opts -> Map String Def -> [Scalar] -> IO Scalar
+runEval opts defs xs = do
+  expr <- prompt defs
   putStr "== "
   runExpr opts expr xs
 
-runInteractive :: Opts -> [Scalar] -> IO ()
-runInteractive opts xs = do
+runInteractive :: Opts -> Map String Def -> [Scalar] -> IO ()
+runInteractive opts defs xs = do
   repl
     `catches` [ Handler $ \(ex :: IOException) -> return (),
-                Handler $ \(ex :: Error) -> print ex >> runInteractive opts xs
+                Handler $ \(ex :: Error) -> print ex >> runInteractive opts defs xs
               ]
   where
-    repl = runEval opts xs >>= runInteractive opts . (: xs)
+    repl = runEval opts defs xs >>= runInteractive opts defs . (: xs)
 
 runLoop :: Opts -> Expr -> IO ()
 runLoop opts expr = do
@@ -117,23 +122,26 @@ runLoop opts expr = do
   runExpr opts expr inputs
   runLoop opts expr
 
-run :: Opts -> [String] -> IO ()
-run opts [] = runInteractive opts []
-run opts (exprString : inputs) = do
-  (expr, xs) <- (,) <$> parseExpr exprString <*> parseInputs inputs
+run :: Opts -> Map String Def -> [String] -> IO ()
+run opts defs [] = runInteractive opts defs []
+run opts defs (exprString : inputs) = do
+  (expr, xs) <- (,) <$> parseExpr defs exprString <*> parseInputs inputs
 
   -- no placeholder (run once), no inputs (use stdin), or run once w/ CLI args
   if
       | not (hasPlaceholder expr) -> void $ runExpr opts expr []
-      | null xs -> runLoop opts expr
+      | L.null xs -> runLoop opts expr
       | otherwise -> void $ runExpr opts expr xs
 
 main :: IO ()
 main = do
   opts <- getOpts
 
+  -- load all the scripts to create a single defs map
+  defs <- loadScripts defMap $ scriptFiles opts
+
   -- handle EOF or expression error
-  run opts (exprStrings opts)
+  run opts defs (exprStrings opts)
     `catches` [ Handler $ \(ex :: IOException) -> return (),
                 Handler $ \(ex :: Error) -> print ex
               ]

@@ -8,13 +8,8 @@ import Calc.Scalar
 import Calc.Units hiding (_pi)
 import Control.Monad
 import Data.Map.Strict as M
-import Data.Maybe
-import Data.String
 
-data Def = Def ([Double] -> Either Error Scalar) [Units]
-
-instance IsString Def where
-  fromString = fromMaybe (error "no function") . (defMap !?)
+data Def = Def ([Scalar] -> Either Error Scalar) [Units]
 
 defMap =
   M.fromList
@@ -30,8 +25,8 @@ apply (Def func units) args = case zipWithM convert args units of
 _pi [] = Right $ scalar pi "rad"
 _pi _ = Left WrongArity
 
-_sin [x] = Right $ scalar (sin x) mempty
+_sin [x] = Right $ scalar (sin $ fromRational $ toRational x) mempty
 _sin _ = Left WrongArity
 
-_cos [x] = Right $ scalar (cos x) mempty
+_cos [x] = Right $ scalar (cos $ fromRational $ toRational x) mempty
 _cos _ = Left WrongArity

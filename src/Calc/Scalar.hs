@@ -45,6 +45,9 @@ instance Num Scalar where
   abs = mapScalar abs
   signum = mapScalar signum
 
+instance Real Scalar where
+  toRational (Scalar x _ _) = x
+
 instance Fractional Scalar where
   fromRational r = Scalar (fromRational r) mempty mempty
 
