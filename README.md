@@ -15,10 +15,6 @@ A simple, scriptable, scalar expression and units calculator for the terminal.
 2. From within the repository directory run `stack build` and/or `stack install`
 3. Optionally ensure it's all good with `stack test`
 
-## Screencast
-
-![demo](demo/demo.gif)
-
 ## Examples
 
 ```bash
