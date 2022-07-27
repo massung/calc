@@ -21,7 +21,7 @@ Scalar expression and units calculator
 
 ## Usages screencast
 
-TODO: show asciinema to record examples
+
 
 ### Simple expressions
 
@@ -45,6 +45,10 @@ calc '2 mi + 3 km'
 calc '40 m^2/s + 2 acre/min'
 
 
+# call built-in functions that also understand units
+calc '[sin 45 deg]'
+
+
 # use placeholders for inputs
 calc '_ tbsp : floz' 10
 calc '100 hz * _ m : mph' 13
@@ -62,7 +66,7 @@ calc '_ t : kg'
 
 
 # or pipe them
-cut -d ',' -f2 values.txt | calc '_ deg/s : rev/min'
+head -n 5 values.txt | cut -d ',' -f2 | calc '_ deg/s : rev/min'
 
 
 # or just run an interactive session

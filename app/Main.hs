@@ -43,7 +43,16 @@ getOpts =
       }
       &= program "calc"
       &= summary "calc v1.0, (c) Jeffrey Massung"
-      &= details ["Scalar expression and units calculator"]
+      &= details
+        [ "Examples:",
+          "  calc '1+2'",
+          "  calc '6 ft + 3 in : m'",
+          "  calc '500 N * 10 ft to BTU'",
+          "  calc '10 GB / 2 hr to MB/s'",
+          "  calc '30 W * 6 min to J'",
+          "  calc '2 * [sin 45 deg]'",
+          "  calc '100 hz * _ m : mph' < values.txt"
+        ]
       &= noAtExpand
 
 printAns :: Opts -> Scalar -> IO Scalar
