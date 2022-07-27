@@ -13,13 +13,13 @@ lexer = makeTokenParser lang
       LanguageDef
         { commentStart = "",
           commentEnd = "",
-          commentLine = "",
+          commentLine = "#",
           nestedComments = False,
           identStart = letter <|> char '_',
           identLetter = letter,
-          opStart = oneOf ":+-*/",
+          opStart = oneOf ":+-*/=",
           opLetter = parserZero,
-          reservedNames = ["_", "to"],
-          reservedOpNames = ["+", "-", "*", "/", ":"],
+          reservedNames = ["_", "to", "function"],
+          reservedOpNames = ["+", "-", "*", "/", ":", "="],
           caseSensitive = True
         }
