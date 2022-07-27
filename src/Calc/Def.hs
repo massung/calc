@@ -15,7 +15,7 @@ import Data.String
 data Def = Def ([Double] -> Either Error Scalar) [Units]
 
 instance IsString Def where
-  fromString = fromMaybe (error "no parse") . (defMap !?)
+  fromString = fromMaybe (error "no function") . (defMap !?)
 
 defMap =
   M.fromList
