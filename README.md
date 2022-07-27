@@ -36,7 +36,7 @@ calc '_ / _ in' '3 yd^2' 4
 head -n 5 values.txt | calc '_ deg/s : rev/min'
 
 # call functions that understand units
-calc -p8 '[sin 45 deg] * [cos [pi] / 4]'
+calc '[sin 45 deg] * [cos [pi] / 4]'
 ```
 
 ## Scripts
