@@ -110,6 +110,8 @@ _btu = Unit {dim = Energy, symbol = "BTU", conv = Linear (50000000 % 52752792631
 
 _therm = Unit {dim = Energy, symbol = "thm", conv = Linear (1 % 105480400)}
 
+_electronVolt = Unit {dim = Energy, symbol="eV", conv = Linear (5000000000000000000000000000 % 801088317)}
+
 {-
 -- force units
 -}
@@ -257,6 +259,7 @@ unitMap = F.foldl' (\m u -> M.insert (symbol u) u m) mempty units
             _cup,
             _day,
             _degree,
+            _electronVolt,
             _farad,
             _fathom,
             _fluidOunce,
@@ -310,6 +313,7 @@ unitMap = F.foldl' (\m u -> M.insert (symbol u) u m) mempty units
           -- si units
           siUnits _ampere,
           siUnits _coulomb,
+          siUnits _electronVolt,
           siUnits _farad,
           siUnits _gram,
           siUnits _hertz,
