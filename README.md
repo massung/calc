@@ -13,6 +13,7 @@ A simple, scriptable, scalar expression and units calculator for the terminal.
 
 1. Clone the repository
 2. From within the repository directory run `stack build` and/or `stack install`
+3. Optionally ensure it's all good with `stack test`
 
 ## Screencast
 
@@ -49,6 +50,6 @@ function transferRate [MB; s] = _/_
 
 And now you can load the script and use it in your calculations:
 
-```
+```bash
 calc --script myfuncs.calc '[transferRate 10 GB; 20 min]'
 ```
