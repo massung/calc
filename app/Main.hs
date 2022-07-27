@@ -14,6 +14,7 @@ import Calc.Parser.Scalar
 import Calc.Scalar
 import Calc.Script
 import Calc.Units hiding (name)
+import Control.Applicative
 import Control.Exception
 import Control.Monad.Except
 import Control.Monad.State.Strict
@@ -22,6 +23,7 @@ import Data.List.Extra as L
 import Data.Map.Strict as M
 import Data.Maybe
 import System.Console.CmdArgs
+import System.Environment
 import System.IO
 import Text.Parsec hiding (try, (<|>))
 import Text.Parsec.Token
@@ -48,7 +50,7 @@ getOpts =
     Opts
       { scriptFiles = def &= explicit &= name "s" &= name "script" &= typ "FILE",
         precision = def &= explicit &= name "p" &= name "precision" &= typ "DIGITS",
-        delim = def &= explicit &= name "d" &= name "delimiter" &= typ "SEP",
+        delim = def &= explicit &= name "d" &= name "delim" &= typ "FS",
         noUnits = def &= explicit &= name "n" &= name "no-units",
         exprStrings = def &= args &= typ "EXPRESSION [ARGS...]"
       }
@@ -91,7 +93,8 @@ parseInputs inputs = either (throw . ExprError) return $ sequence xs
 parseCsvInputs :: Opts -> IO [Scalar]
 parseCsvInputs opts = do
   input <- getLine
-  parseInputs $ splitOn (fromMaybe "," $ delim opts) input
+  fs <- lookupEnv "FS"
+  parseInputs $ splitOn (fromMaybe "," $ delim opts <|> fs) input
 
 prompt :: Map String Def -> IO Expr
 prompt defs = do
