@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Calc.Def where
+module Calc.Defs where
 
 import Calc.Error
 import Calc.Parser.Units

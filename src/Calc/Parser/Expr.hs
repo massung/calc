@@ -2,7 +2,7 @@
 
 module Calc.Parser.Expr where
 
-import Calc.Def
+import Calc.Defs
 import Calc.Parser.Lexer
 import Calc.Parser.Scalar
 import Calc.Parser.Units

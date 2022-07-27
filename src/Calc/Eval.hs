@@ -1,6 +1,6 @@
 module Calc.Eval where
 
-import Calc.Def
+import Calc.Defs
 import Calc.Error
 import Calc.Parser.Expr
 import Calc.Scalar
