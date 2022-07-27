@@ -7,7 +7,6 @@ import Calc.Parser.Units
 import Calc.Scalar
 import Calc.Units hiding (_pi)
 import Control.Monad
-import Data.Functor
 import Data.Map.Strict as M
 import Data.Maybe
 import Data.String
