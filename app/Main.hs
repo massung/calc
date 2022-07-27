@@ -31,23 +31,29 @@ import Text.Printf
 data Opts = Opts
   { scriptFiles :: [String],
     precision :: Maybe Int,
-    noUnits :: Bool,
     delim :: Maybe String,
+    noUnits :: Bool,
     exprStrings :: [String]
   }
   deriving (Data, Typeable, Show, Eq)
+
+motd = printf "calc v%d.%d.%d, (c) Jeffrey Massung" major minor patch
+  where
+    major = 1 :: Int
+    minor = 0 :: Int
+    patch = 0 :: Int
 
 getOpts =
   cmdArgs $
     Opts
       { scriptFiles = def &= explicit &= name "s" &= name "script" &= typ "FILE",
-        precision = def &= explicit &= name "p" &= name "precision" &= typ "N",
-        noUnits = def &= explicit &= name "n" &= name "no-units",
+        precision = def &= explicit &= name "p" &= name "precision" &= typ "DIGITS",
         delim = def &= explicit &= name "d" &= name "delimiter" &= typ "SEP",
+        noUnits = def &= explicit &= name "n" &= name "no-units",
         exprStrings = def &= args &= typ "EXPRESSION [ARGS...]"
       }
       &= program "calc"
-      &= summary "calc v1.0, (c) Jeffrey Massung"
+      &= summary motd
       &= details
         [ "Examples:",
           "  calc '1+2'",
@@ -123,7 +129,7 @@ runLoop opts expr = do
   runLoop opts expr
 
 run :: Opts -> Map String Def -> [String] -> IO ()
-run opts defs [] = runInteractive opts defs []
+run opts defs [] = putStrLn motd >> runInteractive opts defs []
 run opts defs (exprString : inputs) = do
   (expr, xs) <- (,) <$> parseExpr defs exprString <*> parseInputs inputs
 
