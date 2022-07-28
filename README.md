@@ -54,7 +54,7 @@ calc --script myfuncs.calc '[transferRate 10 GB; 20 min]'
 
 It's also possible to simply run in interactive mode:
 
-```bash
+```
 $ calc
 calc v1.0.0, (c) Jeffrey Massung
 >> 1 + 1
