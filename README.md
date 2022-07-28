@@ -1,15 +1,15 @@
-# CALC - a CLI calculator with support for units
+# CALC - a calculator for the CLI that understands units
 
 A simple, scriptable, scalar expression and units calculator for the terminal.
 
 ## Setup
 
-### Installing Haskell and Stack
+### Install Haskell and Stack
 
 1. Install [ghcup](https://www.haskell.org/ghcup/)
 2. Run `ghcup` to install [stack](https://docs.haskellstack.org/en/stable/README/)
 
-### Building from Source
+### Build from Source
 
 1. Clone the repository
 2. From within the repository directory run `stack build` and/or `stack install`
