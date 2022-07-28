@@ -1,6 +1,12 @@
-# CALC - a calculator for the CLI that understands units
+# Tournesol - a calculator for the CLI that understands units
 
 A simple, scriptable, scalar expression and units calculator for the terminal.
+
+[Tournesol](https://www.tintin.com/en/characters/professor-calculus) - AKA Professor Calculus - is (quoting the linked page)...
+
+> ...very absent-minded, hard of hearing, intuitive and very sentimental. He is capable of the most unexpected, and sometimes really weird, connections with reality, by simply using his pendulum. First and foremost he is a fine handyman, then a clever inventor. Calculus is intrigued by everything, including botany, physics, electronics and dowsing. He has all the traits of a scientist who is determined to make his ideas work. Self-assurance, and obstinacy verging on irritability.
+
+![](https://cdn001.tintin.com/public/tintin/img/static/professor-calculus/tournesol-calculus.jpg)
 
 ## Setup
 
@@ -19,20 +25,20 @@ A simple, scriptable, scalar expression and units calculator for the terminal.
 
 ```bash
 # simple expressions
-calc '1+2'
+tn '1+2'
 
 # more complex expressions with unit conversions
-calc '300 W * 2 hr : BTU'
-calc '100 mL + 1 c to in^3'
+tn '300 W * 2 hr : BTU'
+tn '100 mL + 1 c to in^3'
 
 # make use of placeholder arguments
-calc '_ / _ in' '3 yd^2' 4
+tn '_ / _ in' '3 yd^2' 4
 
 # evaluate piped, delimited values
-calc '_ deg/s : rev/min' < values.txt
+tn '_ deg/s : rev/min' < values.txt
 
 # call functions that understand units
-calc '[sin 45 deg] * [cos [pi] / 4]'
+tn '[sin 45 deg] * [cos [pi] / 4]'
 ```
 
 ## Scripts and Custom Functions
@@ -40,14 +46,14 @@ calc '[sin 45 deg] * [cos [pi] / 4]'
 You can define your own functions in scripts:
 
 ```bash
-# myfuncs.calc
+# myfuncs.tn
 function transferRate [MB; s] = _/_
 ```
 
 And now you can load the script and use it in your calculations:
 
 ```bash
-calc -f myfuncs.calc '[transferRate 10 GB; 20 min]'
+tn -f myfuncs.tn '[transferRate 10 GB; 20 min]'
 ```
 
 ## Interactive Mode
@@ -55,8 +61,8 @@ calc -f myfuncs.calc '[transferRate 10 GB; 20 min]'
 It's also possible to simply run in interactive mode:
 
 ```
-$ calc
-calc v1.0.0, (c) Jeffrey Massung
+$ tn
+Tournesol v1.0.0, (c) Jeffrey Massung
 >> 1 + 1
 == 2.00
 >> _ V * 0.5 A * 2 min

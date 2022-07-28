@@ -48,23 +48,23 @@ motd = printf "calc v%d.%d.%d, (c) Jeffrey Massung" major minor patch
 getOpts =
   cmdArgs $
     Opts
-      { scriptFiles = def &= explicit &= name "f" &= name "functions" &= typ "FILE" &= help "Load calc script functions file",
+      { scriptFiles = def &= explicit &= name "f" &= name "functions" &= typ "FILE" &= help "Load Tournesol script functions file",
         precision = def &= explicit &= name "p" &= name "precision" &= typ "DIGITS" &= help "Precision digits to output, defaults to 2",
         delim = def &= explicit &= name "d" &= name "delimiter" &= typ "FS" &= help "Input stream delimiter, defaults to $FS",
         noUnits = def &= explicit &= name "n" &= name "no-units" &= help "Don't output answer units",
         exprStrings = def &= args &= typ "EXPRESSION [ARGS...]"
       }
-      &= program "calc"
+      &= program "Tournesol"
       &= summary motd
       &= details
         [ "Examples:",
-          "  calc '1+2'",
-          "  calc '6 ft + 3 in : m'",
-          "  calc '500 N * 10 ft to BTU'",
-          "  calc '10 GB / 2 hr to MB/s'",
-          "  calc '30 W * 6 min to J'",
-          "  calc '2 * [sin 45 deg]'",
-          "  calc '100 hz * _ m : mph' < values.txt"
+          "  tn '1+2'",
+          "  tn '6 ft + 3 in : m'",
+          "  tn '500 N * 10 ft to BTU'",
+          "  tn '10 GB / 2 hr to MB/s'",
+          "  tn '30 W * 6 min to J'",
+          "  tn '2 * [sin 45 deg]'",
+          "  tn '100 hz * _ m : mph' < values.txt"
         ]
       &= noAtExpand
 

@@ -4,11 +4,11 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 
-name:           calc
+name:           tn
 version:        0.9.0.0
-description:    Please see the README on GitHub at <https://github.com/massung/calc#readme>
-homepage:       https://github.com/massung/calc#readme
-bug-reports:    https://github.com/massung/calc/issues
+description:    Please see the README on GitHub at <https://github.com/massung/tournesol#readme>
+homepage:       https://github.com/massung/tournesol#readme
+bug-reports:    https://github.com/massung/tournesol/issues
 author:         Jeffrey Massung
 maintainer:     massung@gmail.com
 copyright:      2022 Jeffrey Massung
@@ -20,7 +20,7 @@ extra-source-files:
 
 source-repository head
   type: git
-  location: https://github.com/massung/calc
+  location: https://github.com/massung/tournesol
 
 library
   exposed-modules:
@@ -37,7 +37,7 @@ library
       Calc.Script
       Calc.Units
   other-modules:
-      Paths_calc
+      Paths_tn
   hs-source-dirs:
       src
   build-depends:
@@ -53,16 +53,15 @@ library
     , vector
   default-language: Haskell2010
 
-executable calc
+executable tn
   main-is: Main.hs
   other-modules:
-      Paths_calc
+      Paths_tn
   hs-source-dirs:
       app
   ghc-options: -threaded -rtsopts -O2 -with-rtsopts=-N
   build-depends:
       base
-    , calc
     , case-insensitive
     , cmdargs
     , containers
@@ -71,20 +70,20 @@ executable calc
     , extra
     , mtl
     , parsec
+    , tn
     , vector
   default-language: Haskell2010
 
-test-suite calc-test
+test-suite tn-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
-      Paths_calc
+      Paths_tn
   hs-source-dirs:
       test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base
-    , calc
     , case-insensitive
     , cmdargs
     , containers
@@ -94,5 +93,6 @@ test-suite calc-test
     , hspec
     , mtl
     , parsec
+    , tn
     , vector
   default-language: Haskell2010
