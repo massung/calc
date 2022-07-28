@@ -9,18 +9,29 @@ import Calc.Units hiding (_pi)
 import Control.Monad
 import Data.Map.Strict as M
 
-data Def = Def ([Scalar] -> Either Error Scalar) [Units]
+data Def = Def ([Scalar] -> Either Error Scalar) [Arg]
+
+data Arg = Any | Typed Units
 
 defMap =
   M.fromList
-    [ ("pi", Def _pi []),
-      ("sin", Def _sin ["rad"]),
-      ("cos", Def _cos ["rad"])
+    [ ("sqrt", Def _sqrt [Any]),
+      ("pi", Def _pi []),
+      ("sin", Def _sin [Typed "rad"]),
+      ("cos", Def _cos [Typed "rad"])
     ]
 
-apply (Def func units) args = case zipWithM convert args units of
-  Right xs -> func [fromRational x | (Scalar x _ _) <- xs]
+mapArgs = zipWithM mapArg
+  where
+    mapArg x Any = Right x
+    mapArg x (Typed u) = convert x u
+
+apply (Def func args) xs = case mapArgs xs args of
+  Right xs -> func xs
   Left e -> Left e
+
+_sqrt [x] = powScalar x 0.5
+_sqrt _ = Left WrongArity
 
 _pi [] = Right $ scalar pi "rad"
 _pi _ = Left WrongArity

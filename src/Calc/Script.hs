@@ -17,10 +17,10 @@ import Text.Parsec.Token
 
 newtype Script = Script (Map String Def)
 
-scriptDef :: [Units] -> Expr -> Def
-scriptDef units expr = Def f units
+scriptDef :: [Arg] -> Expr -> Def
+scriptDef args expr = Def f args
   where
-    f xs = case zipWithM convert xs units of
+    f xs = case mapArgs xs args of
       Right xs -> evalState (runExceptT $ evalExpr expr) xs
       Left e -> Left e
 
@@ -42,9 +42,11 @@ scriptParser = do
 scriptFunction = do
   reserved lexer "function"
   def <- identifier lexer
-  units <- scriptUnits
+  args <- scriptArgs
   reservedOp lexer "="
   expr <- exprParser
-  return (def, scriptDef units expr)
+  return (def, scriptDef args expr)
 
-scriptUnits = brackets lexer (sepBy unitsParser $ lexeme lexer (char ';'))
+scriptArgs = brackets lexer (sepBy scriptArg $ lexeme lexer (char ';'))
+  where
+    scriptArg = Typed <$> unitsParser <|> (do reserved lexer "_"; return Any)
