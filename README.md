@@ -47,7 +47,7 @@ function transferRate [MB; s] = _/_
 And now you can load the script and use it in your calculations:
 
 ```bash
-calc --script myfuncs.calc '[transferRate 10 GB; 20 min]'
+calc -f myfuncs.calc '[transferRate 10 GB; 20 min]'
 ```
 
 ## Interactive Mode

@@ -41,17 +41,17 @@ data Opts = Opts
 
 motd = printf "calc v%d.%d.%d, (c) Jeffrey Massung" major minor patch
   where
-    major = 1 :: Int
-    minor = 0 :: Int
+    major = 0 :: Int
+    minor = 9 :: Int
     patch = 0 :: Int
 
 getOpts =
   cmdArgs $
     Opts
-      { scriptFiles = def &= explicit &= name "s" &= name "script" &= typ "FILE",
-        precision = def &= explicit &= name "p" &= name "precision" &= typ "DIGITS",
-        delim = def &= explicit &= name "d" &= name "delim" &= typ "FS",
-        noUnits = def &= explicit &= name "n" &= name "no-units",
+      { scriptFiles = def &= explicit &= name "f" &= name "functions" &= typ "FILE" &= help "Load calc script functions file",
+        precision = def &= explicit &= name "p" &= name "precision" &= typ "DIGITS" &= help "Precision digits to output, defaults to 2",
+        delim = def &= explicit &= name "d" &= name "delimiter" &= typ "FS" &= help "Input stream delimiter, defaults to $FS",
+        noUnits = def &= explicit &= name "n" &= name "no-units" &= help "Don't output answer units",
         exprStrings = def &= args &= typ "EXPRESSION [ARGS...]"
       }
       &= program "calc"
