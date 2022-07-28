@@ -45,14 +45,16 @@ evalUnary f x = do
   x' <- evalExpr x
   return $ f x'
 
-evalBinary :: (Scalar -> Scalar -> Scalar) -> Expr -> Expr -> Eval Scalar
+evalBinary :: (Scalar -> Scalar -> Either Error Scalar) -> Expr -> Expr -> Eval Scalar
 evalBinary f x y = do
   x' <- evalExpr x
   y'@(Scalar _ _ to) <- evalExpr y
-  (`f` y') <$> either throwError return (harmonize x' to)
+  ans <- (`f` y') <$> either throwError return (harmonize x' to)
+  either throwError return ans
 
-evalBinaryConv :: (Scalar -> Scalar -> Scalar) -> Expr -> Expr -> Eval Scalar
+evalBinaryConv :: (Scalar -> Scalar -> Either Error Scalar) -> Expr -> Expr -> Eval Scalar
 evalBinaryConv f x y = do
   x' <- evalExpr x
   y'@(Scalar _ _ to) <- evalExpr y
-  (`f` y') <$> either throwError return (convert x' to)
+  ans <- (`f` y') <$> either throwError return (convert x' to)
+  either throwError return ans

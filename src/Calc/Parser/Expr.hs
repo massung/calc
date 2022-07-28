@@ -3,6 +3,7 @@
 module Calc.Parser.Expr where
 
 import Calc.Defs
+import Calc.Error
 import Calc.Parser.Lexer
 import Calc.Parser.Scalar
 import Calc.Parser.Units
@@ -20,8 +21,8 @@ data Expr
   | Convert Units Expr
   | Apply Def [Expr]
   | Unary (Scalar -> Scalar) Expr
-  | Binary (Scalar -> Scalar -> Scalar) Expr Expr
-  | BinaryConv (Scalar -> Scalar -> Scalar) Expr Expr
+  | Binary (Scalar -> Scalar -> Either Error Scalar) Expr Expr
+  | BinaryConv (Scalar -> Scalar -> Either Error Scalar) Expr Expr
 
 hasPlaceholder Answer = True
 hasPlaceholder (Term _) = False
@@ -62,11 +63,13 @@ exprApply = do
 
 exprTable =
   [ [prefix "-" negate, prefix "+" id],
-    --[binary "^" (^) AssocLeft],
-    [binary "*" (*) AssocLeft, binary "/" (/) AssocLeft],
-    [binaryConv "+" (+) AssocLeft, binaryConv "-" (-) AssocLeft],
+    [binary "^" powScalar AssocLeft],
+    [binary "*" (binOp (*)) AssocLeft, binary "/" (binOp (/)) AssocLeft],
+    [binaryConv "+" (binOp (+)) AssocLeft, binaryConv "-" (binOp (-)) AssocLeft],
     [Postfix (do Convert <$> exprCast)]
   ]
+  where
+    binOp f x y = Right $ f x y
 
 prefix op f = Prefix (do reservedOp lexer op; return $ Unary f)
 

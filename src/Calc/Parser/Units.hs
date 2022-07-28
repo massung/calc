@@ -45,7 +45,7 @@ unitTerm = do
 unitExponent = do
   reservedOp lexer "^"
   s <- unitsSign
-  e <- fromInteger <$> decimal lexer
+  e <- either fromInteger toRational <$> naturalOrFloat lexer
   return (e * s)
 
 unitsSign = option 1 (neg <|> pos)

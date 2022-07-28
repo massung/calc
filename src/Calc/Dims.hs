@@ -5,6 +5,7 @@ module Calc.Dims where
 import Data.Char
 import Data.List as L
 import Data.Map.Strict as M
+import Data.Ratio
 
 data Dim
   = Angle
@@ -27,14 +28,16 @@ data Dim
   | Volume
   deriving (Eq, Ord, Show)
 
-newtype Dims = Dims (Map Dim Int)
+newtype Dims = Dims (Map Dim Rational)
   deriving (Eq, Ord)
 
 instance Show Dims where
   show (Dims dims) = mconcat $ L.intersperse "*" [showDim dim | dim <- M.toList dims]
     where
       showDim (dim, 1) = "[" ++ L.map toLower (show dim) ++ "]"
-      showDim (dim, n) = "[" ++ L.map toLower (show dim) ++ "^" ++ show n ++ "]"
+      showDim (dim, n)
+        | denominator n == 1 = "[" ++ L.map toLower (show dim) ++ "^" ++ show (numerator n) ++ "]"
+        | otherwise = "[" ++ L.map toLower (show dim) ++ "^" ++ show (fromRational n) ++ "]"
 
 instance Semigroup Dims where
   (<>) (Dims a) (Dims b) = Dims $ M.filter (/= 0) $ M.unionWith (+) a b

@@ -55,7 +55,10 @@ recipConv (Linear x) = Linear $ recip x
 recipConv (Function f) = Function $ recip . f
 
 powConv _ Base = Base
-powConv n (Linear x) = Linear $ x ^^ n
+powConv n (Linear x) =
+  if denominator n == 1
+    then Linear $ x ^^ numerator n
+    else Linear $ toRational $ fromRational x ** fromRational n
 powConv n (Function f) = Function f
 
 applyConv Base w = w

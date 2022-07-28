@@ -28,7 +28,7 @@ instance IsString Unit where
 instance Show Unit where
   show = symbol
 
-newtype Units = Units (Map Unit Int)
+newtype Units = Units (Map Unit Rational)
   deriving (Eq, Ord)
 
 instance Semigroup Units where
@@ -47,7 +47,10 @@ instance Show Units where
 
       -- display a single unit with exponent
       showExp (x, 1) = show x
-      showExp (x, n) = show x ++ "^" ++ show n
+      showExp (x, n) =
+        if denominator n == 1
+          then show x ++ "^" ++ show (numerator n)
+          else show x ++ "^" ++ show (fromRational n)
 
       -- concatenate units together
       showExps' = unwords . L.map showExp . M.toList
@@ -341,13 +344,13 @@ recipUnits = mapUnits negate
 
 (</>) a b = a <> recipUnits b
 
-simplify (Units m) = (M.map (`div` factor) m, factor)
-  where
-    factor =
-      let x = M.foldl' gcd (maximum m) m
-       in if all (< 0) m then negate x else x
+-- simplify (Units m) = (M.map (`div` factor) m, factor)
+--   where
+--     factor =
+--       let x = M.foldl' gcd (maximum m) m
+--        in if all (< 0) m then negate x else x
 
-simplifyUnits u = first Units $ simplify u
+-- simplifyUnits u = first Units $ simplify u
 
 validateUnits (Units u) = all (== 1) $ M.foldlWithKey' countDims M.empty u
   where

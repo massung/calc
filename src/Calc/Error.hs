@@ -11,6 +11,7 @@ data Error
   | ExprError ParseError
   | ConversionError Units Units
   | WrongArity
+  | IllegalExponent
   deriving (Eq)
 
 instance Exception Error
@@ -22,3 +23,4 @@ instance Show Error where
   show NoExpr = "no expression"
   show NoAnswer = "no answer"
   show WrongArity = "wrong arity"
+  show IllegalExponent = "illegal exponent"

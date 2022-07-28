@@ -8,6 +8,7 @@ import Calc.Error
 import Calc.Units
 import Data.Foldable as F
 import Data.Map.Strict as M
+import Data.Ratio
 import Text.Printf
 
 data Scalar = Scalar Rational Dims Units
@@ -56,9 +57,16 @@ instance Fractional Scalar where
 
 scalar x units = Scalar (toRational x) (dims units) units
 
+fromUnits u = Scalar 1 (dims u) u
+
 mapScalar f (Scalar x d u) = Scalar (f x) d u
 
-fromUnits u = Scalar 1 (dims u) u
+powScalar (Scalar x _ u) (Scalar n d _)
+  | not $ nullDims d = Left IllegalExponent
+  | denominator n == 1 = Right $ Scalar (x ^^ numerator n) (dims u') u'
+  | otherwise = Right $ Scalar (toRational $ fromRational x ** fromRational n) (dims u') u'
+  where
+    u' = mapUnits (* n) u
 
 harmonize s@(Scalar x d from) to
   | nullUnits from || nullUnits to = Right s
