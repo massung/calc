@@ -35,7 +35,7 @@ head -n 5 values.txt | calc '_ deg/s : rev/min'
 calc '[sin 45 deg] * [cos [pi] / 4]'
 ```
 
-## Scripts
+## Scripts and Custom Functions
 
 You can define your own functions in scripts:
 
@@ -48,4 +48,19 @@ And now you can load the script and use it in your calculations:
 
 ```bash
 calc --script myfuncs.calc '[transferRate 10 GB; 20 min]'
+```
+
+## Interactive Mode
+
+It's also possible to simply run in interactive mode:
+
+```bash
+$ calc
+calc v1.0.0, (c) Jeffrey Massung
+>> 1 + 1
+== 2.00
+>> _ V * 0.5 A * 2 min
+== 2.00 V A min
+>> _ J
+== 120.00 J
 ```
