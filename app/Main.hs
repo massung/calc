@@ -33,6 +33,7 @@ import Text.Printf
 data Opts = Opts
   { scriptFiles :: [String],
     precision :: Maybe Int,
+    sciNotation :: Bool,
     delim :: Maybe String,
     noUnits :: Bool,
     exprStrings :: [String]
@@ -50,8 +51,9 @@ getOpts =
     Opts
       { scriptFiles = def &= explicit &= name "f" &= name "functions" &= typ "FILE" &= help "Load Tournesol script functions file",
         precision = def &= explicit &= name "p" &= name "precision" &= typ "DIGITS" &= help "Precision digits to output, defaults to 2",
+        sciNotation = def &= explicit &= name "g" &= name "sci-notation" &= help "Output using scientific notation",
+        noUnits = def &= explicit &= name "n" &= name "no-units" &= help "Don't output units",
         delim = def &= explicit &= name "d" &= name "delimiter" &= typ "FS" &= help "Input stream delimiter, defaults to $FS",
-        noUnits = def &= explicit &= name "n" &= name "no-units" &= help "Don't output answer units",
         exprStrings = def &= args &= typ "EXPRESSION [ARGS...]"
       }
       &= program "Tournesol"
@@ -62,19 +64,21 @@ getOpts =
           "  tn '6 ft + 3 in : m'",
           "  tn '500 N * 10 ft to BTU'",
           "  tn '10 GB / 2 hr to MB/s'",
+          "  tn '2 * (1500 cm)^2 to acre'",
           "  tn '30 W * 6 min to J'",
           "  tn '2 * [sin 45 deg]'",
           "  tn '100 hz * _ m : mph' < values.txt"
         ]
       &= noAtExpand
 
+printFormat :: Opts -> String
+printFormat opts = "%0." ++ show (fromMaybe 2 $ precision opts) ++ (if sciNotation opts then "g" else "f")
+
 printAns :: Opts -> Scalar -> IO Scalar
 printAns opts x@(Scalar _ d u) =
   if nullUnits u || noUnits opts
-    then printf (prec ++ "\n") x >> return x
-    else printf (prec ++ " %U\n") x x >> return x
-  where
-    prec = "%0." ++ show (fromMaybe 2 $ precision opts) ++ "g"
+    then printf (printFormat opts ++ "\n") x >> return x
+    else printf (printFormat opts ++ " %U\n") x x >> return x
 
 parseExpr :: Map String Def -> String -> IO Expr
 parseExpr defs s = either throw return $ mapLeft ExprError $ runParser parser defs "" s

@@ -21,7 +21,7 @@ instance Show Scalar where
 
 instance PrintfArg Scalar where
   formatArg (Scalar x d u) fmt
-    | fmtChar (vFmt 'g' fmt) == 'g' = formatRealFloat (fromRational x) fmt
+    | fmtChar (vFmt 'g' fmt) `elem` ['e' .. 'g'] = formatRealFloat (fromRational x) fmt
     | fmtChar (vFmt 'U' fmt) == 'U' = formatString (show u) fmt {fmtChar = 's'}
     | otherwise = errorBadFormat $ fmtChar fmt
 
