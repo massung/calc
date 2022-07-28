@@ -1,8 +1,6 @@
 # Tournesol - a calculator for the CLI that understands units
 
-A simple, scriptable, scalar expression and units calculator for the terminal.
-
-[Tournesol](https://www.tintin.com/en/characters/professor-calculus) - AKA Professor Calculus - is (quoting the linked page)...
+A simple, scriptable, scalar expression and units calculator for the terminal. [Tournesol](https://www.tintin.com/en/characters/professor-calculus) - AKA Professor Calculus - is (quoting the linked page)...
 
 > ...very absent-minded, hard of hearing, intuitive and very sentimental. He is capable of the most unexpected, and sometimes really weird, connections with reality, by simply using his pendulum. First and foremost he is a fine handyman, then a clever inventor. Calculus is intrigued by everything, including botany, physics, electronics and dowsing. He has all the traits of a scientist who is determined to make his ideas work. Self-assurance, and obstinacy verging on irritability.
 
