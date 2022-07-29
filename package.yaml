@@ -26,6 +26,7 @@ dependencies:
 - data-default
 - errors
 - extra
+- file-embed
 - mtl
 - parsec
 - vector

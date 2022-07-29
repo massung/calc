@@ -48,6 +48,7 @@ library
     , data-default
     , errors
     , extra
+    , file-embed
     , mtl
     , parsec
     , vector
@@ -68,6 +69,7 @@ executable tn
     , data-default
     , errors
     , extra
+    , file-embed
     , mtl
     , parsec
     , tn
@@ -90,6 +92,7 @@ test-suite tn-test
     , data-default
     , errors
     , extra
+    , file-embed
     , hspec
     , mtl
     , parsec

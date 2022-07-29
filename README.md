@@ -97,3 +97,31 @@ The following table of all (base) units and dimensions are understood by Tournes
 | volume | `[length^3]` | -L, tsp, tbp, floz, c, pt, qt, gal
 
 _NOTE: Storage units (byte and bit) use base-2 SI prefixes (e.g. MB - megabyte - is 1048576 bytes, not 1000000)._
+
+## Built-in Functions
+
+The following functions are built-in and available for use:
+
+```bash
+# -------------------------------------------------
+# Constants functions
+
+function pi []
+
+# -------------------------------------------------
+# Trigometric functions
+
+function sin [angle]
+function cos [angle]
+
+# -------------------------------------------------
+# Geometry functions
+
+function areaOfCircle [length]
+function areaOfRect [length; length]
+
+# -------------------------------------------------
+# Storage functions
+
+function transferRate [storage; duration]
+```

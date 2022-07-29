@@ -157,7 +157,7 @@ main = do
   opts <- getOpts
 
   -- load all the scripts to create a single defs map
-  defs <- loadScripts defMap $ scriptFiles opts
+  defs <- builtInDefs >>= (`loadScripts` scriptFiles opts)
 
   -- handle EOF or expression error
   run opts defs (exprStrings opts)

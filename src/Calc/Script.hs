@@ -1,3 +1,5 @@
+{-# LANGUAGE TemplateHaskell #-}
+
 module Calc.Script where
 
 import Calc.Defs
@@ -7,16 +9,20 @@ import Calc.Eval
 import Calc.Parser.Expr
 import Calc.Parser.Lexer
 import Calc.Parser.Units
-import Calc.Scalar
-import Calc.Units
 import Control.Exception
 import Control.Monad.Except
 import Control.Monad.State.Strict
+import Data.FileEmbed
 import Data.Map.Strict as M
 import Text.Parsec
 import Text.Parsec.Token
 
 newtype Script = Script (Map String Def)
+
+builtInDefs :: IO (Map String Def)
+builtInDefs = either (throw . ExprError) return $ loadScriptContents defMap "built-ins.tn" source
+  where
+    source = $(embedStringFile "scripts/built-ins.tn")
 
 scriptDef :: [Arg] -> Expr -> Def
 scriptDef args expr = Def f args
@@ -30,6 +36,9 @@ loadScripts defs (path : rest) = loadScript defs path >>= (`loadScripts` rest)
 
 loadScript defs path = do
   contents <- readFile path
+  loadScriptContents defs path contents
+
+loadScriptContents defs path contents =
   case runParser scriptParser defs path contents of
     Right functions -> return $ union (M.fromList functions) defMap
     Left err -> throw $ ExprError err

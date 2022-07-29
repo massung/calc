@@ -1,0 +1,13 @@
+# some built-in functions for testing and general use
+
+# -------------------------------------------------
+# Geometry functions
+
+function areaOfCircle [length] = [pi] * _^2
+function areaOfRect [length;length] = _ * _
+
+# -------------------------------------------------
+# Storage functions
+
+function transferRate [storage; duration] = _/_ to MB/s
+
