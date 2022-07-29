@@ -57,6 +57,8 @@ instance Fractional Scalar where
 
 scalar x units = Scalar (toRational x) (dims units) units
 
+fromReal f = Scalar (toRational f) mempty mempty
+
 fromUnits u = Scalar 1 (dims u) u
 
 mapScalar f (Scalar x d u) = Scalar (f x) d u

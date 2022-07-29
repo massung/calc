@@ -26,7 +26,7 @@ mapArgs = zipWithM mapArg
   where
     mapArg x Any = Right x
     mapArg x@(Scalar _ d _) (Typed dims) =
-      if d == dims
+      if nullDims d || d == dims
         then Right x
         else Left $ WrongDims d dims
 
@@ -37,11 +37,11 @@ apply (Def func args) xs = case mapArgs xs args of
 _sqrt [x] = powScalar x 0.5
 _sqrt _ = Left WrongArity
 
-_pi [] = Right $ scalar pi mempty
+_pi [] = Right $ fromReal pi
 _pi _ = Left WrongArity
 
-_sin [x] = Right $ scalar (sin $ fromRational $ toRational x) mempty
+_sin [x] = fromReal . sin . fromRational . toRational <$> convert x "rad"
 _sin _ = Left WrongArity
 
-_cos [x] = Right $ scalar (cos $ fromRational $ toRational x) mempty
+_cos [x] = fromReal . cos . fromRational . toRational <$> convert x "rad"
 _cos _ = Left WrongArity
