@@ -10,7 +10,7 @@ import Data.Ratio
 import Text.Printf
 
 data Scalar = Scalar Rational Dims Units
-  deriving (Eq, Ord)
+  deriving (Eq)
 
 instance Show Scalar where
   show (Scalar x d u)
@@ -26,6 +26,12 @@ instance PrintfArg Scalar where
 instance Semigroup Scalar where
   (<>) a b = a * b
 
+instance Ord Scalar where
+  compare (Scalar x dx ux) (Scalar y dy uy) =
+    if nullDims dx || nullDims dy || ux == uy
+      then compare x y
+      else error "Cannot compare disparate units"
+
 instance Num Scalar where
   fromInteger n = Scalar (fromInteger n) mempty mempty
 
@@ -33,7 +39,7 @@ instance Num Scalar where
   (+) (Scalar x dx ux) (Scalar y dy uy)
     | nullDims dy = Scalar (x + y) dx ux
     | nullDims dx = Scalar (x + y) dy uy
-    | dx == dy = Scalar (x + y) dx ux
+    | ux == uy = Scalar (x + y) dx ux
     | otherwise = error "Cannot add disparate units"
 
   -- multiply scalars
@@ -56,6 +62,9 @@ instance Fractional Scalar where
 scalar x units = Scalar (toRational x) (dims units) units
 
 fromReal f = Scalar (toRational f) mempty mempty
+
+fromBool True = Scalar 1 mempty mempty
+fromBool False = Scalar 0 mempty mempty
 
 fromUnits u = Scalar 1 (dims u) u
 

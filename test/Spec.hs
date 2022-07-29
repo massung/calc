@@ -8,7 +8,7 @@ import Calc.Eval
 import Calc.Parser.Expr
 import Calc.Parser.Scalar
 import Calc.Parser.Units
-import Calc.Scalar as S
+import Calc.Scalar
 import Calc.Script
 import Calc.Units as U
 import Control.Monad.Except
@@ -96,6 +96,25 @@ testScalars = do
   describe "scalars" $ do
     it "no units" $ do
       (1 :: Scalar) `shouldBe` Scalar 1 mempty mempty
+
+  describe "scalar math operations" $ do
+    testExpr "1 + 1" 2
+    testExpr "1 - 1" 0
+    testExpr "2 * 3" 6
+    testExpr "6 / 3" 2
+    testExpr "1 < 2" $ fromBool True
+    testExpr "1 > 2" $ fromBool False
+    testExpr "2 <= 2" $ fromBool True
+    testExpr "2 <= 1" $ fromBool False
+    testExpr "2 >= 2" $ fromBool True
+    testExpr "2 >= 3" $ fromBool False
+    testExpr "2 == 2" $ fromBool True
+    testExpr "2 == 3" $ fromBool False
+    testExpr "2 /= 2" $ fromBool False
+    testExpr "2 /= 3" $ fromBool True
+    testExpr "(2 ft)^2" "4 ft^2"
+    testExpr "(3 ft^3)^2" "9 ft^6"
+    testExpr "(4 ft^2)^0.5" "2 ft"
 
 testConversions = do
   describe "basic conversions" $ do
@@ -191,6 +210,8 @@ testArgs = do
 
 testDefs defs = do
   describe "code functions" $ do
+    testScriptExpr defs "[if true; 1; 2]" 1
+    testScriptExpr defs "[if false; 1; 2]" 2
     testScriptExpr defs "[abs -8 ft]" "8 ft"
     testScriptExpr defs "[signum -4 ft]" "-1 ft"
     testScriptExpr defs "[sqrt 4 ft^2]" "2 ft"

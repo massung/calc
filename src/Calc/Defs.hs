@@ -16,7 +16,8 @@ data Arg = None | Any | Typed Dims
 
 defMap =
   M.fromList
-    [ ("abs", Def _abs [Any]),
+    [ ("if", Def _if [Any, Any, Any]),
+      ("abs", Def _abs [Any]),
       ("signum", Def _signum [Any]),
       ("sqrt", Def _sqrt [Any]),
       ("log", Def _log [None]),
@@ -59,6 +60,9 @@ apply (Def func args) xs = case mapArgs xs args of
   Left e -> Left e
 
 unaryDef f = fmap $ fromReal . f . fromRational . toRational
+
+_if [test,t,e] = Right $ if test == 0 then e else t
+_if _ = Left WrongArity
 
 _abs [x] = unaryDef abs $ Right x
 _abs _ = Left WrongArity

@@ -17,9 +17,9 @@ lexer = makeTokenParser lang
           nestedComments = False,
           identStart = letter <|> char '_',
           identLetter = letter,
-          opStart = oneOf ":+-*/=",
-          opLetter = parserZero,
-          reservedNames = ["_", "any", "none", "to", "function"],
-          reservedOpNames = ["+", "-", "*", "/", ":", "="],
+          opStart = oneOf ":+-*/<>=",
+          opLetter = oneOf "=",
+          reservedNames = ["_", "any", "none", "to", "function", "true", "false"],
+          reservedOpNames = ["+", "-", "*", "/", "<", ">", "<=", ">=", "=", ":"],
           caseSensitive = True
         }

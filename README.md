@@ -110,6 +110,11 @@ The following functions are built-in and available for use:
 
 ```bash
 # -------------------------------------------------
+# Conditional functions
+
+function if [any; any; any]
+
+# -------------------------------------------------
 # Constants functions
 
 function pi []

@@ -41,6 +41,8 @@ exprTerm =
     <|> Term <$> scalarParser
     <|> Term . fromUnits <$> unitsTerm
     <|> exprAnswer
+    <|> (do reserved lexer "true"; return $ Term $ fromBool True)
+    <|> (do reserved lexer "false"; return $ Term $ fromBool False)
 
 exprAnswer = do
   reserved lexer "_"
@@ -66,10 +68,12 @@ exprTable =
     [binary "^" powScalar AssocLeft],
     [binary "*" (binOp (*)) AssocLeft, binary "/" (binOp (/)) AssocLeft],
     [binaryConv "+" (binOp (+)) AssocLeft, binaryConv "-" (binOp (-)) AssocLeft],
+    [binaryConv "==" (cmpOp (==)) AssocLeft, binaryConv "/=" (cmpOp (/=)) AssocLeft, binaryConv "<" (cmpOp (<)) AssocLeft, binaryConv ">" (cmpOp (>)) AssocLeft, binaryConv "<=" (cmpOp (<=)) AssocLeft, binaryConv ">=" (cmpOp (>=)) AssocLeft],
     [Postfix (do Convert <$> exprCast)]
   ]
   where
     binOp f x y = Right $ f x y
+    cmpOp f x y = Right $ fromBool (f x y)
 
 prefix op f = Prefix (do reservedOp lexer op; return $ Unary f)
 
