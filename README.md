@@ -26,7 +26,7 @@ A simple, scriptable, scalar expression and units calculator for the terminal. [
 tn '1+2'
 
 # more complex expressions with unit conversions
-tn '300 W * 2 hr : BTU'
+tn '300 W * 2 hr : btu'
 tn '100 mL + 1 c to in^3'
 
 # make use of placeholder arguments
@@ -83,7 +83,7 @@ The following table of all (base) units and dimensions are understood by Tournes
 | capacitance | `[current^2;duration^4;length^-2;mass^-1]` | -F
 | charge | `[current;duration]` | -C
 | current | `[current]` | -A
-| energy | `[mass;length^2;duration^-2]` | -J, -eV, BTU, thm
+| energy | `[mass;length^2;duration^-2]` | -J, -eV, btu, thm
 | force | `[mass;length;duration^-2]` | -N, lbf, pond
 | frequency | `[length^-1]` | -hz
 | length | `[length]` | -m, mil, in, h, ft, yd, ftm, ch, fur, mi, lea, cable, nmi, link, rod, pc, au, ly
