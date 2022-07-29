@@ -98,6 +98,12 @@ The following table of all (base) units and dimensions are understood by Tournes
 
 _NOTE: Storage units (byte and bit) use base-2 SI prefixes (e.g. MB - megabyte - is 1048576 bytes, not 1000000)._
 
+## FAQ
+
+***Why does `[cos [pi]]` error with `wrong dimensions; got [] expected [angle]`?***
+
+The constant `[pi]` has no units as must be converted to radians (e.g. `[cos [pi] : rad]`).
+
 ## Built-in Functions
 
 The following functions are built-in and available for use:
@@ -142,6 +148,16 @@ function round [any]
 
 function areaOfCircle [length]
 function areaOfRect [length; length]
+function areaOfTriangle [length; length]
+
+function volumeOfSphere [length]
+function volumeOfCylinder [length; length]
+function volumeOfPrism [length; length; length]
+function volumeOfTrianglePrism [length; length; length]
+function volumeOfCube [length]
+function volumeOfSquarePyramid [length; length]
+function volumeOfTetrahedron [length]
+function volumeOfTorus [length; length]
 
 # -------------------------------------------------
 # Storage functions

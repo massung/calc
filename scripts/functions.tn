@@ -5,9 +5,18 @@
 
 function areaOfCircle [length] = [pi] * _^2
 function areaOfRect [length;length] = _ * _
+function areaOfTriangle [length; length] = _ * _ / 2
+
+function volumeOfSphere [length] = 4/3 * [pi] * _^3
+function volumeOfCylinder [length; length] = [pi] * _^2 * _
+function volumeOfPrism [length; length; length] = _ * _ * _
+function volumeOfTrianglePrism [length; length; length] = _ * _ * _ / 2
+function volumeOfCube [length] = _^3
+function volumeOfSquarePyramid [length; length] = _^2 * _ / 3
+function volumeOfTetrahedron [length] = _^3 * [sqrt 2] / 12
+function volumeOfTorus [length; length] = 2 * [pi]^2 * _^2 * _
 
 # -------------------------------------------------
 # Storage functions
 
 function transferRate [storage; duration] = _/_ to MB/s
-

@@ -200,7 +200,7 @@ testDefs defs = do
     testScriptExpr defs "[ceil 4.2 kn]" "5 kn"
     testScriptExpr defs "[round 4.3 acre]" "4 acre"
     testScriptExpr defs "[sin 90 deg]" 1
-    testScriptExpr defs "[cos [pi]]" (-1)
+    testScriptExpr defs "[cos [pi] : rad]" (-1)
     testScriptExpr defs "[asin [sin 45 deg]] to deg" "45 deg"
     testScriptExpr defs "[asinh [sinh 1.4 rad]]" "1.4 rad"
 

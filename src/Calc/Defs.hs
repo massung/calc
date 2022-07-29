@@ -50,7 +50,7 @@ mapArgs = zipWithM mapArg
         then Right x
         else Left $ WrongDims d mempty
     mapArg x@(Scalar _ d _) (Typed dims) =
-      if nullDims d || d == dims
+      if d == dims
         then Right x
         else Left $ WrongDims d dims
 
