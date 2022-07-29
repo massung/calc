@@ -22,6 +22,7 @@ import Data.Either.Extra
 import Data.List.Extra as L
 import Data.Map.Strict as M
 import Data.Maybe
+import Data.Ratio
 import System.Console.CmdArgs
 import System.Environment
 import System.IO
@@ -71,14 +72,19 @@ getOpts =
         ]
       &= noAtExpand
 
-printFormat :: Opts -> String
-printFormat opts = "%0." ++ show (fromMaybe 2 $ precision opts) ++ (if sciNotation opts then "g" else "f")
+printFormat :: Opts -> Scalar -> String
+printFormat opts (Scalar x _ _) = "%0." ++ prec ++ (if sciNotation opts then "g" else "f")
+  where
+    prec =
+      if denominator x == 1
+        then "0"
+        else show (fromMaybe 2 $ precision opts)
 
 printAns :: Opts -> Scalar -> IO Scalar
 printAns opts x@(Scalar _ d u) =
   if nullUnits u || noUnits opts
-    then printf (printFormat opts ++ "\n") x >> return x
-    else printf (printFormat opts ++ " %U\n") x x >> return x
+    then printf (printFormat opts x ++ "\n") x >> return x
+    else printf (printFormat opts x ++ " %U\n") x x >> return x
 
 parseExpr :: Map String Def -> String -> IO Expr
 parseExpr defs s = either throw return $ mapLeft ExprError $ runParser parser defs "" s

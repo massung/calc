@@ -63,6 +63,8 @@ _pi = toRational pi
 
 _radian = Unit {dim = Angle, symbol = "rad", conv = Base}
 
+_gradian = Unit {dim = Angle, symbol = "grad", conv = Linear (200 / _pi)}
+
 _degree = Unit {dim = Angle, symbol = "deg", conv = Linear (180 / _pi)}
 
 _rev = Unit {dim = Angle, symbol = "rev", conv = Linear ((1 % 2) / _pi)}
@@ -166,6 +168,16 @@ _link = Unit {dim = Length, symbol = "link", conv = Linear (62500 % 12573)}
 _rod = Unit {dim = Length, symbol = "rod", conv = Linear (2500 % 12573)}
 
 {-
+-- astronomical lengths
+-}
+
+_parsec = Unit {dim = Length, symbol = "pc", conv = Linear (1 % 30856775814913670)}
+
+_astronomicalUnit = Unit {dim = Length, symbol = "au", conv = Linear (1 % 149597870700)}
+
+_lightYear = Unit {dim = Length, symbol = "ly", conv = Linear (1 % 9460730472580800)}
+
+{-
 -- mass units
 -}
 
@@ -252,6 +264,7 @@ unitMap = F.foldl' (\m u -> M.insert (symbol u) u m) mempty units
       concat
         [ [ _acre,
             _ampere,
+            _astronomicalUnit,
             _bar,
             _bit,
             _btu,
@@ -269,6 +282,7 @@ unitMap = F.foldl' (\m u -> M.insert (symbol u) u m) mempty units
             _foot,
             _furlong,
             _gallon,
+            _gradian,
             _gram,
             _hand,
             _hectare,
@@ -281,6 +295,7 @@ unitMap = F.foldl' (\m u -> M.insert (symbol u) u m) mempty units
             _knot,
             _kph,
             _league,
+            _lightYear,
             _link,
             _liter,
             _meter,
@@ -292,6 +307,7 @@ unitMap = F.foldl' (\m u -> M.insert (symbol u) u m) mempty units
             _newton,
             _ohm,
             _ounce,
+            _parsec,
             _pascal,
             _pint,
             _pond,
