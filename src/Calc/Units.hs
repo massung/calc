@@ -111,7 +111,7 @@ _volt = Unit {dim = Voltage, symbol = "V", conv = Base}
 
 _joule = Unit {dim = Energy, symbol = "J", conv = Base}
 
-_btu = Unit {dim = Energy, symbol = "btu", conv = Linear (50000000 % 52752792631)}
+_btu = Unit {dim = Energy, symbol = "BTU", conv = Linear (50000000 % 52752792631)}
 
 _therm = Unit {dim = Energy, symbol = "thm", conv = Linear (1 % 105480400)}
 
