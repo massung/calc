@@ -184,7 +184,12 @@ testArgs = do
 
 testDefs = do
   describe "function calls" $ do
+    testExpr "[sqrt 4 ft^2]" "2 ft"
     testExpr "[exp [log 16]]" 16
+    testExpr "[truncate 4.4 in]" "4 in"
+    testExpr "[floor 4.7 mi]" "4 mi"
+    testExpr "[ceil 4.2 kn]" "5 kn"
+    testExpr "[round 4.3 acre]" "4 acre"
     testExpr "[sin 90 deg]" 1
     testExpr "[cos [pi]]" (-1)
     testExpr "[asin [sin 45 deg]] to deg" "45 deg"

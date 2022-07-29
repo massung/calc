@@ -19,6 +19,10 @@ defMap =
     [ ("sqrt", Def _sqrt [Any]),
       ("log", Def _log [None]),
       ("exp", Def _exp [None]),
+      ("truncate", Def _truncate [Any]),
+      ("floor", Def _floor [Any]),
+      ("ceil", Def _ceiling [Any]),
+      ("round", Def _round [Any]),
       ("pi", Def _pi []),
       ("sin", Def _sin $ dims [Angle]),
       ("cos", Def _cos $ dims [Angle]),
@@ -62,6 +66,18 @@ _log _ = Left WrongArity
 
 _exp [x] = unaryDef exp $ Right x
 _exp _ = Left WrongArity
+
+_truncate [x] = unaryDef truncate $ Right x
+_truncate _ = Left WrongArity
+
+_floor [x] = unaryDef floor $ Right x
+_floor _ = Left WrongArity
+
+_ceiling [x] = unaryDef ceiling $ Right x
+_ceiling _ = Left WrongArity
+
+_round [x] = unaryDef round $ Right x
+_round _ = Left WrongArity
 
 _pi [] = Right $ fromReal pi
 _pi _ = Left WrongArity

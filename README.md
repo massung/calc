@@ -130,6 +130,10 @@ function atanh [none]
 function sqrt [any]
 function log [none]
 function exp [none]
+function truncate [any]
+function floor [any]
+function ceil [any]
+function round [any]
 
 # -------------------------------------------------
 # Geometry functions
