@@ -22,7 +22,10 @@ defMap =
       ("pi", Def _pi []),
       ("sin", Def _sin $ dims [Angle]),
       ("cos", Def _cos $ dims [Angle]),
-      ("tan", Def _tan $ dims [Angle])
+      ("tan", Def _tan $ dims [Angle]),
+      ("asin", Def _asin [None]),
+      ("acos", Def _acos [None]),
+      ("atan", Def _atan [None])
     ]
   where
     dims xs = [Typed $ baseDims x | x <- xs]
@@ -65,3 +68,12 @@ _cos _ = Left WrongArity
 
 _tan [x] = unaryDef tan $ convert x "rad"
 _tan _ = Left WrongArity
+
+_asin [x] = unaryDef asin (Right x) >>= (`convert` "rad")
+_asin _ = Left WrongArity
+
+_acos [x] = unaryDef acos (Right x) >>= (`convert` "rad")
+_acos _ = Left WrongArity
+
+_atan [x] = unaryDef atan (Right x) >>= (`convert` "rad")
+_atan _ = Left WrongArity

@@ -114,6 +114,9 @@ function pi []
 function sin [angle]
 function cos [angle]
 function tan [angle]
+function asin [none]
+function acos [none]
+function atan [none]
 
 # -------------------------------------------------
 # Math functions
