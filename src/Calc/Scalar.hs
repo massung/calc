@@ -1,5 +1,3 @@
-{-# LANGUAGE MultiWayIf #-}
-
 module Calc.Scalar where
 
 import Calc.Conv
