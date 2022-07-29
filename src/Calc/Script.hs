@@ -22,7 +22,7 @@ newtype Script = Script (Map String Def)
 builtInDefs :: IO (Map String Def)
 builtInDefs = either (throw . ExprError) return $ loadScriptContents defMap "built-ins.tn" source
   where
-    source = $(embedStringFile "scripts/built-ins.tn")
+    source = $(embedStringFile "scripts/functions.tn")
 
 scriptDef :: [Arg] -> Expr -> Def
 scriptDef args expr = Def f args
@@ -40,7 +40,7 @@ loadScript defs path = do
 
 loadScriptContents defs path contents =
   case runParser scriptParser defs path contents of
-    Right functions -> return $ union (M.fromList functions) defMap
+    Right functions -> return $ union (M.fromList functions) defs
     Left err -> throw $ ExprError err
 
 scriptParser = do

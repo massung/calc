@@ -9,6 +9,7 @@ import Calc.Parser.Expr
 import Calc.Parser.Scalar
 import Calc.Parser.Units
 import Calc.Scalar as S
+import Calc.Script
 import Calc.Units as U
 import Control.Monad.Except
 import Control.Monad.State.Strict
@@ -23,23 +24,29 @@ noUnits = Units M.empty
 epsilon = 1e-2
 
 main :: IO ()
-main = hspec $ do
-  testUnits
-  testDims
-  testScalars
-  testConversions
-  testArgs
-  testDefs
+main = do
+  defs <- builtInDefs
+  hspec $ do
+    testUnits
+    testDims
+    testScalars
+    testConversions
+    testArgs
+    testDefs defs
 
-testExprArgs args s ans = it (unwords [s, "==", show ans]) $ eval `shouldBe` Right True
+testExprBasic defs args s ans = it (unwords [s, "==", show ans]) $ eval `shouldBe` Right True
   where
     eval = do
-      expr <- mapLeft ExprError $ runParser exprParser defMap "" s
+      expr <- mapLeft ExprError $ runParser exprParser defs "" s
       case evalState (runExceptT $ evalExpr expr) args of
         Right x -> return $ abs (x - ans) < epsilon
         Left e -> return False
 
-testExpr = testExprArgs []
+testExpr = testExprBasic mempty []
+
+testExprArgs = testExprBasic mempty
+
+testScriptExpr defs = testExprBasic defs []
 
 testDims = do
   describe "baseDims" $ do
@@ -182,17 +189,22 @@ testArgs = do
     testExprArgs [1, 2] "_ ft + _ in" "14 in"
     testExprArgs [2, 3, 1] "_ * _ - _" "5"
 
-testDefs = do
-  describe "function calls" $ do
-    testExpr "[abs -8 ft]" "8 ft"
-    testExpr "[signum -4 ft]" "-1 ft"
-    testExpr "[sqrt 4 ft^2]" "2 ft"
-    testExpr "[exp [log 16]]" 16
-    testExpr "[truncate 4.4 in]" "4 in"
-    testExpr "[floor 4.7 mi]" "4 mi"
-    testExpr "[ceil 4.2 kn]" "5 kn"
-    testExpr "[round 4.3 acre]" "4 acre"
-    testExpr "[sin 90 deg]" 1
-    testExpr "[cos [pi]]" (-1)
-    testExpr "[asin [sin 45 deg]] to deg" "45 deg"
-    testExpr "[asinh [sinh 1.4 rad]]" "1.4 rad"
+testDefs defs = do
+  describe "code functions" $ do
+    testScriptExpr defs "[abs -8 ft]" "8 ft"
+    testScriptExpr defs "[signum -4 ft]" "-1 ft"
+    testScriptExpr defs "[sqrt 4 ft^2]" "2 ft"
+    testScriptExpr defs "[exp [log 16]]" 16
+    testScriptExpr defs "[truncate 4.4 in]" "4 in"
+    testScriptExpr defs "[floor 4.7 mi]" "4 mi"
+    testScriptExpr defs "[ceil 4.2 kn]" "5 kn"
+    testScriptExpr defs "[round 4.3 acre]" "4 acre"
+    testScriptExpr defs "[sin 90 deg]" 1
+    testScriptExpr defs "[cos [pi]]" (-1)
+    testScriptExpr defs "[asin [sin 45 deg]] to deg" "45 deg"
+    testScriptExpr defs "[asinh [sinh 1.4 rad]]" "1.4 rad"
+
+  describe "script functions" $ do
+    testScriptExpr defs "[areaOfCircle 4 m]" "50.266 m^2"
+    testScriptExpr defs "[areaOfRect 2 ft; 3 in]" "72 in^2"
+    testScriptExpr defs "[transferRate 10 GB; 1 hr]" "2.844 MB/s"
