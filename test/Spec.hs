@@ -188,3 +188,4 @@ testDefs = do
     testExpr "[sin 90 deg]" 1
     testExpr "[cos [pi]]" (-1)
     testExpr "[asin [sin 45 deg]] to deg" "45 deg"
+    testExpr "[asinh [sinh 1.4 rad]]" "1.4 rad"

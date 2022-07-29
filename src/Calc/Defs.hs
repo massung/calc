@@ -23,9 +23,15 @@ defMap =
       ("sin", Def _sin $ dims [Angle]),
       ("cos", Def _cos $ dims [Angle]),
       ("tan", Def _tan $ dims [Angle]),
+      ("sinh", Def _sinh $ dims [Angle]),
+      ("cosh", Def _cosh $ dims [Angle]),
+      ("tanh", Def _tanh $ dims [Angle]),
       ("asin", Def _asin [None]),
       ("acos", Def _acos [None]),
-      ("atan", Def _atan [None])
+      ("atan", Def _atan [None]),
+      ("asinh", Def _asinh [None]),
+      ("acosh", Def _acosh [None]),
+      ("atanh", Def _atanh [None])
     ]
   where
     dims xs = [Typed $ baseDims x | x <- xs]
@@ -69,6 +75,15 @@ _cos _ = Left WrongArity
 _tan [x] = unaryDef tan $ convert x "rad"
 _tan _ = Left WrongArity
 
+_sinh [x] = unaryDef sinh $ convert x "rad"
+_sinh _ = Left WrongArity
+
+_cosh [x] = unaryDef cosh $ convert x "rad"
+_cosh _ = Left WrongArity
+
+_tanh [x] = unaryDef tanh $ convert x "rad"
+_tanh _ = Left WrongArity
+
 _asin [x] = unaryDef asin (Right x) >>= (`convert` "rad")
 _asin _ = Left WrongArity
 
@@ -77,3 +92,12 @@ _acos _ = Left WrongArity
 
 _atan [x] = unaryDef atan (Right x) >>= (`convert` "rad")
 _atan _ = Left WrongArity
+
+_asinh [x] = unaryDef asinh (Right x) >>= (`convert` "rad")
+_asinh _ = Left WrongArity
+
+_acosh [x] = unaryDef acosh (Right x) >>= (`convert` "rad")
+_acosh _ = Left WrongArity
+
+_atanh [x] = unaryDef atanh (Right x) >>= (`convert` "rad")
+_atanh _ = Left WrongArity
