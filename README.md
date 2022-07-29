@@ -73,4 +73,27 @@ Tournesol v1.0.0, (c) Jeffrey Massung
 
 ## Dimensions and Units
 
-The following table of all (base) units and dimensions are understood by Tournesol. Metric units may also be prefixed with the SI prefixes from atto- to exa- (see: [https://physics.nist.gov/cuu/Units/prefixes.html](https://physics.nist.gov/cuu/Units/prefixes.html)).
+The following table of all (base) units and dimensions are understood by Tournesol. Units prefixed with a `-` may also be prefixed with the SI prefixes from atto- to exa- (see: [https://physics.nist.gov/cuu/Units/prefixes.html](https://physics.nist.gov/cuu/Units/prefixes.html)).
+
+| Dimension | Base dimensions | Units
+|-|-|-
+| angle | `[angle]` | rad, grad, deg, rev, turn
+| area | `[length^2]` | ha, acre
+| duration | `[duration]` | -s, min, hr, day
+| capacitance | `[current^2;duration^4;length^-2;mass^-1]` | -F
+| charge | `[current;duration]` | -C
+| current | `[current]` | -A
+| energy | `[mass;length^2;duration^-2]` | -J, -eV, BTU, thm
+| force | `[mass;length;duration^-2]` | -N, lbf, pond
+| frequency | `[length^-1]` | -hz
+| length | `[length]` | -m, mil, in, h, ft, yd, ftm, ch, fur, mi, lea, cable, nmi, link, rod, pc, au, ly
+| mass | `[mass]` | -g, oz, lb, st, cwt, t
+| power | `[mass;length^2;duration^-3]` | -W, hp
+| pressure | `[mass;length^-1;duration^-2]` | -Pa, psi, bar
+| resistance | `[mass;length^2;current^-4;duration^-3]` | -O
+| speed | `[length;duration^-1]` | kph, mph, kn
+| storage | `[storage]` | -B, -b
+| voltage | `[mass;length^2;current^-1;duration^-3]` | -V
+| volume | `[length^3]` | -L, tsp, tbp, floz, c, pt, qt, gal
+
+_NOTE: Storage units (byte and bit) use base-2 SI prefixes (e.g. MB - megabyte - is 1048576 bytes, not 1000000)._
