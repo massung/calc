@@ -184,5 +184,6 @@ testArgs = do
 
 testDefs = do
   describe "function calls" $ do
+    testExpr "[exp [log 16]]" 16
     testExpr "[sin 90 deg]" 1
     testExpr "[cos [pi]]" (-1)

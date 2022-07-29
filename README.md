@@ -113,6 +113,14 @@ function pi []
 
 function sin [angle]
 function cos [angle]
+function tan [angle]
+
+# -------------------------------------------------
+# Math functions
+
+function sqrt [any]
+function log [none]
+function exp [none]
 
 # -------------------------------------------------
 # Geometry functions

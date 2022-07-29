@@ -57,9 +57,10 @@ scriptFunction = do
   expr <- exprParser
   return (def, scriptDef args expr)
 
-scriptArgs = brackets lexer (sepBy (typedArg <|> anyArg) $ lexeme lexer (char ';'))
+scriptArgs = brackets lexer (sepBy (typedArg <|> anyArg <|> noneArg) $ lexeme lexer (char ';'))
   where
-    anyArg = do reserved lexer "_"; return Any
+    anyArg = do reserved lexer "any"; return Any
+    noneArg = do reserved lexer "none"; return None
     typedArg = do
       (dim, e) <- dimParser
       return $ Typed $ mapDims (* e) (baseDims dim)
