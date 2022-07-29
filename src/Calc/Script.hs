@@ -1,6 +1,7 @@
 module Calc.Script where
 
 import Calc.Defs
+import Calc.Dims
 import Calc.Error
 import Calc.Eval
 import Calc.Parser.Expr
@@ -47,6 +48,9 @@ scriptFunction = do
   expr <- exprParser
   return (def, scriptDef args expr)
 
-scriptArgs = brackets lexer (sepBy scriptArg $ lexeme lexer (char ';'))
+scriptArgs = brackets lexer (sepBy (typedArg <|> anyArg) $ lexeme lexer (char ';'))
   where
-    scriptArg = Typed <$> unitsParser <|> (do reserved lexer "_"; return Any)
+    anyArg = do reserved lexer "_"; return Any
+    typedArg = do
+      (dim, e) <- dimParser
+      return $ Typed $ mapDims (* e) (baseDims dim)

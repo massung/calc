@@ -45,13 +45,15 @@ You can define your own functions in scripts:
 
 ```bash
 # myfuncs.tn
-function transferRate [MB; s] = _/_
+function transferRate [storage; duration] = _/_ to MB/s
+function areaOfCircle [length] = [pi] * _^2
 ```
 
 And now you can load the script and use it in your calculations:
 
 ```bash
 tn -f myfuncs.tn '[transferRate 10 GB; 20 min]'
+tn -f myfuncs.tn '[areaOfCircle 2 ft]'
 ```
 
 ## Interactive Mode
@@ -68,3 +70,7 @@ Tournesol v1.0.0, (c) Jeffrey Massung
 >> _ J
 == 120.00 J
 ```
+
+## Dimensions and Units
+
+The following table of all (base) units and dimensions are understood by Tournesol. Metric units may also be prefixed with the SI prefixes from atto- to exa- (see: [https://physics.nist.gov/cuu/Units/prefixes.html](https://physics.nist.gov/cuu/Units/prefixes.html)).

@@ -1,3 +1,5 @@
 # this is a comment
 
-function transferRate [MB;s] = _ / _
+function transferRate [storage; duration] = _/_ to MB/s
+
+function areaOfCircle [length] = [pi] * _^2
