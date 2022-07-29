@@ -127,6 +127,8 @@ function atanh [none]
 # -------------------------------------------------
 # Math functions
 
+function abs [any]
+function signum [any]
 function sqrt [any]
 function log [none]
 function exp [none]

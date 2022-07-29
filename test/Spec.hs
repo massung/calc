@@ -184,6 +184,8 @@ testArgs = do
 
 testDefs = do
   describe "function calls" $ do
+    testExpr "[abs -8 ft]" "8 ft"
+    testExpr "[signum -4 ft]" "-1 ft"
     testExpr "[sqrt 4 ft^2]" "2 ft"
     testExpr "[exp [log 16]]" 16
     testExpr "[truncate 4.4 in]" "4 in"
