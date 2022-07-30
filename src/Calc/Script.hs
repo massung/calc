@@ -9,6 +9,7 @@ import Calc.Eval
 import Calc.Parser.Expr
 import Calc.Parser.Lexer
 import Calc.Parser.Units
+import Calc.Units
 import Control.Exception
 import Control.Monad.Except
 import Control.Monad.State.Strict
@@ -17,7 +18,10 @@ import Data.Map.Strict as M
 import Text.Parsec
 import Text.Parsec.Token
 
-newtype Script = Script (Map String Def)
+data Script = Script
+  { units :: Map String Units,
+    defs :: Map String Def
+  }
 
 builtInDefs :: IO (Map String Def)
 builtInDefs = either (throw . ExprError) return $ loadScriptContents defMap "built-ins.tn" source

@@ -249,6 +249,8 @@ _quart = Unit {dim = Volume, symbol = "qt", conv = Linear (500000000000 % 473176
 
 _gallon = Unit {dim = Volume, symbol = "gal", conv = Linear (125000000000 % 473176473)}
 
+_bushel = Unit {dim = Volume, symbol = "bsh", conv = Linear (1000000000000 % 473176473)}
+
 siUnits u = [siUnit conversion | conversion <- siConversions]
   where
     siUnit (p, c) = u {symbol = p ++ symbol u, conv = conv u <> c}
@@ -268,6 +270,7 @@ unitMap = F.foldl' (\m u -> M.insert (symbol u) u m) mempty units
             _bar,
             _bit,
             _btu,
+            _bushel,
             _byte,
             _cable,
             _chain,
