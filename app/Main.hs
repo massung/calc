@@ -41,7 +41,7 @@ data Opts = Opts
   }
   deriving (Data, Typeable, Show, Eq)
 
-motd = printf "calc v%d.%d.%d, (c) Jeffrey Massung" major minor patch
+motd = printf "Tournesol v%d.%d.%d, (c) Jeffrey Massung" major minor patch
   where
     major = 0 :: Int
     minor = 9 :: Int
