@@ -85,7 +85,7 @@ The following table of all (base) units and dimensions are understood by Tournes
 | current | `[current]` | -A
 | energy | `[mass;length^2;duration^-2]` | -J, -eV, BTU, thm
 | force | `[mass;length;duration^-2]` | -N, lbf, pond
-| frequency | `[length^-1]` | -hz
+| frequency | `[duration^-1]` | -hz
 | length | `[length]` | -m, mil, in, h, ft, yd, ftm, ch, fur, mi, lea, cable, nmi, link, rod, pc, au, ly
 | mass | `[mass]` | -g, oz, lb, st, cwt, t
 | power | `[mass;length^2;duration^-3]` | -W, hp
