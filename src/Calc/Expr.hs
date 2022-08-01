@@ -9,7 +9,6 @@ import Calc.Parser
 import Calc.Scalar
 import Calc.Units
 import Data.Map.Strict as M
-import Data.String
 import Text.Parsec
 import Text.Parsec.Expr
 import Text.Parsec.Token

@@ -7,6 +7,7 @@ import Calc.Units
 import Data.Foldable as F
 import Data.Map.Strict as M
 import Data.Ratio
+import Data.String
 import Text.Printf
 
 data Scalar = Scalar Rational Dims Units

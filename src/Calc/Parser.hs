@@ -17,7 +17,17 @@ instance IsString Units where
   fromString = fromRight (error "illegal units") . parseUnits
 
 instance IsString Scalar where
-  fromString = fromRight (error "no parse") . parseScalar
+  fromString = fromRight (error "illegal scalar") . parseScalar
+
+parseScalar = parse parser ""
+  where
+    parser = do
+      s <- unitsSign
+      n <- scalarParser
+      eof
+      if s < 0
+        then return $ negate n
+        else return n
 
 parseUnits = parse parser ""
   where
@@ -26,6 +36,13 @@ parseUnits = parse parser ""
       u <- unitsParser
       eof
       return u
+
+scalarParser = do
+  n <- naturalOrFloat lexer
+  u <- option mempty $ try unitsParser <|> unitsTerm
+  return $ case n of
+    Left i -> Scalar (fromIntegral i) (dims u) u
+    Right f -> Scalar (toRational f) (dims u) u
 
 unitsParser :: Parsec String st Units
 unitsParser = buildExpressionParser unitsExprTable unitsTerm
@@ -62,20 +79,3 @@ unitsExprTable =
       Infix (do reservedOp lexer "/"; return (</>)) AssocLeft
     ]
   ]
-
-parseScalar = parse parser ""
-  where
-    parser = do
-      s <- unitsSign
-      n <- scalarParser
-      eof
-      if s < 0
-        then return $ negate n
-        else return n
-
-scalarParser = do
-  n <- naturalOrFloat lexer
-  u <- option mempty $ try unitsParser <|> unitsTerm
-  return $ case n of
-    Left i -> Scalar (fromIntegral i) (dims u) u
-    Right f -> Scalar (toRational f) (dims u) u
