@@ -61,7 +61,12 @@ scriptFunction = do
   expr <- exprParser
   return (def, scriptDef args expr)
 
-scriptArgs = brackets lexer (sepBy (typedArg <|> anyArg <|> noneArg) $ lexeme lexer (char ';'))
+scriptArgs = brackets lexer (sepBy scriptArg $ lexeme lexer (char ';'))
+
+scriptArg = do
+  arg <- typedArg <|> anyArg <|> noneArg
+  name <- optionMaybe $ do reservedOp lexer ":"; identifier lexer
+  return arg
   where
     anyArg = do reserved lexer "any"; return Any
     noneArg = do reserved lexer "none"; return None

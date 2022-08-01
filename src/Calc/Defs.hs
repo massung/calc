@@ -61,7 +61,7 @@ apply (Def func args) xs = case mapArgs xs args of
 
 unaryDef f = fmap $ fromReal . f . fromRational . toRational
 
-_if [test,t,e] = Right $ if test == 0 then e else t
+_if [test, t, e] = Right $ if test == 0 then e else t
 _if _ = Left WrongArity
 
 _abs [x] = unaryDef abs $ Right x

@@ -228,4 +228,5 @@ testDefs defs = do
   describe "script functions" $ do
     testScriptExpr defs "[areaOfCircle 4 m]" "50.266 m^2"
     testScriptExpr defs "[areaOfRect 2 ft; 3 in]" "72 in^2"
+    testScriptExpr defs "[volumeOfTorus 2 in; 12 in]" "947.482 in^3"
     testScriptExpr defs "[transferRate 10 GB; 1 hr]" "2.844 MB/s"

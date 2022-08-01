@@ -151,18 +151,18 @@ function round [any]
 # -------------------------------------------------
 # Geometry functions
 
-function areaOfCircle [length]
-function areaOfRect [length; length]
-function areaOfTriangle [length; length]
+function areaOfCircle [length:r]
+function areaOfRect [length:b;length:h]
+function areaOfTriangle [length:b;length:h]
 
-function volumeOfSphere [length]
-function volumeOfCylinder [length; length]
-function volumeOfPrism [length; length; length]
-function volumeOfTrianglePrism [length; length; length]
+function volumeOfSphere [length:r]
+function volumeOfCylinder [length:r;length:h]
+function volumeOfPrism [length:b;length:h;length:d]
+function volumeOfTrianglePrism [length:b;length:h;length:d]
 function volumeOfCube [length]
-function volumeOfSquarePyramid [length; length]
+function volumeOfSquarePyramid [length:b;length:h]
 function volumeOfTetrahedron [length]
-function volumeOfTorus [length; length]
+function volumeOfTorus [length:r;length:R]
 
 # -------------------------------------------------
 # Storage functions
