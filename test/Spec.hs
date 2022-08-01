@@ -5,9 +5,8 @@ import Calc.Defs
 import Calc.Dims
 import Calc.Error
 import Calc.Eval
-import Calc.Parser.Expr
-import Calc.Parser.Scalar
-import Calc.Parser.Units
+import Calc.Expr
+import Calc.Parser
 import Calc.Scalar
 import Calc.Script
 import Calc.Units as U

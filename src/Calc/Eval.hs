@@ -2,7 +2,7 @@ module Calc.Eval where
 
 import Calc.Defs
 import Calc.Error
-import Calc.Parser.Expr
+import Calc.Expr
 import Calc.Scalar
 import Calc.Units
 import Control.Monad.Except

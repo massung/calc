@@ -29,10 +29,9 @@ library
       Calc.Dims
       Calc.Error
       Calc.Eval
-      Calc.Parser.Expr
-      Calc.Parser.Lexer
-      Calc.Parser.Scalar
-      Calc.Parser.Units
+      Calc.Expr
+      Calc.Lexer
+      Calc.Parser
       Calc.Scalar
       Calc.Script
       Calc.Units

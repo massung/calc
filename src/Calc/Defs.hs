@@ -4,7 +4,7 @@ module Calc.Defs where
 
 import Calc.Dims
 import Calc.Error
-import Calc.Parser.Units
+import Calc.Parser
 import Calc.Scalar
 import Calc.Units hiding (_pi)
 import Control.Monad

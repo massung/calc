@@ -1,9 +1,10 @@
 {-# LANGUAGE NegativeLiterals #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Calc.Parser.Units where
+module Calc.Parser where
 
-import Calc.Parser.Lexer
+import Calc.Lexer
+import Calc.Scalar
 import Calc.Units
 import Data.Either
 import Data.Map.Strict as M
@@ -14,6 +15,9 @@ import Text.Parsec.Token
 
 instance IsString Units where
   fromString = fromRight (error "illegal units") . parseUnits
+
+instance IsString Scalar where
+  fromString = fromRight (error "no parse") . parseScalar
 
 parseUnits = parse parser ""
   where
@@ -58,3 +62,20 @@ unitsExprTable =
       Infix (do reservedOp lexer "/"; return (</>)) AssocLeft
     ]
   ]
+
+parseScalar = parse parser ""
+  where
+    parser = do
+      s <- unitsSign
+      n <- scalarParser
+      eof
+      if s < 0
+        then return $ negate n
+        else return n
+
+scalarParser = do
+  n <- naturalOrFloat lexer
+  u <- option mempty $ try unitsParser <|> unitsTerm
+  return $ case n of
+    Left i -> Scalar (fromIntegral i) (dims u) u
+    Right f -> Scalar (toRational f) (dims u) u

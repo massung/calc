@@ -8,9 +8,9 @@ module Main where
 import Calc.Defs
 import Calc.Error
 import Calc.Eval
-import Calc.Parser.Expr
-import Calc.Parser.Lexer
-import Calc.Parser.Scalar
+import Calc.Expr
+import Calc.Lexer
+import Calc.Parser
 import Calc.Scalar
 import Calc.Script
 import Calc.Units hiding (name)

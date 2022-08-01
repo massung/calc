@@ -6,9 +6,9 @@ import Calc.Defs
 import Calc.Dims
 import Calc.Error
 import Calc.Eval
-import Calc.Parser.Expr
-import Calc.Parser.Lexer
-import Calc.Parser.Units
+import Calc.Expr
+import Calc.Lexer
+import Calc.Parser
 import Calc.Units
 import Control.Exception
 import Control.Monad.Except

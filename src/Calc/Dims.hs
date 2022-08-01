@@ -4,7 +4,7 @@
 
 module Calc.Dims where
 
-import Calc.Parser.Lexer
+import Calc.Lexer
 import Data.Char
 import Data.List.Extra as L
 import Data.Map.Strict as M

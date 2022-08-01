@@ -1,12 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Calc.Parser.Expr where
+module Calc.Expr where
 
 import Calc.Defs
 import Calc.Error
-import Calc.Parser.Lexer
-import Calc.Parser.Scalar
-import Calc.Parser.Units
+import Calc.Lexer
+import Calc.Parser
 import Calc.Scalar
 import Calc.Units
 import Data.Map.Strict as M

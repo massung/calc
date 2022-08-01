@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Calc.Parser.Lexer where
+module Calc.Lexer where
 
 import Data.Functor.Identity
 import Text.Parsec
