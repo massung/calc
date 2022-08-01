@@ -61,6 +61,8 @@ apply (Def func args) xs = case mapArgs xs args of
 
 unaryDef f = fmap $ fromReal . f . fromRational . toRational
 
+radians = Units $ M.fromList [(_radian, 1)]
+
 _if [test, t, e] = Right $ if test == 0 then e else t
 _if _ = Left WrongArity
 
@@ -94,38 +96,38 @@ _round _ = Left WrongArity
 _pi [] = Right $ fromReal pi
 _pi _ = Left WrongArity
 
-_sin [x] = unaryDef sin $ convert x "rad"
+_sin [x] = unaryDef sin $ convert x radians
 _sin _ = Left WrongArity
 
-_cos [x] = unaryDef cos $ convert x "rad"
+_cos [x] = unaryDef cos $ convert x radians
 _cos _ = Left WrongArity
 
-_tan [x] = unaryDef tan $ convert x "rad"
+_tan [x] = unaryDef tan $ convert x radians
 _tan _ = Left WrongArity
 
-_sinh [x] = unaryDef sinh $ convert x "rad"
+_sinh [x] = unaryDef sinh $ convert x radians
 _sinh _ = Left WrongArity
 
-_cosh [x] = unaryDef cosh $ convert x "rad"
+_cosh [x] = unaryDef cosh $ convert x radians
 _cosh _ = Left WrongArity
 
-_tanh [x] = unaryDef tanh $ convert x "rad"
+_tanh [x] = unaryDef tanh $ convert x radians
 _tanh _ = Left WrongArity
 
-_asin [x] = unaryDef asin (Right x) >>= (`convert` "rad")
+_asin [x] = unaryDef asin (Right x) >>= (`convert` radians)
 _asin _ = Left WrongArity
 
-_acos [x] = unaryDef acos (Right x) >>= (`convert` "rad")
+_acos [x] = unaryDef acos (Right x) >>= (`convert` radians)
 _acos _ = Left WrongArity
 
-_atan [x] = unaryDef atan (Right x) >>= (`convert` "rad")
+_atan [x] = unaryDef atan (Right x) >>= (`convert` radians)
 _atan _ = Left WrongArity
 
-_asinh [x] = unaryDef asinh (Right x) >>= (`convert` "rad")
+_asinh [x] = unaryDef asinh (Right x) >>= (`convert` radians)
 _asinh _ = Left WrongArity
 
-_acosh [x] = unaryDef acosh (Right x) >>= (`convert` "rad")
+_acosh [x] = unaryDef acosh (Right x) >>= (`convert` radians)
 _acosh _ = Left WrongArity
 
-_atanh [x] = unaryDef atanh (Right x) >>= (`convert` "rad")
+_atanh [x] = unaryDef atanh (Right x) >>= (`convert` radians)
 _atanh _ = Left WrongArity
