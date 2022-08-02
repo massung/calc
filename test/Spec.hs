@@ -140,6 +140,11 @@ testConversions = do
     testExpr "1 PL : L" "1e15 L"
     testExpr "1 EL : L" "1e18 L"
 
+  describe "parent conversions" $ do
+    testExpr "(10/2) ft" "5 ft"
+    testExpr "(24 in/2) ft" "1 ft"
+    testExpr "(10 J/2 s) W" "5 W"
+
   describe "multi-step conversions" $ do
     testExpr "1 cable : h" "2160 h"
     testExpr "1 gal : floz" "128 floz"

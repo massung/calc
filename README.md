@@ -100,6 +100,10 @@ _NOTE: Storage units (byte and bit) use base-2 SI prefixes (e.g. MB - megabyte -
 
 ## FAQ
 
+***Why is `1/2ft` equal to `0.5 ft^-1` and not `0.5 ft`?***
+
+Math operators have a lower precedence than unit assignment. Use parenthesis if needed: `(1/2) ft`.
+
 ***Why does `[cos [pi]]` error with `wrong dimensions; got [] expected [angle]`?***
 
 The constant `[pi]` has no units as must be converted to radians (e.g. `[cos [pi] : rad]`).

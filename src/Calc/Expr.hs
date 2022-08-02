@@ -34,13 +34,20 @@ exprParser :: Parsec String (Map String Def) Expr
 exprParser = buildExpressionParser exprTable exprTerm
 
 exprTerm =
-  parens lexer exprParser
+  exprParens
     <|> brackets lexer exprApply
     <|> Term <$> scalarParser
     <|> Term . fromUnits <$> unitsTerm
     <|> exprAnswer
     <|> (do reserved lexer "true"; return $ Term $ fromBool True)
     <|> (do reserved lexer "false"; return $ Term $ fromBool False)
+
+exprParens = do
+  expr <- parens lexer exprParser
+  u <- optionMaybe unitsTerm
+  return $ case u of
+    Nothing -> expr
+    Just units -> Convert units expr
 
 exprAnswer = do
   reserved lexer "_"
