@@ -114,6 +114,9 @@ testScalars = do
     testExpr "(2 ft)^2" "4 ft^2"
     testExpr "(3 ft^3)^2" "9 ft^6"
     testExpr "(4 ft^2)^0.5" "2 ft"
+    testExpr "(4 ft)^0" 1
+    testExpr "4 ft^0" 4
+    testExpr "(4 ft)^-1" "0.25 ft^-1"
 
 testConversions = do
   describe "basic conversions" $ do

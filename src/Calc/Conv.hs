@@ -55,6 +55,8 @@ recipConv (Linear x) = Linear $ recip x
 recipConv (Function f) = Function $ recip . f
 
 powConv _ Base = Base
+powConv 0 _ = Function $ const 1
+powConv 1 x = x
 powConv n (Linear x) =
   if denominator n == 1
     then Linear $ x ^^ numerator n

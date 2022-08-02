@@ -73,6 +73,7 @@ mapScalar f (Scalar x d u) = Scalar (f x) d u
 
 powScalar (Scalar x _ u) (Scalar n d _)
   | not $ nullDims d = Left IllegalExponent
+  | n == 0 = Right 1
   | denominator n == 1 = Right $ Scalar (x ^^ numerator n) (dims u') u'
   | otherwise = Right $ Scalar (toRational $ fromRational x ** fromRational n) (dims u') u'
   where

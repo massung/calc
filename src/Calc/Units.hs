@@ -354,7 +354,7 @@ nullUnits (Units u) = M.null u
 
 dims (Units u) = mconcat [powDims n $ baseDims (dim unit) | (unit, n) <- M.toList u]
 
-mapUnits f (Units u) = Units $ M.map f u
+mapUnits f (Units u) = Units $ M.filter (/= 0) $ M.map f u
 
 recipUnits = mapUnits negate
 
